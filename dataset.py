@@ -74,7 +74,9 @@ class Dataset:
 
                     # Resample to max_length
                     temp_data = df[self.config['features']].to_numpy().T
-                    resample_data = self.resample(temp_data)
+                    resample_data = np.zeros((temp_data.shape[0],self.config['cutoff_length']))
+                    for i,sequence in enumerate(temp_data):
+                        resample_data[i,:] = self.resample(sequence)
 
                     assert resample_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
                     
