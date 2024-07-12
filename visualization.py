@@ -16,7 +16,6 @@ def visualize_ts_lineplot(
     path='/visualize/sample.png'): 
     
     assert len(X.shape) == 3
-    os.makedirs(path,exist_ok=True)
 
     fig , axs = plt.subplots(num,1,figsize=(14,10))
     if num == 1: axs = [axs]
