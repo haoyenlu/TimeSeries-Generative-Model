@@ -16,7 +16,7 @@ def preprocess_mvnx(args,config):
 
     print(train_data.shape,test_data.shape)
 
-    visualize_ts_lineplot(train_data,train_label,path='./visualize/original.png')
+    # visualize_ts_lineplot(train_data,train_label,path='./visualize/original.png')
 
     scaler = tsgm.utils.TSFeatureWiseScaler((-1,1))
     scaler.fit(np.concatenate([train_data,test_data],axis=0))
@@ -26,7 +26,7 @@ def preprocess_mvnx(args,config):
     X_train = X_train.astype(np.float32)
     Y_train = Y_train.astype(np.float32)
 
-    visualize_ts_lineplot(X_train,train_label,path='./visualize/scale.png')
+    # visualize_ts_lineplot(X_train,train_label,path='./visualize/scale.png')
 
     X_test = scaler.transform(test_data)
     Y_test = keras.utils.to_categorical(test_label,num_classes=len(config['tasks']))
