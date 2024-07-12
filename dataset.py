@@ -73,7 +73,7 @@ class Dataset:
                     if len(df) > self.config['cutoff_length']: continue
 
                     # Resample to max_length
-                    temp_data = df[self.config['features']].to_numpy().T
+                    temp_data = df[self.config['features']].to_numpy()
                     assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}"
                     
 
