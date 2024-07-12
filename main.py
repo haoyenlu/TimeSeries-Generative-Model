@@ -14,6 +14,10 @@ def preprocess_mvnx(args,config):
     (train_data, train_label), (test_data, test_label) = preprocessor.get_dataset(path=args.data,test_patient=args.test_patient)
 
 
+    if args.save is not None:
+        save_path = f'./{args.save}/ulf_original_{"_".join(args.test_patient)}.npy'
+        np.save(save_path,{'train':{'data':train_data,'label':train_label},'test':{'data':test_data,'label':test_label}})
+
     print(train_data.shape,test_data.shape)
 
     # visualize_ts_lineplot(train_data,train_label,path='./visualize/original.png')
@@ -34,7 +38,7 @@ def preprocess_mvnx(args,config):
     print(Y_train[0])
 
     if args.save is not None:
-        save_path = f'./{args.save}/ulf_test_{"_".join(args.test_patient)}.npy'
+        save_path = f'./{args.save}/ulf_rescale_{"_".join(args.test_patient)}.npy'
         np.save(save_path,{'train':{'data':X_train,'label':Y_train},'test':{'data':X_test,'label':Y_test}})
 
 
