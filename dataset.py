@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import os
 import re
 import yaml
+from tqdm import tqdm
 
 from pathlib import Path
 from scipy.signal import resample
@@ -62,11 +63,11 @@ class Dataset:
 
         onehot_label = [0] * len(self.config['tasks'])
 
-        for type in self.config['types']:
+        for type in tqdm(self.config['types'],desc="Type",leave=False):
             type_dir = os.path.join(self.ulf_filepath,type)
-            for patient in os.listdir(type_dir):
+            for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=True):
                 patient_dir = os.path.join(type_dir,patient)
-                for file in os.listdir(patient_dir):
+                for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
                     subject , task , hand = Path(file).stem.split('_')
                     df = self.parse_mvnx_file(os.path.join(patient_dir,file))
 
