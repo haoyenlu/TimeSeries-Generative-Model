@@ -12,6 +12,7 @@ parser.add_argument('--mvnx',type=str,default=None)
 parser.add_argument('--numpy',type=str,default=None)
 parser.add_argument('--config',type=str)
 parser.add_argument('--test_patient',nargs='*')
+parser.add_argument('--save',type=str)
 
 args = parser.parse_args()
 
