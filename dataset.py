@@ -76,7 +76,7 @@ class Dataset:
                     temp_data = df[self.config['features']].to_numpy().T
                     for i,sequence in enumerate(temp_data):
                         temp_data[i,:] = self.resample(sequence)
-                        
+
                     assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {temp_data.shape}"
                     
 
@@ -99,7 +99,7 @@ class Dataset:
         pad_width = (pad // 2, pad // 2) if pad % 2 == 0 else ((pad-1) // 2, (pad-1) // 2 + 1)
         resample_sequence = np.pad(sequence,pad_width,mode='edge')
 
-        assert len(resample_sequence) == len(sequence)
+        assert len(resample_sequence) == max_length
         return resample_sequence
     
     def scipy_resample(self,sequence,max_length):
