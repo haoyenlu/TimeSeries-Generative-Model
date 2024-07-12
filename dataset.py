@@ -14,7 +14,7 @@ import tensorflow as tf
 
 
 class PreprocessMVNX:
-    def __init__(self,ulf_filepath,config):
+    def __init__(self,config):
         '''
         Output Training dataset shape should be (B,T,C) for tensorflow, (B,C,T) for pytorch
         '''
@@ -27,6 +27,9 @@ class PreprocessMVNX:
         
 
     def parse_mvnx_file(self,file,use_xzy = True):
+        '''
+        Function for preprocessing jointAngle in mvnx file
+        '''
         tree = ET.parse(file)
         root = tree.getroot()
         
@@ -55,15 +58,13 @@ class PreprocessMVNX:
         
         return df_zxy
 
-    def get_dataset(self,path,test_patient  = set(),onehot_encode = True):
+    def get_dataset(self,path,test_patient  = set()):
         self.ulf_filepath = path
 
         TRAIN_DATA = []
         TEST_DATA = []
         TRAIN_LABEL = []
         TEST_LABEL = []
-
-        onehot_label = [0] * len(self.config['tasks'])
 
         for type in self.config['types']:
             print(f"Processing {type} Folder.")
