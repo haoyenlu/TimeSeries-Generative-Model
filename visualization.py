@@ -32,17 +32,3 @@ def visualize_ts_lineplot(
 
     plt.savefig(path)
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data',type=str)
-    parser.add_argument('--num',type=int,default=5)
-    parser.add_argument('--output',type=str)
-    args = parser.parse_args()
-
-    (train_data, train_label), (test_data,test_label) = load_numpy_data(args.data)
-
-    print(train_label)
-    visualize_ts_lineplot(train_data,train_label,args.num,path=args.output)
-
-
