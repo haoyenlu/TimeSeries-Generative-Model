@@ -40,7 +40,7 @@ class Dataset:
         frames = subject.find(namespace + 'frames')
         ZXY = []
         XZY = []
-        for frame in frames:
+        for frame in frames[3:]:
             jointangle = frame.find(namespace + 'jointAngle')
             ZXY.append(float(num) for num in jointangle.text.split(' '))
             jointangleXZY = frame.find(namespace + 'jointAngleXZY')
