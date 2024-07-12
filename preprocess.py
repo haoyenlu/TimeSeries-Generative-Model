@@ -28,19 +28,22 @@ if args.mvnx is not None:
     save_to_numpy(train_data,train_label,test_data,test_label,save_path)
 
 elif args.numpy is not None:
-    (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.original)
+    (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.numpy)
 
 else:
     raise Exception("Specify either mvnx or numpy file to load.")
 
 
 '''Scaling'''
-scaler = tsgm.utils.TSFeatureWiseScaler((-1,1))
+scale_range = (-1,1)
+print(f"Scaling time-series sequence to {scale_range}.")
+scaler = tsgm.utils.TSFeatureWiseScaler(scale_range)
 scaler.fit(np.concatenate([train_data,test_data],axis=0))
 X_train = scaler.transform(train_data).astype(np.float32)
 X_test = scaler.transform(test_data).toarray().astype(np.float32)
 
 '''Onehot Encoding'''
+print("Encoding label.")
 encoder = OneHotEncoder(handle_unknown='ignore')
 encoder.fit(np.array(config['tasks']).reshape(-1,1))
 Y_train = encoder.transform(train_label).astype(np.float32)
