@@ -9,13 +9,12 @@ from pathlib import Path
 from scipy.signal import resample
 
 from functools import partial
-from torch.utils.data import DataLoader
+import tensorflow as tf
 
 
 class Dataset:
-    def __init__(self,ulf_filepath,patient_csv,config):
+    def __init__(self,ulf_filepath,config):
         self.ulf_filepath = ulf_filepath
-        self.patient_csv = patient_csv
         
         with open(config) as yaml_file:
             self.config = yaml.safe_load(yaml_file)
@@ -25,7 +24,6 @@ class Dataset:
         elif self.config['resample'] == 'scipy':
             self.resample = partial(self.scipy_resample,max_length = self.config['cutoff_length'])
         
-        self.scaler = self.minmax_scaler
 
     def parse_mvnx_file(self,file,use_xzy = True):
         tree = ET.parse(file)
@@ -59,7 +57,10 @@ class Dataset:
     def get_dataset(self,test_patient  = set(),onehot_encode = True):
         TRAIN_DATA = []
         TEST_DATA = []
+        TRAIN_LABEL = []
+        TEST_LABEL = []
 
+        onehot_label = [0] * len(self.config['tasks'])
 
         for type in self.config['types']:
             for patient in os.listdir(self.ulf_filepath,type):
@@ -71,18 +72,18 @@ class Dataset:
 
                     # Resample to max_length
                     temp_data = df[self.config['features']].to_numpy().T
-                    for i in range(len(self.config['features'])):
-                        temp_data[i] = self.scaler(self.resample(temp_data[i]))
-                        
-                    
                     assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}"
-                    temp_label = np.argwhere(self.config['tasks'] == task) if onehot_encode else task
+                    
 
-                    if subject in test_patient: TEST_DATA.append([temp_data,temp_label])
-                    else: TRAIN_DATA.append([temp_data,temp_label])
-        
-        
-        return DataLoader(TRAIN_DATA,self.config['batch_size'],shuffle=True), DataLoader(TEST_DATA,self.config['batch_size'],shuffle=True)
+                    if subject in test_patient: 
+                        TEST_DATA.append(temp_data)
+                        TEST_LABEL.append(np.argwhere(self.config['tasks'] == task))
+                    else: 
+                        TRAIN_DATA.append(temp_data)
+                        TRAIN_LABEL.append(np.argwhere(self.config['tasks'] == task))
+
+
+        return (np.array(TRAIN_DATA), TRAIN_LABEL), (np.array(TEST_DATA), TEST_LABEL)
     
 
     
@@ -92,6 +93,8 @@ class Dataset:
         pad = max_length - len(sequence)
         pad_width = (pad // 2, pad // 2) if pad % 2 == 0 else ((pad-1) // 2, (pad-1) // 2 + 1)
         resample_sequence = np.pad(sequence,pad_width,mode='edge')
+
+        assert len(resample_sequence) == len(sequence)
         return resample_sequence
     
     def scipy_resample(self,sequence,max_length):
