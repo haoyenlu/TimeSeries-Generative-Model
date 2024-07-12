@@ -74,7 +74,7 @@ class Dataset:
 
                     # Resample to max_length
                     temp_data = df[self.config['features']].to_numpy()
-                    assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}"
+                    assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {temp_data.shape}"
                     
 
                     if subject in test_patient: 
