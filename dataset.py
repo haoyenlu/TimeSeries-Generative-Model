@@ -13,12 +13,12 @@ from functools import partial
 import tensorflow as tf
 
 
-class Dataset:
+class PreprocessMVNX:
     def __init__(self,ulf_filepath,config):
-        self.ulf_filepath = ulf_filepath
-        
-        with open(config) as yaml_file:
-            self.config = yaml.safe_load(yaml_file)
+        '''
+        Output Training dataset shape should be (B,T,C) for tensorflow, (B,C,T) for pytorch
+        '''
+        self.config = config
 
         if self.config['resample'] == 'numpy':
             self.resample = partial(self.np_pad_resample,max_length = self.config['cutoff_length'])
@@ -55,7 +55,9 @@ class Dataset:
         
         return df_zxy
 
-    def get_dataset(self,test_patient  = set(),onehot_encode = True):
+    def get_dataset(self,path,test_patient  = set(),onehot_encode = True):
+        self.ulf_filepath = path
+
         TRAIN_DATA = []
         TEST_DATA = []
         TRAIN_LABEL = []
@@ -75,12 +77,12 @@ class Dataset:
                     if len(df) > self.config['cutoff_length']: continue
 
                     # Resample to max_length
-                    temp_data = df[self.config['features']].to_numpy().T
-                    resample_data = np.zeros((temp_data.shape[0],self.config['cutoff_length']))
+                    temp_data = df[self.config['features']].to_numpy()
+                    resample_data = np.zeros((self.config['cutoff_length'],temp_data.shape[0]))
                     for i,sequence in enumerate(temp_data):
                         resample_data[i,:] = self.resample(sequence)
 
-                    assert resample_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
+                    assert resample_data.shape == (self.config['cutoff_length'],len(self.config['features'])), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
                     
 
                     if subject in test_patient: 
@@ -113,7 +115,9 @@ class Dataset:
         return (sequence - np.min(sequence)) / (np.max(sequence) - np.min(sequence))
 
 
-
+    def load_dataset(path):
+        dataset = np.load(path,allow_pickle=True).item()
+        return (dataset['train']['data'],dataset['train']['label']), (dataset['test']['data'],dataset['test']['label'])
 
 
 

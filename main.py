@@ -1,13 +1,52 @@
 import tsgm
 from argument import parse_argument
+import keras
+import numpy as np
+import tensorflow as tf
+import yaml
 
-from dataset import Dataset
+from dataset import PreprocessMVNX
+from visualization import visualize_ts_lineplot
 
 
-if __name__ == '__main__':
-    args = parse_argument()
+def preprocess_mvnx(args,config):
+    preprocessor = PreprocessMVNX(config=config)
+    (train_data, train_label), (test_data, test_label) = preprocessor.get_dataset(path=args.data,test_patient=args.test_patient)
 
-    dataset = Dataset(args.data,args.config)
-    (train_data, train_label), (test_data, test_label) = dataset.get_dataset(test_patient=['P29','P30'])
 
     print(train_data.shape,test_data.shape)
+
+    visualize_ts_lineplot(train_data,train_label,path='./visualize/original.png')
+
+    scaler = tsgm.utils.TSFeatureWiseScaler((-1,1))
+    scaler.fit(np.concatenate([train_data,test_data],axis=0))
+    X_train = scaler.transform(train_data)
+    Y_train = keras.utils.to_categorical(train_label,num_classes=len(config['tasks']))
+
+    X_train = X_train.astype(np.float32)
+    Y_train = Y_train.astype(np.float32)
+
+    visualize_ts_lineplot(X_train,train_label,path='./visualize/scale.png')
+
+    X_test = scaler.transform(test_data)
+    Y_test = keras.utils.to_categorical(test_label,num_classes=len(config['tasks']))
+
+    print(Y_train[0])
+
+    if args.save is not None:
+        save_path = f'./{args.save}/ulf_test_{"_".join(args.test_patient)}.npy'
+        np.save(save_path,{'train':{'data':X_train,'label':Y_train},'test':{'data':X_test,'label':Y_test}})
+
+
+
+def to_tensor_dataset(X,Y,buffer_size,batch_size):
+    dataset = tf.data.Dataset.from_tensor_slice((X,Y))
+    dataset = dataset.shuffle(buffer_size=buffer_size).batch(batch_size)
+
+if __name__ =='__main__':
+    args = parse_argument()
+        
+    with open(args.config) as yaml_file:
+        config = yaml.safe_load(yaml_file)
+
+    preprocess_mvnx(args,config)
