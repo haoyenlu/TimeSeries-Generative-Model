@@ -89,10 +89,10 @@ class PreprocessMVNX:
 
                     if subject in test_patient: 
                         TEST_DATA.append(resample_data)
-                        TEST_LABEL.append(np.argwhere(self.config['tasks'] == task))
+                        TEST_LABEL.append(task.upper())
                     else: 
                         TRAIN_DATA.append(resample_data)
-                        TRAIN_LABEL.append(np.argwhere(self.config['tasks'] == task))
+                        TRAIN_LABEL.append(task.upper())
 
 
         return (np.array(TRAIN_DATA), TRAIN_LABEL), (np.array(TEST_DATA), TEST_LABEL)

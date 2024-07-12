@@ -42,6 +42,7 @@ if __name__ == '__main__':
 
     (train_data, train_label), (test_data,test_label) = load_numpy_data(args.data)
 
+    print(train_label)
     visualize_ts_lineplot(train_data,train_label,args.num,path=args.output)
 
 

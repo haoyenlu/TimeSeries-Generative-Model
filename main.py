@@ -6,7 +6,9 @@ import tensorflow as tf
 import yaml
 
 from dataset import PreprocessMVNX
-from visualization import visualize_ts_lineplot
+
+from sklearn.preprocessing import OneHotEncoder
+
 
 
 def preprocess_mvnx(args,config):
@@ -23,9 +25,11 @@ def preprocess_mvnx(args,config):
     # visualize_ts_lineplot(train_data,train_label,path='./visualize/original.png')
 
     scaler = tsgm.utils.TSFeatureWiseScaler((-1,1))
+    encoder = OneHotEncoder(handle_unknown='ignore')
     scaler.fit(np.concatenate([train_data,test_data],axis=0))
+    encoder.fit(config['tasks'])
     X_train = scaler.transform(train_data)
-    Y_train = keras.utils.to_categorical(train_label,num_classes=len(config['tasks']))
+    Y_train = encoder.transform(train_label).toarray()
 
     X_train = X_train.astype(np.float32)
     Y_train = Y_train.astype(np.float32)
@@ -33,7 +37,7 @@ def preprocess_mvnx(args,config):
     # visualize_ts_lineplot(X_train,train_label,path='./visualize/scale.png')
 
     X_test = scaler.transform(test_data)
-    Y_test = keras.utils.to_categorical(test_label,num_classes=len(config['tasks']))
+    Y_test = encoder.transform(test_label).toarray()
 
     print(Y_train[0])
 
