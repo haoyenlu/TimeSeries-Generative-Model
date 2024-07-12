@@ -1,7 +1,6 @@
 import numpy as np
-import tsgm
-from sklearn.preprocessing import OneHotEncoder
-
+import tensorflow as tf
+import yaml
 
 def save_to_numpy(train_data,train_label,test_data,test_label,path):
     save = {'train':{'data':train_data,'label':train_label},'test':{'data':test_data,'label':test_label}}
@@ -17,4 +16,14 @@ def load_numpy_data(path):
     return (train_data, train_label), (test_data, test_label)
 
 
+def to_tensor_dataset(X,y,buffer_size=1024,batch_size=8):
+    dataset = tf.data.Dataset.from_tensor_slices((X, y))
+    dataset = dataset.shuffle(buffer_size=1024).batch(batch_size)
+    return dataset
+
+def load_config(path):
+    with open(path.config) as file:
+        config = yaml.safe_load(file)
+
+    return config
 

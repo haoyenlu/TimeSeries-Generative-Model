@@ -1,11 +1,7 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 
-import argparse
-
-from utils import load_numpy_data
 
 def visualize_ts_lineplot(
     X,
