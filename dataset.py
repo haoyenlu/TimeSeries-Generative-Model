@@ -63,10 +63,12 @@ class Dataset:
         onehot_label = [0] * len(self.config['tasks'])
 
         for type in self.config['types']:
-            for patient in os.listdir(self.ulf_filepath,type):
-                for file in os.listdir(self.ulf_filepath,type,patient):
+            type_dir = os.path.join(self.ulf_filepath,type)
+            for patient in os.listdir(type_dir):
+                patient_dir = os.path.join(type_dir,patient)
+                for file in os.listdir(patient_dir):
                     subject , task , hand = Path(file).stem.split('_')
-                    df = self.parse_mvnx_file(os.path.join(self.ulf_filepath,type,patient,file))
+                    df = self.parse_mvnx_file(os.path.join(patient_dir,file))
 
                     if len(df) > self.config['cutoff_length']: continue
 
