@@ -74,17 +74,16 @@ class Dataset:
 
                     # Resample to max_length
                     temp_data = df[self.config['features']].to_numpy().T
-                    for i,sequence in enumerate(temp_data):
-                        temp_data[i,:] = self.resample(sequence)
+                    resample_data = self.resample(temp_data)
 
-                    assert temp_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {temp_data.shape}"
+                    assert resample_data.shape == (len(self.config['features']),self.config['cutoff_length']), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {temp_data.shape}"
                     
 
                     if subject in test_patient: 
-                        TEST_DATA.append(temp_data)
+                        TEST_DATA.append(resample_data)
                         TEST_LABEL.append(np.argwhere(self.config['tasks'] == task))
                     else: 
-                        TRAIN_DATA.append(temp_data)
+                        TRAIN_DATA.append(resample_data)
                         TRAIN_LABEL.append(np.argwhere(self.config['tasks'] == task))
 
 
