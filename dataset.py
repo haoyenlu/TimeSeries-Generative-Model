@@ -78,10 +78,11 @@ class PreprocessMVNX:
                     if len(df) > self.config['cutoff_length']: continue
 
                     # Resample to max_length
-                    temp_data = df[self.config['features']].to_numpy()
-                    resample_data = np.zeros((self.config['cutoff_length'],temp_data.shape[0]))
-                    for i,sequence in enumerate(temp_data):
-                        resample_data[i,:] = self.resample(sequence)
+                    temp_data = df[self.config['features']].to_numpy() # T,C
+                    resample_data = np.zeros((self.config['cutoff_length'],temp_data.shape[1]))
+
+                    for i in range(temp_data.shape[1]):
+                        resample_data[:,i] = self.resample(temp_data[:,i])
 
                     assert resample_data.shape == (self.config['cutoff_length'],len(self.config['features'])), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
                     
