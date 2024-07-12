@@ -42,9 +42,9 @@ class Dataset:
         XZY = []
         for frame in frames[3:]:
             jointangle = frame.find(namespace + 'jointAngle')
-            ZXY.append(float(num) for num in jointangle.text.split(' '))
+            ZXY.append([float(num) for num in jointangle.text.split(' ')])
             jointangleXZY = frame.find(namespace + 'jointAngleXZY')
-            XZY.append(float(num) for num in jointangleXZY.text.split(' '))
+            XZY.append([float(num) for num in jointangleXZY.text.split(' ')])
 
         df_zxy = pd.DataFrame(np.array(ZXY),columns=label)
         df_xzy = pd.DataFrame(np.array(XZY),columns=label)
