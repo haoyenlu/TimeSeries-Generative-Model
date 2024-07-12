@@ -63,9 +63,10 @@ class Dataset:
 
         onehot_label = [0] * len(self.config['tasks'])
 
-        for type in tqdm(self.config['types'],desc="Type",leave=False):
+        for type in self.config['types']:
+            print(f"Processing {type} Folder.")
             type_dir = os.path.join(self.ulf_filepath,type)
-            for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=True):
+            for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=False):
                 patient_dir = os.path.join(type_dir,patient)
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
                     subject , task , hand = Path(file).stem.split('_')
