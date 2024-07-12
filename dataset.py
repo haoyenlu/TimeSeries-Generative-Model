@@ -95,7 +95,7 @@ class PreprocessMVNX:
                         TRAIN_LABEL.append(task.upper())
 
 
-        return (np.array(TRAIN_DATA), TRAIN_LABEL), (np.array(TEST_DATA), TEST_LABEL)
+        return (np.array(TRAIN_DATA), np.array(TRAIN_LABEL).reshape(-1,1)), (np.array(TEST_DATA), np.array(TEST_LABEL).reshape(-1,1))
     
 
     
@@ -115,11 +115,6 @@ class PreprocessMVNX:
 
     def minmax_scaler(self,sequence):
         return (sequence - np.min(sequence)) / (np.max(sequence) - np.min(sequence))
-
-
-    def load_dataset(path):
-        dataset = np.load(path,allow_pickle=True).item()
-        return (dataset['train']['data'],dataset['train']['label']), (dataset['test']['data'],dataset['test']['label'])
 
 
 

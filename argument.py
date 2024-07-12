@@ -9,6 +9,7 @@ def parse_argument():
     parser.add_argument('--test_patient',nargs='*')
 
 
+
     args = parser.parse_args()
     return args
 
