@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data',type=str)
 parser.add_argument('--ckpt',type=str)
 parser.add_argument('--config',type=str)
-parser.add_argument('--arch',type=str)
 parser.add_argument('--vis',type=str)
 
 args = parser.parse_args()

@@ -22,7 +22,7 @@ def to_tensor_dataset(X,y,buffer_size=1024,batch_size=8):
     return dataset
 
 def load_config(path):
-    with open(path.config) as file:
+    with open(path) as file:
         config = yaml.safe_load(file)
 
     return config
