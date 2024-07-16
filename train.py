@@ -25,7 +25,7 @@ parser.add_argument('--max_iter',type=int,default=1000)
 parser.add_argument('--n_critic',type=int,default=5)
 parser.add_argument('--scheduler',action="store_true")
 parser.add_argument('--log',type=str,default="./log")
-parser.add_argument('--ckpt',type='str',default='./checkpoint')
+parser.add_argument('--ckpt',type=str,default='./checkpoint')
 
 args = parser.parse_args()
 config = load_config(args.config)
