@@ -25,7 +25,7 @@ class PreprocessMVNX:
             self.resample = partial(self.scipy_resample,max_length = self.config['cutoff_length'])
         
 
-    def parse_mvnx_file(self,file,use_xzy = True,max_length=1024):
+    def parse_mvnx_file(self,file,use_xzy = True):
         '''
         Function for preprocessing jointAngle in mvnx file
         '''
@@ -45,11 +45,6 @@ class PreprocessMVNX:
         XZY = []
         for frame in frames[3:]:
             jointangle = frame.find(namespace + 'jointAngle')
-
-            ''' Cutoff '''
-            temp = [float(num) for num in jointangle.text.split(' ')]
-            if len(temp) > max_length: return None
-
             ZXY.append([float(num) for num in jointangle.text.split(' ')])
             jointangleXZY = frame.find(namespace + 'jointAngleXZY')
             XZY.append([float(num) for num in jointangleXZY.text.split(' ')])
@@ -77,9 +72,9 @@ class PreprocessMVNX:
                 patient_dir = os.path.join(type_dir,patient)
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
                     subject , task , hand = Path(file).stem.split('_')
-                    df = self.parse_mvnx_file(os.path.join(patient_dir,file),max_length=self.config['cutoff_length'])
+                    df = self.parse_mvnx_file(os.path.join(patient_dir,file))
 
-                    if df is None: continue
+                    if len(df) > self.config['cutoff_length']: continue
 
                     # Resample to max_length
                     temp_data = df[self.config['features']].to_numpy() # T,C
