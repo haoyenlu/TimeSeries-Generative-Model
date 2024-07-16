@@ -4,7 +4,7 @@ generator:
   num_classes: 30
   latent_dim: 64
   data_embed_dim: 64
-  label_embed_dim: 8
+  label_embed_dim: 16
   depth: 3
   num_heads: 4
   forward_drop_rate: 0.5
@@ -15,8 +15,8 @@ discriminator:
   in_channels: 24
   patch_size: 16
   data_emb_size: 64
-  label_emb_size: 8
-  seq_len: 1024
+  label_emb_size: 16
+  seq_length: 1024
   depth: 3
   n_classes: 30
 
