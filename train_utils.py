@@ -51,9 +51,10 @@ def generate_sample_plot(gen_net,config,epoch,num=6):
 
     for i in range(num):
         noise = torch.FloatTensor(np.random.normal(0,1,(1,config['generator']['latent_dim'])))
-        fake_label = torch.randint(0,config['g_optim']['num_classes'],(1,))
+        fake_label = torch.randint(0,config['generator']['num_classes'],(1,))
         fake_sequence = gen_net(noise,fake_label).to('cpu').detach().numpy()
 
+        print(fake_sequence.shape)
         synthetic_data.append(fake_sequence)
         synthetic_label.append(fake_label)
     
