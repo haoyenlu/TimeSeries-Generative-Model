@@ -52,8 +52,8 @@ gen_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, gen_net.param
 dis_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, dis_net.parameters()),**config.get('d_optim',dict()))
 
 
-gen_scheduler = LinearLrDecay(gen_optimizer, config['g_optim']['g_lr'], 0.0, 0, args.max_iter * args.n_critic)
-dis_scheduler = LinearLrDecay(dis_optimizer, config['d_optim']['d_lr'], 0.0, 0, args.max_iter * args.n_critic)
+gen_scheduler = LinearLrDecay(gen_optimizer, config['g_optim']['lr'], 0.0, 0, args.max_iter * args.n_critic)
+dis_scheduler = LinearLrDecay(dis_optimizer, config['d_optim']['lr'], 0.0, 0, args.max_iter * args.n_critic)
 
 
 cls_criterion = nn.CrossEntropyLoss()
