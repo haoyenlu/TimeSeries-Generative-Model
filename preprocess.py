@@ -1,10 +1,10 @@
 import argparse
 import yaml
-import tsgm
 import numpy as np
 
 from mvnx import PreprocessMVNX
 from utils import save_to_numpy, load_numpy_data
+from data_utils import FeatureWiseScaler
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--mvnx',type=str,default=None)
@@ -37,7 +37,7 @@ else:
 '''Scaling'''
 scale_range = config['scale_range']
 print(f"Scaling time-series sequence to {scale_range}.")
-scaler = tsgm.utils.TSFeatureWiseScaler(scale_range)
+scaler = FeatureWiseScaler(scale_range)
 scaler.fit(np.concatenate([train_data,test_data],axis=0))
 X_train = scaler.transform(train_data).astype(np.float32)
 X_test = scaler.transform(test_data).astype(np.float32)
