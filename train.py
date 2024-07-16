@@ -72,6 +72,7 @@ for epoch in tqdm(range(max_epoch)):
 
 
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
+        print(sequence.shape,label.shape)
         sequence = torch.FloatTensor(sequence).to(device)
         label = torch.FloatTensor(label).to(device)
 
