@@ -72,9 +72,8 @@ for epoch in tqdm(range(max_epoch)):
 
 
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
-        print(sequence.shape,label.shape)
-        sequence = torch.FloatTensor(sequence).to(device)
-        label = torch.FloatTensor(label).to(device)
+        sequence = sequence.to(device)
+        label = label.to(device)
 
         # Sample noise
         noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],config['generator']['latent_dim']))).to(device)
