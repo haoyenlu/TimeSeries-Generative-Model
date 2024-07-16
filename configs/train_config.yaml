@@ -32,5 +32,5 @@ d_optim:
 
 
 batch_size: 8
-lamdba_cls: 1
+lambda_cls: 1
 lambda_gp: 10
