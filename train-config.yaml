@@ -1,8 +1,0 @@
-latent_dim: 64
-output_dim: 2
-feature_dim: 24
-seq_len: 100
-batch_size: 8
-epochs: 2000
-save_freq: 10
-architecture: cgan_base_c4_l1

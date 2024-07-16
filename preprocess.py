@@ -4,7 +4,7 @@ from sklearn.preprocessing import OneHotEncoder
 import tsgm
 import numpy as np
 
-from dataset import PreprocessMVNX
+from mvnx import PreprocessMVNX
 from utils import save_to_numpy, load_numpy_data
 
 parser = argparse.ArgumentParser()

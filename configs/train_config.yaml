@@ -1,0 +1,38 @@
+generator:
+  seq_len: 1024
+  channels: 24
+  num_classes: 30
+  latent_dim: 64
+  data_embed_dim: 64
+  label_embed_dim: 8
+  depth: 3
+  num_heads: 4
+  forward_drop_rate: 0.5
+  attn_drop_rate: 0.5
+
+
+discriminator:
+  in_channels: 24
+  patch_size: 16
+  data_emb_size: 64
+  label_emb_size: 8
+  seq_len: 1024
+  depth: 3
+  n_classes: 30
+
+
+g_optim:
+  g_lr: 0.0001
+  beta1: 0.9
+  beta2: 0.99
+
+
+d_optim:
+  d_lr: 0.0001
+  beta1: 0.9  
+  beta2: 0.99
+
+
+batch_size: 8
+lamdba_cls: 1
+lambda_gp: 10
