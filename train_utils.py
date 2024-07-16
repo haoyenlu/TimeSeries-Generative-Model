@@ -6,7 +6,7 @@ import io
 '''L2 Norm'''
 def gradient_panelty(y,x,device):
     weights = torch.ones(y.size()).to(device)
-    dydx = torch.autograd(outputs=y,
+    dydx = torch.autograd.grad(outputs=y,
                           inputs=x,
                           grad_outputs=weights,
                           retain_graph=True,
