@@ -14,7 +14,7 @@ def gradient_panelty(y,x,device):
                           only_inputs=True)[0]
     
     dydx = dydx.reshape(dydx.size(0),-1)
-    dydx_l2norm = torch.sqrt(torch.sum(dydx**2),dim=1)
+    dydx_l2norm = torch.sqrt(torch.sum(dydx**2,dim=1))
     return torch.mean((dydx_l2norm-1)**2)
 
 
