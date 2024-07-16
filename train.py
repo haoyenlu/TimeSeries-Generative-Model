@@ -65,7 +65,7 @@ global_step = 0
 writer = SummaryWriter(args.log)
 
 '''Train Model: TODO''' 
-for epoch in tqdm(range(max_epoch)):
+for epoch in range(max_epoch):
 
     gen_net.train()
     dis_net.train()
