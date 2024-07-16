@@ -79,16 +79,17 @@ for epoch in tqdm(range(max_epoch)):
         noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],config['generator']['latent_dim']))).to(device)
         fake_label = torch.randint(0,config['generator']['num_classes'],(sequence.shape[0],)).to(device)
 
+        # Generate fake sample based on fake label
+        fake_sequence = gen_net(noise,fake_label)
 
+        print(fake_sequence.size()) # Debug
+        
         '''Train Discriminator'''
         critic_step += 1
         dis_net.zero_grad()
         real_out_adv , real_out_cls = dis_net(sequence)
 
-        # Generate fake sample based on fake label
-        fake_sequence = gen_net(noise,fake_label)
 
-        print(fake_sequence.size()) # Debug
 
         assert fake_sequence.size() == sequence.size(),f"fake_imgs.size(): {fake_sequence.size()} real_imgs.size(): {sequence.size()}"
 
