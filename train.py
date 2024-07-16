@@ -32,7 +32,7 @@ config = load_config(args.config)
 
 (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
 
-train_dataset = UpperLimbMotionDataset(train_data,train_label)
+train_dataset = UpperLimbMotionDataset(train_data.transpose(0,2,1),train_label)
 train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
 
 
