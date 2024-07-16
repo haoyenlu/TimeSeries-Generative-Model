@@ -85,13 +85,14 @@ class PreprocessMVNX:
 
                     assert resample_data.shape == (self.config['cutoff_length'],len(self.config['features'])), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
                     
+                    temp_label = np.argwhere(task == self.config['tasks'])
 
                     if subject in test_patient: 
                         TEST_DATA.append(resample_data)
-                        TEST_LABEL.append(task.upper())
+                        TEST_LABEL.append(temp_label)
                     else: 
                         TRAIN_DATA.append(resample_data)
-                        TRAIN_LABEL.append(task.upper())
+                        TRAIN_LABEL.append(temp_label)
 
 
         return (np.array(TRAIN_DATA), np.array(TRAIN_LABEL).reshape(-1,1)), (np.array(TEST_DATA), np.array(TEST_LABEL).reshape(-1,1))

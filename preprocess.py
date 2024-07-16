@@ -36,19 +36,21 @@ else:
 
 
 '''Scaling'''
-scale_range = (-1,1)
+scale_range = config['scale_range']
 print(f"Scaling time-series sequence to {scale_range}.")
 scaler = tsgm.utils.TSFeatureWiseScaler(scale_range)
 scaler.fit(np.concatenate([train_data,test_data],axis=0))
 X_train = scaler.transform(train_data).astype(np.float32)
 X_test = scaler.transform(test_data).astype(np.float32)
 
-'''Onehot Encoding'''
-print("Encoding label.")
-encoder = OneHotEncoder(handle_unknown='ignore')
-encoder.fit(np.array(config['tasks']).reshape(-1,1))
-Y_train = encoder.transform(train_label).toarray().astype(np.float32)
-Y_test = encoder.transform(test_label).toarray().astype(np.float32)
+
+if config['onehot']:
+    '''Onehot Encoding'''
+    print("Encoding label.")
+    encoder = OneHotEncoder(handle_unknown='ignore')
+    encoder.fit(np.array(config['tasks']).reshape(-1,1))
+    Y_train = encoder.transform(train_label).toarray().astype(np.float32)
+    Y_test = encoder.transform(test_label).toarray().astype(np.float32)
 
 save_path = f'./{args.save}/ulf_preprocess_{"_".join(args.test_patient)}.npy'
 save_to_numpy(X_train,Y_train,X_test,Y_test,save_path)
