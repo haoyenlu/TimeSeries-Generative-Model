@@ -58,7 +58,7 @@ dis_scheduler = LinearLrDecay(dis_optimizer, config['d_optim']['lr'], 0.0, 0, ar
 
 cls_criterion = nn.CrossEntropyLoss()
 
-max_epoch = np.ceil((args.max_iter * args.n_critic) / len(train_dataloader))
+max_epoch = int(np.ceil((args.max_iter * args.n_critic) / len(train_dataloader)))
 
 critic_step = 0
 global_step = 0
