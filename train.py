@@ -72,7 +72,7 @@ for epoch in tqdm(range(max_epoch)):
 
 
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
-        sequence = sequence.unsqueeze(2).to(device)
+        sequence = sequence.to(device)
         label = label.to(device)
 
         print(sequence.size()) # Debug
