@@ -36,7 +36,6 @@ else:
 
 '''Scaling'''
 scale_range = config['scale_range']
-print(f"Scaling time-series sequence to {scale_range}.")
 scaler = FeatureWiseScaler(scale_range)
 scaler.fit(np.concatenate([train_data,test_data],axis=0))
 X_train = scaler.transform(train_data).astype(np.float32)

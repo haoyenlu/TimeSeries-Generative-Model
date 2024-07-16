@@ -64,6 +64,7 @@ class PreprocessMVNX:
         TEST_DATA = []
         TRAIN_LABEL = []
         TEST_LABEL = []
+        all_tasks = np.array(self.config['tasks'])
 
         for type in self.config['types']:
             print(f"Processing {type} Folder.")
@@ -85,7 +86,7 @@ class PreprocessMVNX:
 
                     assert resample_data.shape == (self.config['cutoff_length'],len(self.config['features'])), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
                     
-                    temp_label = np.argwhere(task == self.config['tasks'])
+                    temp_label = np.where(self.config['tasks'] == task.upper())
 
                     if subject in test_patient: 
                         TEST_DATA.append(resample_data)
