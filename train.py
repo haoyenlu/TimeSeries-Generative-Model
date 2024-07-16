@@ -74,8 +74,10 @@ for epoch in tqdm(range(max_epoch)):
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
         sequence = sequence.unsqueeze(2).to(device) # shape: (B,C,1,T)
         label = label.to(device)
+        onehot_label = torch.zeros(config['generator']['num_classes'])
+        onehot_label[torch.max(label,1)[1]] = 1
 
-        print(sequence.size()) # Debug
+        print(onehot_label.size()) # Debug
 
         # Sample noise
         noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],config['generator']['latent_dim']))).to(device)
@@ -92,6 +94,7 @@ for epoch in tqdm(range(max_epoch)):
         print(real_out_cls.size())
         print(label.size())
 
+
         assert fake_sequence.size() == sequence.size(),f"fake_imgs.size(): {fake_sequence.size()} real_imgs.size(): {sequence.size()}"
 
         fake_out_adv , fake_out_cls = dis_net(fake_sequence)
@@ -105,7 +108,7 @@ for epoch in tqdm(range(max_epoch)):
         d_real_loss = -torch.mean(real_out_adv)
         d_fake_loss = torch.mean(fake_out_adv)
         d_adv_loss = d_real_loss + d_fake_loss
-        d_cls_loss = cls_criterion(real_out_cls,label)
+        d_cls_loss = cls_criterion(real_out_cls,onehot_label)
         d_loss = d_adv_loss + config['lambda_cls']*d_cls_loss + config['lambda_gp'] * d_loss_gp
         d_loss.backward()
 
