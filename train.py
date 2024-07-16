@@ -89,11 +89,11 @@ for epoch in tqdm(range(max_epoch)):
         dis_net.zero_grad()
         real_out_adv , real_out_cls = dis_net(sequence)
 
-
+        print(real_out_cls.size())
 
         assert fake_sequence.size() == sequence.size(),f"fake_imgs.size(): {fake_sequence.size()} real_imgs.size(): {sequence.size()}"
 
-        fake_out_adv , real_out_adv = dis_net(fake_sequence)
+        fake_out_adv , fake_out_cls = dis_net(fake_sequence)
         
         # Compute loss
         alpha = torch.rand(sequence.size(0),1,1,1).to(device)
