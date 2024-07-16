@@ -136,8 +136,13 @@ for epoch in tqdm(range(max_epoch)):
         '''Moving Average Weight (Not understand yet): TODO'''
 
         global_step += 1
-        tqdm.set_description(f"[Epoch:{epoch}/{max_epoch}][Batch:{idx}/{len(train_dataloader)}][d_loss:{d_loss.item()}][g_loss:{g_loss.item()}]")
 
+        if critic_step == 0:
+            tqdm.set_description(f"[Epoch:{epoch}/{max_epoch}][Batch:{idx}/{len(train_dataloader)}][d_loss:{d_loss.item()}][g_loss:{g_loss.item()}]")
+        else:
+            tqdm.set_description(f"[Epoch:{epoch}/{max_epoch}][Batch:{idx}/{len(train_dataloader)}][d_loss:{d_loss.item()}]")
+
+            
 
     '''Visualize Synthesize Sample'''
     gen_net.eval()
