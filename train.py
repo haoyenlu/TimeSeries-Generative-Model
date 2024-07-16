@@ -89,7 +89,7 @@ for epoch in tqdm(range(max_epoch)):
         real_out_adv , real_out_cls = dis_net(sequence)
 
         print(real_out_cls.size())
-        print(label.size())
+        print(onehot_label.size())
 
 
         assert fake_sequence.size() == sequence.size(),f"fake_imgs.size(): {fake_sequence.size()} real_imgs.size(): {sequence.size()}"
