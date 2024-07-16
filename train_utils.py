@@ -42,12 +42,12 @@ class LinearLrDecay(object):
     
 
 
-def generate_sample_plot(gen_net,config,epoch,num=6):
+def generate_sample_plot(gen_net,config,epoch,device,num=6):
     '''Generate pyplot and save to buffer'''
     assert num % 2 == 0, "Number of sample has to be divisible by 2"
 
-    noise = torch.FloatTensor(np.random.normal(0,1,(num,config['generator']['latent_dim'])))
-    fake_label = torch.randint(0,config['generator']['num_classes'],(num,))
+    noise = torch.FloatTensor(np.random.normal(0,1,(num,config['generator']['latent_dim']))).to(device)
+    fake_label = torch.randint(0,config['generator']['num_classes'],(num,)).to(device)
     fake_sequence = gen_net(noise,fake_label).to('cpu').detach().numpy().squeeze()
     
     _,C,_ = fake_sequence.shape

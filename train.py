@@ -146,7 +146,7 @@ for epoch in tqdm(range(max_epoch)):
 
     '''Visualize Synthesize Sample'''
     gen_net.eval()
-    plot_buf = generate_sample_plot(gen_net,config,epoch=epoch)
+    plot_buf = generate_sample_plot(gen_net,config,epoch=epoch,device=device)
     image = PIL.Image.open(plot_buf)
     image = ToTensor()(image).unsqueeze(0)
     writer.add_image('Image',image[0],epoch)
