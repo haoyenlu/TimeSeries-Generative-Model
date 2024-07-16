@@ -77,7 +77,7 @@ for epoch in tqdm(range(max_epoch)):
 
         # Sample noise
         noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],config['generator']['latent_dim']))).to(device)
-        fake_label = torch.randint(0,config['g_optim']['num_classes'],(sequence.shape[0],)).to(device)
+        fake_label = torch.randint(0,config['generator']['num_classes'],(sequence.shape[0],)).to(device)
 
 
         '''Train Discriminator'''
