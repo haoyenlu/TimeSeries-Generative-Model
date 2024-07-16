@@ -5,7 +5,7 @@ EPS = 1e-18
 
 class FeatureWiseScaler:
     def __init__(self,feature_range = (0,1)):
-        assert len(feature_range) == 2
+        # assert len(feature_range) == 2
 
         self.min_v, self.max_v = feature_range
     
