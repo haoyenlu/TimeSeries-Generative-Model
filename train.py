@@ -72,8 +72,10 @@ for epoch in tqdm(range(max_epoch)):
 
 
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
-        sequence = sequence.to(device)
+        sequence = sequence.unsqueeze(2).to(device)
         label = label.to(device)
+
+        print(sequence.size()) # Debug
 
         # Sample noise
         noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],config['generator']['latent_dim']))).to(device)
@@ -82,8 +84,6 @@ for epoch in tqdm(range(max_epoch)):
         # Generate fake sample based on fake label
         fake_sequence = gen_net(noise,fake_label)
 
-        print(fake_sequence.size()) # Debug
-        
         '''Train Discriminator'''
         critic_step += 1
         dis_net.zero_grad()
