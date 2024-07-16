@@ -12,7 +12,8 @@ def gradient_panelty(y,x,device):
                           retain_graph=True,
                           create_graph=True,
                           only_inputs=True)[0]
-    dydx = dydx.view(dydx.size(0),-1)
+    
+    dydx = dydx.reshape(dydx.size(0),-1)
     dydx_l2norm = torch.sqrt(torch.sum(dydx**2),dim=1)
     return torch.mean((dydx_l2norm-1)**2)
 
