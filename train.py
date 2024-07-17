@@ -72,7 +72,7 @@ for epoch in range(max_epoch):
 
 
     for idx, (sequence,label) in enumerate(tqdm(train_dataloader)):
-        sequence = sequence.unsqueeze(2).to(device) # shape: (B,C,1,T)
+        sequence = sequence.to(device) # shape: (B,C,1,T)
         label = label.to(device)
         onehot_label = F.one_hot(label.long(),num_classes=config['generator']['num_classes']).squeeze(1).float()
 
@@ -93,7 +93,7 @@ for epoch in range(max_epoch):
         fake_out_adv , fake_out_cls = dis_net(fake_sequence)
         
         # Compute loss
-        alpha = torch.rand(sequence.size(0),1,1,1).to(device)
+        alpha = torch.rand(sequence.size(0),1,1).to(device)
         x_hat = (alpha * sequence.data + (1-alpha) * fake_sequence.data).requires_grad_(True)
         out_src, _ = dis_net(x_hat)
         d_loss_gp = gradient_panelty(out_src,x_hat,device=device)
