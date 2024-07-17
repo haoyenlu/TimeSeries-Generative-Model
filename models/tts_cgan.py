@@ -50,7 +50,7 @@ class Generator(nn.Module):
         x = self.blocks(x)
         x = x.reshape(x.shape[0], 1, x.shape[1], x.shape[2])
         output = self.deconv(x.permute(0, 3, 1, 2))
-        return output 
+        return output.squeeze()
 
 
 class Gen_TransformerEncoderBlock(nn.Sequential):
@@ -191,6 +191,7 @@ class PatchEmbedding_Linear(nn.Module):
 
 
     def forward(self, x:Tensor) ->Tensor:
+        x = x.unsqueeze(2)
         b, _, _, _ = x.shape
         x = self.projection(x)
         cls_tokens = repeat(self.cls_token, '() n e -> b n e', b=b)
