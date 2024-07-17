@@ -90,7 +90,7 @@ class ConditionalGAN:
                 d_loss.backward()
 
                 # Clip Weight
-                nn.utils.clip_grad_norm(self.discriminator.parameters(),5.)
+                nn.utils.clip_grad_norm_(self.discriminator.parameters(),10.)
                 self.d_optimizer.step()
 
                 self.writer.add_scalar('d_loss',d_loss.item(),iter*self.n_critic + d_step)
@@ -109,7 +109,7 @@ class ConditionalGAN:
             g_loss.backward()
 
             # Clip Weight
-            nn.utils.clip_grad_norm_(self.generator.parameters(),5.)
+            nn.utils.clip_grad_norm_(self.generator.parameters(),10.)
             self.g_optimizer.step()
 
             self.writer.add_scalar('g_loss',g_loss.item(),iter)
