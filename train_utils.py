@@ -64,5 +64,6 @@ def generate_sample_plot(gen_net,config,epoch,device,num=6):
 
     buf = io.BytesIO()
     plt.savefig(buf,format='jpg')
+    plt.close(fig)
     buf.seek(0)
     return buf

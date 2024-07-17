@@ -7,8 +7,8 @@ generator:
   label_embed_dim: 16
   depth: 3
   num_heads: 4
-  forward_drop_rate: 0.5
-  attn_drop_rate: 0.5
+  forward_drop_rate: 0.2
+  attn_drop_rate: 0.2
 
 
 discriminator:
@@ -23,7 +23,7 @@ discriminator:
 
 
 g_optim:
-  lr: 0.001
+  lr: 0.01
   betas: [0.9,0.99]
 
 d_optim:
