@@ -122,11 +122,15 @@ class ConditionalGAN:
             self.writer.add_scalar('LR/g_lr',g_lr,iter)
             self.writer.add_scalar('LR/d_lr',d_lr,iter)    
 
-            '''Visualize SYnthetic data'''
-            plot_buf = self.visualize(iter)
-            image = PIL.Image.open(plot_buf)
-            image = ToTensor()(image).unsqueeze(0)
-            self.writer.add_image('Image',image[0],iter)
+
+            if (iter+1) % self.save_iter == 0:
+                '''Visualize SYnthetic data'''
+                plot_buf = self.visualize(iter)
+                image = PIL.Image.open(plot_buf)
+                image = ToTensor()(image).unsqueeze(0)
+                self.writer.add_image('Image',image[0],iter)
+
+                self.save_weight(iter)
 
 
 
@@ -147,9 +151,8 @@ class ConditionalGAN:
         self.generator.eval()
         num_sample = 6
         noise = torch.FloatTensor(np.random.normal(0,1,(num_sample,self.latent_dim))).to(self.device)
-        fake_label = torch.randint(0,self.num_classes,(num_sample,)).to(self.device)
-        fake_sequence = self.generator(noise,fake_label)
-
+        fake_label = torch.randint(0,self.num_classes,(num_sample,))
+        fake_sequence = self.generator(noise,fake_label.to(self.device)).to('cpu').detach().numpy()
         _,c,_ = fake_sequence.shape
 
         fig, axs = plt.subplots(2,3,figsize=(20,8))
