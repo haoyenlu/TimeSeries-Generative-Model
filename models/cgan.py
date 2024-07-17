@@ -1,8 +1,14 @@
+import PIL.Image
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from tqdm import tqdm
 import numpy as np
+import os
+import matplotlib.pyplot as plt
+import io
+import PIL
+from torchvision.transforms import ToTensor
 
 from train_utils import gradient_panelty
 
@@ -13,14 +19,19 @@ def cycle(dataloader):
 
 
 class ConditionalGAN:
-    def __init__(self,generator,discriminator,g_optimizer,d_optimizer,
+    def __init__(self,generator,discriminator,
+                 g_optimizer,d_optimizer,
+                 g_scheduler,d_scheduler,
                  criterion,lambda_cls,lambda_gp,
                  max_iter,save_iter,n_critic,num_classes,latent_dim,
-                 writer):
+                 writer,save_path):
+        
         self.generator = generator
         self.discriminator = discriminator
         self.g_optimizer = g_optimizer
         self.d_optimizer = d_optimizer
+        self.g_scheduler = g_scheduler
+        self.d_scheduler = d_scheduler
         self.criterion = criterion
         
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -36,7 +47,7 @@ class ConditionalGAN:
         self.num_classes = num_classes
         self.latent_dim = latent_dim
         self.writer = writer
-
+        self.save_path = save_path
 
     def train(self,dataloader):
         '''Train Coniditional GAN model'''
@@ -70,6 +81,7 @@ class ConditionalGAN:
                 out_src, _ = self.discriminator(x_hat)
                 d_loss_gp = gradient_panelty(out_src,x_hat,device=self.device)
 
+                # Wasserstein Loss
                 d_real_loss = -torch.mean(real_out_adv)
                 d_fake_loss = torch.mean(fake_out_adv)
                 d_adv_loss = d_real_loss + d_fake_loss
@@ -81,17 +93,77 @@ class ConditionalGAN:
                 nn.utils.clip_grad_norm(self.discriminator.parameters(),5.)
                 self.d_optimizer.step()
 
+                self.writer.add_scalar('d_loss',d_loss.item(),iter*self.n_critic + d_step)
                 tqdm.write(f"[Critic Step:{d_step}/{self.n_critic}][d_loss:{d_loss.item()}]")
-            
+                
             '''Train Generator'''
             self.generator.zero_grad()
             noise = torch.FloatTensor(np.random.normal(0,1,(sequence.shape[0],self.latent_dim))).to(self.device)
             fake_label = torch.randint(0,self.num_classes,(sequence.shape[0],)).to(self.device)
+            fake_onehot_label = F.one_hot(fake_label.squeeze().long(),num_classes=self.num_classes).float()
             fake_sequence = self.generator(noise,fake_label)
             g_out_adv, g_out_cls = self.discriminator(fake_sequence)
             g_adv_loss = -torch.mean(g_out_adv)
-            g_cls_loss = self.criterion(g_out_cls,fake_label)
+            g_cls_loss = self.criterion(g_out_cls,fake_onehot_label)
+            g_loss = g_adv_loss + self.lamdba_cls*g_cls_loss
+            g_loss.backward()
 
-            tqdm.write(f"[Iteration:{iter}/{self.max_iter}][g_loss:{g_los}]")
+            # Clip Weight
+            nn.utils.clip_grad_norm_(self.generator.parameters(),5.)
+            self.g_optimizer.step()
+
+            self.writer.add_scalar('g_loss',g_loss.item(),iter)
+            tqdm.write(f"[Iteration:{iter}/{self.max_iter}][g_loss:{g_loss.item()}]")
+            
+            
+            '''LR scheduler step'''
+            g_lr = self.g_scheduler.step(iter)
+            d_lr = self.d_scheduler.step(iter)
+            self.writer.add_scalar('LR/g_lr',g_lr,iter)
+            self.writer.add_scalar('LR/d_lr',d_lr,iter)    
+
+            '''Visualize SYnthetic data'''
+            plot_buf = self.visualize(iter)
+            image = PIL.Image.open(plot_buf)
+            image = ToTensor()(image).unsqueeze(0)
+            self.writer.add_image('Image',image[0],iter)
 
 
+
+    def save_weight(self,epoch):
+        ckpt = {
+            'epoch':epoch+1,
+            'gen_state_dict':self.generator.state_dict(),
+            'dis_state_dict':self.discriminator.state_dict(),
+            'get_optim':self.g_optimizer.state_dict(),
+            'dis_optim':self.d_optimizer.state_dict()
+        }
+
+        torch.save(ckpt,os.path.join(self.save_path,'checkpoint.pth'))
+
+
+    
+    def visualize(self,epoch):
+        self.generator.eval()
+        num_sample = 6
+        noise = torch.FloatTensor(np.random.normal(0,1,(num_sample,self.latent_dim))).to(self.device)
+        fake_label = torch.randint(0,self.num_classes,(num_sample,)).to(self.device)
+        fake_sequence = self.generator(noise,fake_label)
+
+        _,c,_ = fake_sequence.shape
+
+        fig, axs = plt.subplots(2,3,figsize=(20,8))
+        fig.suptitle(f'Synthetic data at epoch {epoch}',fontsize=20)
+
+        for i in range(2):
+            for j in range(3):
+                for k in range(c):
+                    axs[i, j].plot(fake_sequence[i*3+j][k][:])
+            
+                axs[i, j].title.set_text(fake_label[i*3+j])
+
+        buf = io.BytesIO()
+        plt.savefig(buf,format='jpg')
+        plt.close(fig)
+        buf.seek(0)
+        return buf
