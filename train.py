@@ -114,10 +114,11 @@ for epoch in range(max_epoch):
             '''Train Generator'''
             gen_net.zero_grad()
             fake_sequence = gen_net(noise,fake_label)
+            fake_onehot_label = F.one_hot(fake_label.long(),num_classes=config['generator']['num_classes']).squeeze(1).float()
             g_out_adv, g_out_cls = dis_net(fake_sequence)
-            print(fake_label.size())
+            
             g_adv_loss = -torch.mean(g_out_adv)
-            g_cls_loss = cls_criterion(g_out_cls, fake_label)
+            g_cls_loss = cls_criterion(g_out_cls, fake_onehot_label)
             g_loss = g_adv_loss + config['lambda_cls'] * g_cls_loss
             g_loss.backward()   
 
