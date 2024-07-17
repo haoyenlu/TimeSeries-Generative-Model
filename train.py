@@ -115,7 +115,7 @@ for epoch in range(max_epoch):
             gen_net.zero_grad()
             fake_sequence = gen_net(noise,fake_label)
             g_out_adv, g_out_cls = dis_net(fake_sequence)
-            print(g_out_cls.size())
+            print(fake_label.size())
             g_adv_loss = -torch.mean(g_out_adv)
             g_cls_loss = cls_criterion(g_out_cls, fake_label)
             g_loss = g_adv_loss + config['lambda_cls'] * g_cls_loss
