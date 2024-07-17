@@ -46,7 +46,7 @@ cgan = ConditionalGAN(generator,discriminator,
                       g_optimizer,d_optimizer,
                       g_scheduler,d_scheduler,
                       criterion,
-                      config['lambda_cls'],config['lamdba_gp'],
+                      config['lambda_cls'],config['lambda_gp'],
                       args.max_iter,args.save_iter,args.n_critic,
                       config['generator']['num_classes'],config['generator']['latent_dim'],
                       writer,args.ckpt)
