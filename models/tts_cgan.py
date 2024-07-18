@@ -40,6 +40,8 @@ class Generator(nn.Module):
         self.deconv = nn.Sequential(
             nn.Conv2d(self.data_embed_dim, self.channels, 1, 1, 0)
         )
+
+        self.sigmoid = nn.Sigmoid()
         
     def forward(self, z, labels):
         c = self.label_embedding(labels)
@@ -50,7 +52,8 @@ class Generator(nn.Module):
         x = self.blocks(x)
         x = x.reshape(x.shape[0], 1, x.shape[1], x.shape[2])
         output = self.deconv(x.permute(0, 3, 1, 2))
-        return output.squeeze()
+        output = self.sigmoid(output.squeeze())
+        return output
 
 
 class Gen_TransformerEncoderBlock(nn.Sequential):
@@ -169,7 +172,8 @@ class ClassificationHead(nn.Sequential):
         self.cls_head = nn.Sequential(
             Reduce('b n e -> b e', reduction='mean'),
             nn.LayerNorm(emb_size),
-            nn.Linear(emb_size, cls_classes)
+            nn.Linear(emb_size, cls_classes),
+            nn.Softmax(dim=1),
         )
 
     def forward(self, x):

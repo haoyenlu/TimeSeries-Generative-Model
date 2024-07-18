@@ -73,6 +73,7 @@ class cGAN_Conv4Architecture:
 
             def forward(self,sequence):
                 x = self.modules(x)
+                x = torch.mean(x,dim=1)
                 out_adv = self.last_adv(x)
                 out_cls = self.last_cls(x)
 
