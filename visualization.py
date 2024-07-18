@@ -2,11 +2,12 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
+import argparse
 
 def visualize_ts_lineplot(
     X,
     Y,
-    num:int = 5,
+    num:int = 3,
     legend_fontsize:int = 12,
     tick_size:int = 10,
     path='/visualize/sample.png'): 
@@ -27,4 +28,18 @@ def visualize_ts_lineplot(
 
 
     plt.savefig(path)
+    plt.close(fig)
+
+
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data',type=str)
+    parser.add_arguemtn('--save',type=str)
+
+    args = parser.parse_args()
+
+    data = np.load(args.data,allow_pickle=True).item()
+    visualize_ts_lineplot(data['train']['data'],data['train']['label'],path=args.save)
 
