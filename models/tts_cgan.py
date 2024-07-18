@@ -159,7 +159,7 @@ class Dis_TransformerEncoder(nn.Sequential):
         
         
 class ClassificationHead(nn.Sequential):
-    def __init__(self, emb_size=100, adv_classes=2, cls_classes=10):
+    def __init__(self, emb_size=100, adv_classes=1, cls_classes=10):
         super().__init__()
         self.adv_head = nn.Sequential(
             Reduce('b n e -> b e', reduction='mean'),
