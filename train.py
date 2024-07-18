@@ -2,6 +2,8 @@ import argparse
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+import os
+from datetime import datetime
 
 from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
@@ -38,8 +40,15 @@ d_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, discriminator.p
 g_scheduler = LinearLrDecay(g_optimizer,config['g_optim']['lr'],0.0,0,args.max_iter)
 d_scheduler = LinearLrDecay(d_optimizer,config['d_optim']['lr'],0.0,0,args.max_iter)
 criterion = torch.nn.CrossEntropyLoss()
-writer = SummaryWriter(args.log)
 
+cur_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+log = os.path.join(args.log,cur_date)
+os.makedirs(log,exist_ok=True)
+
+writer = SummaryWriter(log)
+
+ckpt = os.path.join(args.ckpt,cur_date)
+os.makedirs(ckpt,exist_ok=True)
 
 cgan = ConditionalGAN(generator,discriminator,
                       g_optimizer,d_optimizer,
@@ -48,6 +57,6 @@ cgan = ConditionalGAN(generator,discriminator,
                       config['lambda_cls'],config['lambda_gp'],
                       args.max_iter,args.save_iter,args.n_critic,
                       config['generator']['num_classes'],config['generator']['latent_dim'],
-                      writer,args.ckpt)
+                      writer,ckpt)
 
 cgan.train(train_dataloader)
