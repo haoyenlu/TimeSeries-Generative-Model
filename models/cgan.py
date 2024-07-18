@@ -163,7 +163,7 @@ class ConditionalGAN:
                 for k in range(c):
                     axs[i, j].plot(fake_sequence[i*3+j][k][:])
             
-                axs[i, j].title.set_text(fake_label[i*3+j])
+                axs[i, j].title.set_text(fake_label[i*3+j].item())
 
         buf = io.BytesIO()
         plt.savefig(buf,format='jpg')
