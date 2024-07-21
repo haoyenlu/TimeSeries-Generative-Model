@@ -139,7 +139,7 @@ class ConditionalGAN:
             'epoch':epoch+1,
             'gen_state_dict':self.generator.state_dict(),
             'dis_state_dict':self.discriminator.state_dict(),
-            'get_optim':self.g_optimizer.state_dict(),
+            'gen_optim':self.g_optimizer.state_dict(),
             'dis_optim':self.d_optimizer.state_dict()
         }
 
@@ -170,3 +170,11 @@ class ConditionalGAN:
         plt.close(fig)
         buf.seek(0)
         return buf
+
+
+    def load_weight(self,checkpoint):
+        ckpt = torch.load(checkpoint,map_location=self.device)
+        self.generator.load_state_dict(ckpt['gen_state_dict'])
+        self.discriminator.load_state_dict(ckpt['dis_state_dict'])
+        self.g_optimizer.load_state_dict(ckpt['gen_optim'])
+        self.d_optimizer.load_state_dict(ckpt['dis_optim'])

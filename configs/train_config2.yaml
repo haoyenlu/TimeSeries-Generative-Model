@@ -1,0 +1,28 @@
+generator:
+  sequence_len: 1024
+  feature_dim: 24
+  num_classes: 30
+  hidden_dim: 64
+  latent_dim: 64
+  label_emb_dim: 16
+
+
+discriminator:
+  sequence_len: 1024
+  in_features: 24
+  num_classes: 30
+  hidden_dim: 64
+
+
+g_optim:
+  lr: 0.001
+  betas: [0.9,0.99]
+
+d_optim:
+  lr: 0.001
+  betas: [0.9,0.99]
+
+
+batch_size: 8
+lambda_cls: 1
+lambda_gp: 10

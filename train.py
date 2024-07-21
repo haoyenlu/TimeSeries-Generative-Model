@@ -7,10 +7,10 @@ from datetime import datetime
 
 from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
-from models import tts_cgan
 from model_utils import weight_init
 from train_utils import LinearLrDecay, gradient_panelty, generate_sample_plot
-from models.cgan import ConditionalGAN
+from models.generative.cgan import ConditionalGAN
+from models.generative import eeg_cgan, tts_cgan
 
 
 parser = argparse.ArgumentParser()
@@ -30,8 +30,11 @@ train_dataset = UpperLimbMotionDataset(train_data.transpose(0,2,1),train_label)
 train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
 
 
-generator  = tts_cgan.Generator(**config.get('generator',dict()))
-discriminator = tts_cgan.Discriminator(**config.get('discriminator',dict()))
+# generator  = tts_cgan.Generator(**config.get('generator',dict()))
+# discriminator = tts_cgan.Discriminator(**config.get('discriminator',dict()))
+generator = eeg_cgan.Generator(**config.get('generator',dict()))
+discriminator = eeg_cgan.Discriminator(**config.get('discriminator',dict()))
+
 generator.apply(weight_init)
 discriminator.apply(weight_init)
 
