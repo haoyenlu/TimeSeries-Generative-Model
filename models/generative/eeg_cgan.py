@@ -134,7 +134,7 @@ class Discriminator(nn.Module):
             self.make_conv1d_block(hidden_dim,hidden_dim,downsample=True)
         )
 
-        self.last = ClassificationHead(emb_size=hidden_dim,adv_classes=1,cls_classes=num_classes)
+        self.last = ClassificationHead(emb_size=sequence_len//64,adv_classes=1,cls_classes=num_classes)
 
     def make_conv1d_block(self,in_channel,out_channel,kernel=3,downsample=False):
         block = []
