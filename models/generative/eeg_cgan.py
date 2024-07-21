@@ -154,6 +154,5 @@ class Discriminator(nn.Module):
         _x = self.block4(_x)
         _x = self.block5(_x)
         _x = self.block6(_x)
-        print(_x.shape)
         out_adv, out_class = self.last(_x)
         return out_adv, out_class
