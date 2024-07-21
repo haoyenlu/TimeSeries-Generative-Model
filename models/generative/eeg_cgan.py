@@ -85,12 +85,12 @@ class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size=100, adv_classes=1, cls_classes=10):
         super().__init__()
         self.adv_head = nn.Sequential(
-            Reduce('b n e -> b e', reduction='mean'),
+            Reduce('b n e -> b n', reduction='mean'),
             nn.LayerNorm(emb_size),
             nn.Linear(emb_size, adv_classes)
         )
         self.cls_head = nn.Sequential(
-            Reduce('b n e -> b e', reduction='mean'),
+            Reduce('b n e -> b n', reduction='mean'),
             nn.LayerNorm(emb_size),
             nn.Linear(emb_size, cls_classes),
             nn.Softmax(dim=1),
@@ -134,7 +134,7 @@ class Discriminator(nn.Module):
             self.make_conv1d_block(hidden_dim,hidden_dim,downsample=True)
         )
 
-        self.last = ClassificationHead(emb_size=sequence_len//64,adv_classes=1,cls_classes=num_classes)
+        self.last = ClassificationHead(emb_size=hidden_dim,adv_classes=1,cls_classes=num_classes)
 
     def make_conv1d_block(self,in_channel,out_channel,kernel=3,downsample=False):
         block = []
