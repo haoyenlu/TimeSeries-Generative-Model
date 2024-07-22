@@ -69,7 +69,11 @@ class cGAN_Conv4Architecture:
                 )
 
                 self.last_adv = nn.Linear(128,1)
-                self.last_cls = nn.Linear(128,num_classes)
+
+                self.last_cls = nn.Sequential(
+                    nn.Linear(128,num_classes),
+                    nn.Softmax(dim=1)
+                )
 
             def forward(self,sequence):
                 x = self.modules(x)
