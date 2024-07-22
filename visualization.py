@@ -36,6 +36,7 @@ def visualize_ts_lineplot(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data',type=str)
+    parser.add_argument('--ckpt',type=str)
     parser.add_argument('--save',type=str)
 
     args = parser.parse_args()

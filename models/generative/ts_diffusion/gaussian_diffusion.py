@@ -8,7 +8,6 @@ from tqdm.auto import tqdm
 from functools import partial
 from model.transformer import Transformer
 from model.model_utils import default, identity, extract
-from io_utils import instantiate_from_config
 
 
 # gaussian diffusion trainer class

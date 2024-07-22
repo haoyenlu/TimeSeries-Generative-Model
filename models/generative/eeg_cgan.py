@@ -86,12 +86,12 @@ class ClassificationHead(nn.Sequential):
         super().__init__()
         self.adv_head = nn.Sequential(
             # Reduce('b n e -> b e', reduction='mean'),
-            nn.LayerNorm(emb_size),
+            # nn.LayerNorm(emb_size),
             nn.Linear(emb_size, adv_classes)
         )
         self.cls_head = nn.Sequential(
             # Reduce('b n e -> b e', reduction='mean'),
-            nn.LayerNorm(emb_size),
+            # nn.LayerNorm(emb_size),
             nn.Linear(emb_size, cls_classes),
             nn.Softmax(dim=1),
         )
