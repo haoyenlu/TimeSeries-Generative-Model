@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import io
 import PIL
 from torchvision.transforms import ToTensor
+import math
 
 from train_utils import gradient_panelty
 
@@ -178,3 +179,24 @@ class ConditionalGAN:
         self.discriminator.load_state_dict(ckpt['dis_state_dict'])
         self.g_optimizer.load_state_dict(ckpt['gen_optim'])
         self.d_optimizer.load_state_dict(ckpt['dis_optim'])
+
+
+    def generate_sample(self,num_samples = 1000, sample_per_batch = 10):
+        samples = []
+        iter = math.floor(num_samples / sample_per_batch)
+        res = num_samples % sample_per_batch
+
+        for i in range(iter):
+            noise = torch.FloatTensor(np.random.normal(0,1,(sample_per_batch,self.latent_dim))).to(self.device)
+            fake_label = torch.randint(0,self.num_classes,(sample_per_batch,)).to(self.device)
+            fake_sequence = self.generator(noise,fake_label).to('cpu').detach().numpy()
+            samples.append(fake_sequence)
+        
+        if res:
+            noise = torch.FloatTensor(np.random.normal(0,1,(res,self.latent_dim))).to(self.device)
+            fake_label = torch.randint(0,self.num_classes,(res,)).to(self.device)
+            fake_sequence = self.generator(noise,fake_label).to('cpu').detach().numpy()
+            samples.append(fake_sequence)
+
+        return np.array(samples).squeeze()
+    

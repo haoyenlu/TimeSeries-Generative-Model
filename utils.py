@@ -1,7 +1,6 @@
 import numpy as np
 import yaml
 
-
 def load_config(path):
     with open(path) as file:
         config = yaml.safe_load(file)
@@ -20,6 +19,8 @@ def load_numpy_data(path):
     test_label = data['test']['label']
 
     return (train_data, train_label), (test_data, test_label)
+
+
 
 
 
