@@ -33,7 +33,7 @@ def generate_samples(model,num_samples=1000,sample_per_batch=10):
 
         cnt = 0
         while cnt < num_samples:
-            num_per_batch = min(num_per_batch,num_samples - cnt)
+            num_per_batch = min(sample_per_batch,num_samples - cnt)
             noise = torch.FloatTensor(np.random.normal(0,1,(num_per_batch,latent_dim))).to(device)
             fake_label = torch.randint(0,num_classes,(num_per_batch,)).to(device)
             fake_sequence = model(noise,fake_label).to('cpu').detach().numpy()
