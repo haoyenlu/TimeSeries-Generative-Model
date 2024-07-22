@@ -3,7 +3,7 @@ generator:
   feature_dim: 24
   num_classes: 30
   hidden_dim: 64
-  latent_dim: 64
+  latent_dim: 128
   label_emb_dim: 16
 
 
