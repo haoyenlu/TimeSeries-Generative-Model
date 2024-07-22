@@ -12,6 +12,7 @@ class Generator(nn.Module):
         self.hidden_dim = hidden_dim
         self.label_dim = label_emb_dim
         self.latent_dim = latent_dim
+        self.num_classes = num_classes
 
         self.embedding = nn.Embedding(num_classes,label_emb_dim)
 
