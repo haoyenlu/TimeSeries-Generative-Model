@@ -27,7 +27,7 @@ generator = eeg_cgan.Generator(**config.get('generator',dict()))
 (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
 
 ckpt = torch.load(os.path.join(args.ckpt,'checkpoint.pth'),map_location=torch.device('cpu'))
-generator.load_state_dict(ckpt['gen_state_dcit'])
+generator.load_state_dict(ckpt['gen_state_dict'])
 
 
 samples,labels = generate_samples(generator,num_samples=1000,sample_per_batch=10)
