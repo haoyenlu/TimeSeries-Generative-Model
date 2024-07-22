@@ -41,4 +41,4 @@ def generate_samples(model,num_samples=1000,sample_per_batch=10):
             labels.append(fake_label.to('cpu').detach().numpy())
             cnt += num_per_batch
 
-        return np.array(samples).squeeze(), np.array(labels).squeeze()
+        return np.concatenate(samples,axis=0), np.concatenate(labels,axis=0)
