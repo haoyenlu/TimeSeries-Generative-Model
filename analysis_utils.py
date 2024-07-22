@@ -6,6 +6,7 @@ from sklearn.manifold import TSNE
 import matplotlib.colors as mcolors
 import os
 
+import umap
 
 def plot_pca(real,fake,save_path='./save'):
   _ , feats , seq_len = real.shape
@@ -24,8 +25,23 @@ def plot_tsne(real,fake,save_path='./save'):
   X = np.concatenate([real.reshape(-1,feats*seq_len),fake.reshape(-1,feats*seq_len)])
   Y = np.concatenate([np.ones(real.shape[0]),np.zeros(fake.shape[0])])
   X_embedded = TSNE(n_components=2, learning_rate='auto',init='random', perplexity=15).fit_transform(X)
-  plt.scatter(X_embedded[np.argwhere(Y == 1),0],X_embedded[np.argwhere(Y == 1),1],c='red',label="real",s=5)
-  plt.scatter(X_embedded[np.argwhere(Y == 0),0],X_embedded[np.argwhere(Y == 0),1],c='blue',label="fake",s=5)
+  plt.scatter(X_embedded[:real.shape[0],0],X_embedded[:real.shape[0],1],c='red',label="real",s=5)
+  plt.scatter(X_embedded[real.shape[0]:,0],X_embedded[real.shape[0]:,1],c='blue',label="fake",s=5)
   plt.title("t-SNE Distribution")
   plt.legend()
   plt.savefig(os.path.join(save_path,"TSNE.png"))
+
+
+
+def plot_umap(real,fake,save_path='./save'):
+  reducer = umap.UMAP()
+
+  _  , feats , seq_len = real.shape
+  X = np.concatenate([real.reshape(-1,feats * seq_len),fake.reshape(-1,feats* seq_len)])
+  Y = np.concatenate([np.ones(real.shape[0]),np.zeros(fake.shape[0])])
+  X_embed = reducer.fit_transform(X)
+  plt.scatter(X_embed[:real.shape[0],0],X_embed[:real.shape[0],1],c='red',label="real",s=5)
+  plt.scatter(X_embed[real.shape[0]:,0],X_embed[real.shape[0]:,1],c='blue',label="fake",s=5)
+  plt.title("Umap Distribution")
+  plt.legend()
+  plt.savefig(os.path.join(save_path,"umap.png"))

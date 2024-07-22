@@ -10,7 +10,7 @@ from models.generative import eeg_cgan
 from utils import load_config
 from model_utils import generate_samples
 from utils import load_numpy_data
-from analysis_utils import plot_pca, plot_tsne
+from analysis_utils import plot_pca, plot_tsne, plot_umap
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data',type=str)
@@ -40,6 +40,7 @@ np.save(os.path.join(save_path,'synthesize.npy'), {'data':samples,'labels':label
 
 plot_pca(real=train_data,fake=samples,save_path=save_path)
 plot_tsne(real=train_data,fake=samples,save_path=save_path)
+plot_umap(real=train_data,fake=samples,save_path=save_path)
 
 
 

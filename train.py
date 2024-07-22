@@ -9,7 +9,7 @@ from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
 from model_utils import weight_init
 from train_utils import LinearLrDecay, gradient_panelty, generate_sample_plot
-from models.generative.cgan import ConditionalGAN
+from models.generative.architecture import ConditionalGAN
 from models.generative import eeg_cgan, tts_cgan
 
 
@@ -21,6 +21,7 @@ parser.add_argument('--save_iter',type=int,default=100)
 parser.add_argument('--n_critic',type=int,default=5)
 parser.add_argument('--log',type=str,default="./log")
 parser.add_argument('--ckpt',type=str,default='./checkpoint')
+parser.add_argument('--load_ckpt',type=str,default=None)
 
 args = parser.parse_args()
 config = load_config(args.config)
@@ -53,6 +54,8 @@ writer = SummaryWriter(log)
 ckpt = os.path.join(args.ckpt,cur_date)
 os.makedirs(ckpt,exist_ok=True)
 
+
+# Conditional GAN architecture
 cgan = ConditionalGAN(generator,discriminator,
                       g_optimizer,d_optimizer,
                       g_scheduler,d_scheduler,
@@ -62,4 +65,11 @@ cgan = ConditionalGAN(generator,discriminator,
                       config['generator']['num_classes'],config['generator']['latent_dim'],
                       writer,ckpt)
 
+
+# Load Checkpoint if any
+if args.load_ckpt is not None:
+    cgan.load_weight(args.load_ckpt)
+
+
+# Train model
 cgan.train(train_dataloader)
