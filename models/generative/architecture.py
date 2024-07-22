@@ -194,7 +194,7 @@ class ConditionalGAN:
 
 
     def load_weight(self,checkpoint):
-        ckpt = torch.load(checkpoint,map_location=self.device)
+        ckpt = torch.load(os.path.join(checkpoint,"checkpoint.pth"),map_location=self.device)
         self.generator.load_state_dict(ckpt['gen_state_dict'])
         self.discriminator.load_state_dict(ckpt['dis_state_dict'])
         self.g_optimizer.load_state_dict(ckpt['gen_optim'])
