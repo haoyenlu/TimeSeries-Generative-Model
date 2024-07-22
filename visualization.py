@@ -1,6 +1,8 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+from pathlib import Path
 
 import argparse
 
@@ -36,11 +38,10 @@ def visualize_ts_lineplot(
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data',type=str)
-    parser.add_argument('--ckpt',type=str)
     parser.add_argument('--save',type=str)
 
     args = parser.parse_args()
 
     data = np.load(args.data,allow_pickle=True).item()
-    visualize_ts_lineplot(data['train']['data'],data['train']['label'],path=args.save)
+    visualize_ts_lineplot(data['data'],data['label'],path=os.path.join(args.save,Path(args.data).stem+".png"))
 
