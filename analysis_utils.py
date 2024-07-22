@@ -17,6 +17,7 @@ def plot_pca(real,fake,save_path='./save'):
   plt.scatter(fake_transform[:,0],fake_transform[:,1],label="Fake",s=5)
   plt.legend()
   plt.savefig(os.path.join(save_path,"PCA.png"))
+  plt.close()
 
 
 
@@ -30,12 +31,11 @@ def plot_tsne(real,fake,save_path='./save'):
   plt.title("t-SNE Distribution")
   plt.legend()
   plt.savefig(os.path.join(save_path,"TSNE.png"))
-
+  plt.close()
 
 
 def plot_umap(real,fake,save_path='./save'):
   reducer = umap.UMAP()
-
   _  , feats , seq_len = real.shape
   X = np.concatenate([real.reshape(-1,feats * seq_len),fake.reshape(-1,feats* seq_len)])
   Y = np.concatenate([np.ones(real.shape[0]),np.zeros(fake.shape[0])])
@@ -45,3 +45,4 @@ def plot_umap(real,fake,save_path='./save'):
   plt.title("Umap Distribution")
   plt.legend()
   plt.savefig(os.path.join(save_path,"umap.png"))
+  plt.close()
