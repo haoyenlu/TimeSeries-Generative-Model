@@ -6,15 +6,9 @@ from mvnx import PreprocessMVNX
 from utils import save_to_numpy, load_numpy_data
 from data_utils import FeatureWiseScaler
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--mvnx',type=str,default=None)
-parser.add_argument('--numpy',type=str,default=None)
-parser.add_argument('--config',type=str)
-parser.add_argument('--test_patient',nargs='*')
-parser.add_argument('--save',type=str)
+from argument import preprocess_argument
 
-args = parser.parse_args()
-
+args = preprocess_argument()
 
 with open(args.config) as file:
     config = yaml.safe_load(file)

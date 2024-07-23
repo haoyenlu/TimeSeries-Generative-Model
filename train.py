@@ -5,7 +5,6 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from datetime import datetime
 
-from models.generative.gan import eeg_cgan
 from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
 from model_utils import weight_init
