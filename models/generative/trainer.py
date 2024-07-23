@@ -217,6 +217,8 @@ class DiffusionTrainer(BaseTrainer):
         self.save_iter = save_iter
         self.save_path = save_path
 
+        self.model.to(self.device)
+
     def train(self,dataloader):
         dataloader_cycle = cycle(dataloader)
 
