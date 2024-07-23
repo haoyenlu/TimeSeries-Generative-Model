@@ -210,7 +210,7 @@ class DiffusionTrainer(BaseTrainer):
         
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        self.opimizer = optimizer
+        self.optimizer = optimizer
         self.scheduler = scheduler
         self.writer = writer
         self.max_iter = max_iter
@@ -233,7 +233,7 @@ class DiffusionTrainer(BaseTrainer):
             loss = self.model(sequence,target=sequence,label=label)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(),5.)
-            self.opimizer.step()
+            self.optimizer.step()
             lr = self.scheduler.step(iter)
 
             self.writer.add_scalar('loss',loss.item(),iter)
@@ -262,7 +262,7 @@ class DiffusionTrainer(BaseTrainer):
         if ckpt is None: return
         data = torch.load(ckpt)
         self.model.load_state_dict(data['model'])
-        self.opimizer.load_state_dict(data['opt'])
+        self.optimizer.load_state_dict(data['opt'])
 
 
     def visualize(self,iter):
