@@ -5,10 +5,11 @@ from sklearn.decomposition import FastICA
 from sklearn.manifold import TSNE
 import matplotlib.colors as mcolors
 import os
-
+import time
 import umap
 
 def plot_pca(real,fake,save_path='./save'):
+  print(f"")
   _ , feats , seq_len = real.shape
   pca = PCA(2)
   real_transform = pca.fit_transform(real.reshape(-1,seq_len * feats))

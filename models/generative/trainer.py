@@ -255,7 +255,7 @@ class DiffusionTrainer(BaseTrainer):
             'model':self.model.state_dict(),
             'opt': self.optimizer.state_dict()
         }
-        torch.save(data,os.path.join(self.save_path,"checkpoint,pth"))
+        torch.save(data,os.path.join(self.save_path,"checkpoint.pth"))
 
 
     def load_weight(self, ckpt):
