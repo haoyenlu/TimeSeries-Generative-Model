@@ -269,6 +269,8 @@ class DiffusionTrainer(BaseTrainer):
         self.model.eval()
         num_samples = 6
         samples , labels = self.model.generate_mts(batch_size=num_samples,use_label=True)
+        samples = samples.to('cpu').detach().numpy()
+        labels = labels.to('cpu').detach().numpy()
 
         fig, axs = plt.subplots(2,3,figsize=(20,8))
         fig.suptitle(f'Synthetic data at epoch {iter}',fontsize=20)
