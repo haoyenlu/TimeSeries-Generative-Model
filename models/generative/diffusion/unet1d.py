@@ -87,7 +87,7 @@ class Unet1D(nn.Module):
         self.blocks = nn.ModuleList(blocks)
 
         self.last = nn.Sequential(
-            nn.Conv1d(hidden_ch,feature_dim,kernel_size=5,padding="same"),
+            nn.Conv1d(hidden_ch*2,feature_dim,kernel_size=5,padding="same"),
             nn.Sigmoid()
         )
 
@@ -108,9 +108,9 @@ class Unet1D(nn.Module):
         # Decoding
         res_cnt = 5
         while cnt < 12:
-            _x = torch.concat([_x,res[res_cnt]],dim=1)
             _x = self.blocks[cnt*2](_x,timestep,label)
             _x = self.blocks[cnt*2 + 1](_x,timestep,label)
+            _x = torch.concat([_x,res[res_cnt]],dim=1)
             res_cnt -= 1
             cnt += 1
         
