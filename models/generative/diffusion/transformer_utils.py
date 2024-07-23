@@ -179,16 +179,31 @@ class AdaLayerNorm(nn.Module):
 
 
 class AdaInsNorm(nn.Module):
-    def __init__(self,n_embd):
+    def __init__(self,in_ch,num_classes,eps=1e-7):
         super().__init__()
-        self.emb = SinusoidalPosEmb(n_embd)
-        self.silu = nn.SiLU()
-        self.linear = nn.Linear(n_embd,n_embd * 2)
-        self.instancenorm = nn.InstanceNorm1d(n_embd)
+        self.num_classes =num_classes
+        self.in_ch = in_ch
+        self.eps = eps
+        self.label_emb = nn.Embedding(num_classes,in_ch*4,bias=True )
+        self.timestep_emb = SinusoidalPosEmb(in_ch*4)
+    
+    def c_norm(self,x,bs,ch,eps=1e-7):
+        assert isinstance(x,torch.cuda.FloatTensor)
+        x_var = x.var(dim=-1)
+        x_std = x_var.sqrt().view(bs,ch,1,1)
+        x_mean = x.mean(dim=-1).view(bs,ch,1,1)
+        return x_std, x_mean
 
-    def forward(self,x,timestep,label_emb=None):
-        emb = self.emb(timestep) + label_emb if label_emb is not None else self.emb(timestep)
-        emb = self.linear(self.silu(emb)).unsqueeze(1)
-        scale, shift = torch.chunk(emb,2,dim=2)
-        x = self.instancenorm(x.transpose(-1,-2)).transpose(-1,-2) * (1+scale) + shift
-        return x
+    def forward(self,x,timestep,label):
+        
+        size = x.size()
+        bs ,ch = size[:2]
+        x_ = x.view(bs,ch,-1)
+        emb = self.timestep_emb(timestep) + self.label_emb(label)
+        emb = emb.view(bs,ch,-1)
+        x_std, x_mean = self.c_norm(x_,bs,ch,eps=self.eps)
+        y_std,y_mean = self.c_norm(emb,bs,ch,eps=self.eps)
+
+        out = ((x-x_mean.expand(size))/ x_std.expand(size)) * y_std.expand(size) + y_mean.expand(size)
+
+    
