@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-from transformer_utils import AdaLayerNorm
+from models.generative.diffusion.transformer_utils import AdaLayerNorm
 
 
 class DownSampleBlock(nn.Module):
