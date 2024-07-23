@@ -62,7 +62,7 @@ class Diffusion(nn.Module):
             loss_type='l1',
             beta_schedule='cosine',
             eta=0.,
-            use_ff=True,
+            use_ff=False,
             reg_weight=None,
             label_dim=None,
             **kwargs
@@ -156,22 +156,18 @@ class Diffusion(nn.Module):
         posterior_log_variance_clipped = extract(self.posterior_log_variance_clipped, t, x_t.shape)
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
     
-    def output(self, x, t, padding_masks=None,label=None):
-        trend, season = self.model(x, t, padding_masks=padding_masks,label=label)
-        model_output = trend + season
+    def output(self, x, t,label=None):
+        model_output = self.model(x, t,label=label)
         return model_output
 
-    def model_predictions(self, x, t, clip_x_start=False, padding_masks=None,label=None):
-        if padding_masks is None:
-            padding_masks = torch.ones(x.shape[0], self.seq_length, dtype=bool, device=x.device)
-
+    def model_predictions(self, x, t, clip_x_start=False,label=None):
         maybe_clip = partial(torch.clamp, min=-1., max=1.) if clip_x_start else identity
-        x_start = self.output(x, t, padding_masks,label=label)
-        x_start = maybe_clip(x_start)
+        x_start = self.output(x, t, label=label)
+        # x_start = maybe_clip(x_start)  ------> Test if clip have to be used
         pred_noise = self.predict_noise_from_start(x, t, x_start)
         return pred_noise, x_start
 
-    def p_mean_variance(self, x, t, clip_denoised=True,label=None):
+    def p_mean_variance(self, x, t, clip_denoised=False,label=None):
         _, x_start = self.model_predictions(x, t,label=label)
         if clip_denoised:
             x_start.clamp_(-1., 1.)
@@ -179,7 +175,7 @@ class Diffusion(nn.Module):
             self.q_posterior(x_start=x_start, x_t=x, t=t)
         return model_mean, posterior_variance, posterior_log_variance, x_start
 
-    def p_sample(self, x, t: int, clip_denoised=True,label=None):
+    def p_sample(self, x, t: int, clip_denoised=False,label=None):
         batched_times = torch.full((x.shape[0],), t, device=x.device, dtype=torch.long)
         model_mean, _, model_log_variance, x_start = \
             self.p_mean_variance(x=x, t=batched_times, clip_denoised=clip_denoised,label=label)
@@ -191,8 +187,7 @@ class Diffusion(nn.Module):
     def sample(self, shape,use_label=False):
         device = self.betas.device
         img = torch.randn(shape, device=device)
-        if use_label:
-            label = F.one_hot(torch.randint(low=0,high=30,size=(shape[0],),device=device),num_classes=30).float()
+        label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if use_label else None
         for t in reversed(range(0, self.num_timesteps)):
             img, _ = self.p_sample(img, t,label=label)
 
@@ -230,9 +225,8 @@ class Diffusion(nn.Module):
         return img, label if use_label else img
 
     def generate_mts(self, batch_size=16,use_label=False):
-        feature_size, seq_length = self.feature_size, self.seq_length
         sample_fn = self.fast_sample if self.fast_sampling else self.sample
-        return sample_fn((batch_size, seq_length, feature_size),use_label=use_label)
+        return sample_fn((batch_size, self.feature_size, self.seq_length),use_label=use_label)
 
     @property
     def loss_fn(self):
@@ -256,7 +250,7 @@ class Diffusion(nn.Module):
             target = x_start
 
         x = self.q_sample(x_start=x_start, t=t, noise=noise)  # noise sample
-        model_out = self.output(x.float(), t, padding_masks,label=label)
+        model_out = self.output(x.float(), t,label=label)
 
         train_loss = self.loss_fn(model_out, target, reduction='none')
 
@@ -275,7 +269,7 @@ class Diffusion(nn.Module):
 
     def forward(self, x, **kwargs):
         b, c, n, device, feature_size, = *x.shape, x.device, self.feature_size
-        assert n == feature_size, f'number of variable must be {feature_size}'
+        assert c == feature_size, f'number of variable must be {feature_size}'
         t = torch.randint(0, self.num_timesteps, (b,), device=device)
         return self._train_loss(x_start=x, t=t, **kwargs)
 

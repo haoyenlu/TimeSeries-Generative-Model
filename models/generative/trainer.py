@@ -10,6 +10,7 @@ import io
 import PIL
 from torchvision.transforms import ToTensor
 import math
+from abc import ABC , abstractmethod
 
 
 from train_utils import gradient_panelty
@@ -20,7 +21,23 @@ def cycle(dataloader):
             yield data
 
 
-class ConditionalGAN:
+
+class BaseTrainer(ABC):
+
+    @abstractmethod
+    def train(self,dataloader):
+        pass
+
+    @abstractmethod
+    def save_weight(self,iter):
+        pass
+
+    @abstractmethod
+    def load_weight(self,ckpt):
+        pass
+
+
+class cGANTrainer(BaseTrainer):
     def __init__(self,generator,discriminator,
                  g_optimizer,d_optimizer,
                  g_scheduler,d_scheduler,
@@ -185,24 +202,27 @@ class ConditionalGAN:
 
 
 
-class DiffusionTrainer:
+class DiffusionTrainer(BaseTrainer):
     def __init__(self,model,optimizer,scheduler,
-                 max_iter,
-                 writer):
+                 max_iter,save_iter,
+                 save_path,writer):
+        
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.opimizer = optimizer
         self.scheduler = scheduler
         self.writer = writer
         self.max_iter = max_iter
-    
+        self.save_iter = save_iter
+        self.save_path = save_path
+
     def train(self,dataloader):
         dataloader_cycle = cycle(dataloader)
 
         self.model.train()
-        self.model.zero_grad()
 
         for iter in tqdm(range(self.max_iter)):
+            self.model.zero_grad()
             sequence , label = next(dataloader_cycle)
             sequence = sequence.to(self.device)
             label = label.to(self.device)
@@ -215,4 +235,52 @@ class DiffusionTrainer:
 
             self.writer.add_scalar('loss',loss.item(),iter)
             self.writer.add_scalar('lr',lr,iter)
+            tqdm.write(f"[Iter:{iter}][loss:{loss.item()}]")
+
+            if (iter+1) % self.save_iter == 0:
+                '''Visualize SYnthetic data'''
+                plot_buf = self.visualize(iter)
+                image = PIL.Image.open(plot_buf)
+                image = ToTensor()(image).unsqueeze(0)
+                self.writer.add_image('Image',image[0],iter)
+                self.save_weight(iter)
             
+
+    def save_weight(self, iter):
+        data = {
+            'epoch': iter + 1,
+            'model':self.model.state_dict(),
+            'opt': self.optimizer.state_dict()
+        }
+        torch.save(data,os.path.join(self.save_path,"checkpoint,pth"))
+
+
+    def load_weight(self, ckpt):
+        data = torch.load(ckpt)
+        self.model.load_state_dict(data['model'])
+        self.opimizer.load_state_dict(data['opt'])
+
+
+    def visualize(self,iter):
+        self.model.eval()
+        num_samples = 6
+        samples , labels = self.model.generate_mts(batch_size=num_samples,use_label=True)
+
+        fig, axs = plt.subplots(2,3,figsize=(20,8))
+        fig.suptitle(f'Synthetic data at epoch {iter}',fontsize=20)
+
+        _,c,_ = samples.shape
+
+        for i in range(2):
+            for j in range(3):
+                for k in range(c):
+                    axs[i, j].plot(samples[i*3+j][k][:])
+            
+                axs[i, j].title.set_text(labels[i*3+j].item())
+
+        buf = io.BytesIO()
+        plt.savefig(buf,format='jpg')
+        plt.close(fig)
+        buf.seek(0)
+        return buf
+    

@@ -5,12 +5,13 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from datetime import datetime
 
+from models.generative.gan import eeg_cgan
 from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
 from model_utils import weight_init
 from train_utils import LinearLrDecay, gradient_panelty, generate_sample_plot
-from models.generative.architecture import ConditionalGAN
-from models.generative import eeg_cgan, tts_cgan
+from models.generative.trainer import cGANTrainer
+from models.generative.GAN import tts_cgan, eeg_cgan
 
 
 parser = argparse.ArgumentParser()
@@ -56,7 +57,7 @@ os.makedirs(ckpt,exist_ok=True)
 
 
 # Conditional GAN architecture
-cgan = ConditionalGAN(generator,discriminator,
+cgan = cGANTrainer(generator,discriminator,
                       g_optimizer,d_optimizer,
                       g_scheduler,d_scheduler,
                       criterion,

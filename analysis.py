@@ -6,7 +6,7 @@ import numpy as np
 from pathlib import Path
 import os
 
-from models.generative import eeg_cgan
+from models.generative.gan import eeg_cgan
 from utils import load_config
 from model_utils import generate_samples
 from utils import load_numpy_data
