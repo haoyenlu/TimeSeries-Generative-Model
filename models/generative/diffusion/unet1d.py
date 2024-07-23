@@ -13,7 +13,7 @@ class DownSampleBlock(nn.Module):
 
         modules = []
 
-        modules.append(nn.Conv1d(in_ch,out_ch,kernel=kernel,padding=padding))
+        modules.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding=padding))
         modules.append(nn.LeakyReLU(0.2))
         if downsample:
             modules.append(nn.AvgPool1d(kernel_size=3,padding=1,stride=2))
@@ -38,7 +38,7 @@ class UpsampleBlock(nn.Module):
         if upsample:
             modules.append(nn.Upsample(scale_factor=2))
         
-        modules.append(nn.Conv1d(in_ch,out_ch,kernel,padding="same"))
+        modules.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding="same"))
         # block.append(nn.BatchNorm1d(out_ch))
         modules.append(nn.LeakyReLU(0.2))
 
