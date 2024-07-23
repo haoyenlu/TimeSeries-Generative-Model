@@ -28,7 +28,7 @@ class DownSampleBlock(nn.Module):
         return x
         
 
-class UpsampleBlock(nn.Moduel):
+class UpsampleBlock(nn.Module):
     def __init__(self,in_ch,out_ch,emb_dim,kernel=3,padding="same",upsample=True,norm=True):
         super(UpsampleBlock,self).__init__()
         self.norm = norm
