@@ -20,7 +20,7 @@ def weight_init(model,init_type='normal'):
         nn.init.constant_(model.bias.data, 0.0)
 
 
-def generate_samples(model,num_samples=1000,sample_per_batch=10):
+def generate_samples_gan(model,num_samples=1000,sample_per_batch=10):
         device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         samples = []
         labels = []
@@ -42,3 +42,24 @@ def generate_samples(model,num_samples=1000,sample_per_batch=10):
             cnt += num_per_batch
 
         return np.concatenate(samples,axis=0), np.concatenate(labels,axis=0)
+
+def generate_samples_diffusion(model,num_samples=1000,sample_per_batch=10):
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        sample_arr = []
+        label_arr = []
+
+        model.to(device)
+        model.eval()
+
+        cnt = 0
+        while cnt < num_samples:
+            num_per_batch = min(sample_per_batch,num_samples - cnt)
+            samples , labels = model.generate_mts(batch_size=num_per_batch,use_label=True)
+            samples = samples.to('cpu').detach().numpy()
+            labels = labels.to('cpu').detach().numpy()
+
+            sample_arr.append(samples)
+            label_arr.append(labels)
+            cnt += num_per_batch
+
+        return np.concatenate(sample_arr,axis=0), np.concatenate(label_arr,axis=0)

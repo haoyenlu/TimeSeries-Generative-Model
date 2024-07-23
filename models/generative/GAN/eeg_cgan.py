@@ -81,6 +81,7 @@ class Generator(nn.Module):
         out = torch.reshape(out,(-1,self.out_features,self.sequence_len))
         
         return out
+
     
 class ClassificationHead(nn.Sequential):
     def __init__(self, emb_size=100, adv_classes=1, cls_classes=10):
