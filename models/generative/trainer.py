@@ -191,12 +191,13 @@ class cGANTrainer(BaseTrainer):
         return buf
 
 
-    def load_weight(self,checkpoint):
-        ckpt = torch.load(os.path.join(checkpoint,"checkpoint.pth"),map_location=self.device)
-        self.generator.load_state_dict(ckpt['gen_state_dict'])
-        self.discriminator.load_state_dict(ckpt['dis_state_dict'])
-        self.g_optimizer.load_state_dict(ckpt['gen_optim'])
-        self.d_optimizer.load_state_dict(ckpt['dis_optim'])
+    def load_weight(self,ckpt):
+        if ckpt is None: return 
+        data = torch.load(os.path.join(ckpt,"checkpoint.pth"),map_location=self.device)
+        self.generator.load_state_dict(data['gen_state_dict'])
+        self.discriminator.load_state_dict(data['dis_state_dict'])
+        self.g_optimizer.load_state_dict(data['gen_optim'])
+        self.d_optimizer.load_state_dict(data['dis_optim'])
 
     
 
@@ -256,6 +257,7 @@ class DiffusionTrainer(BaseTrainer):
 
 
     def load_weight(self, ckpt):
+        if ckpt is None: return
         data = torch.load(ckpt)
         self.model.load_state_dict(data['model'])
         self.opimizer.load_state_dict(data['opt'])
