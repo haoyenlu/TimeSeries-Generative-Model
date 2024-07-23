@@ -78,10 +78,10 @@ class Unet1D(nn.Module):
         '''Decoder (Upsample)'''
         for i in range(6):
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=False,norm=True),
+                UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=True,norm=False),
             )
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch*2,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=True,norm=False),
+                UpsampleBlock(in_ch=hidden_ch*2,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=False,norm=True),
             )
 
         self.blocks = nn.ModuleList(blocks)
