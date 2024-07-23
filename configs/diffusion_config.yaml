@@ -1,0 +1,15 @@
+diffusion:
+  seq_length: 1024
+  feature_size: 24
+  timesteps: 512
+  sampling_timesteps: 512
+  loss_type: 'l1'
+  beta_schedule: 'linear'
+
+
+backbone:
+  seq_len: 1024
+  feature_dim: 24
+  num_classes: 30
+  hidden_ch: 64
+  emb_dim: 32

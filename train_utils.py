@@ -42,28 +42,3 @@ class LinearLrDecay(object):
     
 
 
-def generate_sample_plot(gen_net,config,epoch,device,num=6):
-    '''Generate pyplot and save to buffer'''
-    assert num % 2 == 0, "Number of sample has to be divisible by 2"
-
-    noise = torch.FloatTensor(np.random.normal(0,1,(num,config['generator']['latent_dim']))).to(device)
-    fake_label = torch.randint(0,config['generator']['num_classes'],(num,)).to(device)
-    fake_sequence = gen_net(noise,fake_label).to('cpu').detach().numpy().squeeze()
-    
-    _,C,_ = fake_sequence.shape
-    
-    fig, axs = plt.subplots(2,num//2,figsize=(20,8))
-    fig.suptitle(f'Synthetic data at epoch {epoch}',fontsize=20)
-
-    for i in range(2):
-        for j in range(num//2):
-            for k in range(C):
-                axs[i, j].plot(fake_sequence[i*(num//2)+j][k][:])
-        
-            axs[i, j].title.set_text(fake_label[i*(num//2)+j])
-
-    buf = io.BytesIO()
-    plt.savefig(buf,format='jpg')
-    plt.close(fig)
-    buf.seek(0)
-    return buf
