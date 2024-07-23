@@ -190,8 +190,8 @@ class AdaInsNorm(nn.Module):
     def c_norm(self,x,bs,ch,eps=1e-7):
         assert isinstance(x,torch.cuda.FloatTensor)
         x_var = x.var(dim=-1)
-        x_std = x_var.sqrt().view(bs,ch,1,1)
-        x_mean = x.mean(dim=-1).view(bs,ch,1,1)
+        x_std = x_var.sqrt().view(bs,ch,1)
+        x_mean = x.mean(dim=-1).view(bs,ch,1)
         return x_std, x_mean
 
     def forward(self,x,timestep,label):
