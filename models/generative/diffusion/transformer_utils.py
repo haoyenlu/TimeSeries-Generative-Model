@@ -205,5 +205,6 @@ class AdaInsNorm(nn.Module):
         y_std,y_mean = self.c_norm(emb,bs,ch,eps=self.eps)
 
         out = ((x-x_mean.expand(size))/ x_std.expand(size)) * y_std.expand(size) + y_mean.expand(size)
+        return out
 
     
