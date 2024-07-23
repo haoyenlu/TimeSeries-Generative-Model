@@ -64,29 +64,29 @@ class Unet1D(nn.Module):
 
         self.label_emb = nn.Embedding(num_classes,emb_dim)
 
-        modules = []
+        blocks = []
         
         '''Encoder (Downsample)'''
         prev_ch = feature_dim
         for i in range(6):
-            modules.append(
+            blocks.append(
                 DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch,emb_dim=emb_dim,kernel=3,padding="same",downsample=False,norm=True),
             )
-            modules.append(
+            blocks.append(
                 DownSampleBlock(in_ch=hidden_ch,out_ch=hidden_ch,emb_dim=emb_dim,kernel=3,padding="same",downsample=True,norm=False)
             )
             prev_ch = hidden_ch
         
         '''Decoder (Upsample)'''
         for i in range(6):
-            modules.append(
+            blocks.append(
                 UpsampleBlock(in_ch=hidden_ch * 2,out_ch=hidden_ch,emb_dim=emb_dim,kernel=3,padding="same",upsample=False,norm=True),
             )
-            modules.append(
+            blocks.append(
                 UpsampleBlock(in_ch=hidden_ch,out_ch=hidden_ch,emb_dim=emb_dim,kernel=3,padding="same",upsample=True,norm=False),
             )
 
-        self.modules = nn.ModuleList(modules)
+        self.blocks = nn.ModuleList(blocks)
 
         self.last = nn.Sequential(
             nn.Conv1d(hidden_ch,feature_dim,kernel_size=5,padding="same"),
@@ -103,17 +103,17 @@ class Unet1D(nn.Module):
         # Encoding
         cnt = 0
         while cnt < 6:
-            _x = self.modules[cnt*2](_x,timestep,label_embedding)
+            _x = self.blocks[cnt*2](_x,timestep,label_embedding)
             res.append(_x)
-            _x = self.modules[cnt*2 + 1](_x,timestep,label_embedding)
+            _x = self.blocks[cnt*2 + 1](_x,timestep,label_embedding)
             cnt += 1
         
         # Decoding
         res_cnt = 5
         while cnt < 12:
             _x = torch.concat([_x,res[res_cnt]],dim=1)
-            _x = self.modules[cnt*2](_x,timestep,label_embedding)
-            _x = self.modules[cnt*2 + 1](_x,timestep,label_embedding)
+            _x = self.blocks[cnt*2](_x,timestep,label_embedding)
+            _x = self.blocks[cnt*2 + 1](_x,timestep,label_embedding)
             res_cnt -= 1
             cnt += 1
         
