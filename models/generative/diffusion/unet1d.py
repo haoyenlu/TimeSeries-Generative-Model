@@ -11,20 +11,20 @@ class DownSampleBlock(nn.Module):
         self.norm = norm
         self.ln = AdaInsNorm(in_ch,num_classes)
 
-        modules = []
+        blocks = []
 
-        modules.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding=padding))
-        modules.append(nn.LeakyReLU(0.2))
+        blocks.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding=padding))
+        blocks.append(nn.LeakyReLU(0.2))
         if downsample:
-            modules.append(nn.AvgPool1d(kernel_size=3,padding=1,stride=2))
+            blocks.append(nn.AvgPool1d(kernel_size=3,padding=1,stride=2))
 
-        self.modules =  nn.Sequential(*modules)
+        self.blocks =  nn.Sequential(*blocks)
     
     def forward(self,x,timestep,emb_label):
         if self.norm:
             x = self.ln(x,timestep,emb_label)
 
-        x = self.modules(x)
+        x = self.blocks(x)
         return x
         
 
@@ -34,21 +34,21 @@ class UpsampleBlock(nn.Module):
         self.norm = norm
         self.ln = AdaInsNorm(in_ch,num_classes)
 
-        modules = []
+        blocks = []
         if upsample:
-            modules.append(nn.Upsample(scale_factor=2))
+            blocks.append(nn.Upsample(scale_factor=2))
         
-        modules.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding="same"))
+        blocks.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding="same"))
         # block.append(nn.BatchNorm1d(out_ch))
-        modules.append(nn.LeakyReLU(0.2))
+        blocks.append(nn.LeakyReLU(0.2))
 
-        self.modules =  nn.Sequential(*modules)
+        self.blocks =  nn.Sequential(*blocks)
 
     def forward(self,x,timestep,emb_label):
         if self.norm:
             x = self.ln(x,timestep,emb_label)
 
-        x = self.modules(x)
+        x = self.blocks(x)
         return x
 
 
