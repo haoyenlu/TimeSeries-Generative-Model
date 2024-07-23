@@ -86,8 +86,8 @@ def main():
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
     
     curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
-    trainer = get_trainer_GAN(args,config,curr_date)
-    #trainer = get_trainer_diffusion(args,config,curr_date)
+    # trainer = get_trainer_GAN(args,config,curr_date)
+    trainer = get_trainer_diffusion(args,config,curr_date)
 
     '''Load checkpoint if any'''
     if args.load_ckpt is not None:
