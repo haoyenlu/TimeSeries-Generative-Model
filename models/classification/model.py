@@ -2,8 +2,6 @@ import torch
 import torch.nn as nn
 
 
-from model_utils import DataEmbedding, PositionalEmbedding, Encoder
-
 class InceptionModule(nn.Module):
   def __init__(self,input_dim,filter_size=32,kernels=[10,20,40],use_bottleneck=True,use_attn=False):
     super(InceptionModule,self).__init__()

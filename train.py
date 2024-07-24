@@ -9,7 +9,7 @@ from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
 from model_utils import weight_init
 from train_utils import LinearLrDecay
-from models.generative.trainer import cGANTrainer, DiffusionTrainer
+from models.trainer import cGANTrainer, DiffusionTrainer
 from models.generative.GAN import tts_cgan, eeg_cgan
 from models.generative.diffusion import diffusion_ts , unet1d
 

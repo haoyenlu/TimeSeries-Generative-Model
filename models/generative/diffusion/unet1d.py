@@ -102,13 +102,13 @@ class Unet1D(nn.Module):
         while cnt < 6:
             _x = self.blocks[cnt*2](_x,timestep,label)
             res.append(_x)
-            _x = self.blocks[cnt*2 + 1](_x,timestep,label)
+            _x = self.blocks[cnt*2 + 1](_x,timestep,label) # downsample
             cnt += 1
         
         # Decoding
         res_cnt = 5
         while cnt < 12:
-            _x = self.blocks[cnt*2](_x,timestep,label)
+            _x = self.blocks[cnt*2](_x,timestep,label) # upsample
             _x = torch.concat([_x,res[res_cnt]],dim=1)
             _x = self.blocks[cnt*2 + 1](_x,timestep,label)
             res_cnt -= 1

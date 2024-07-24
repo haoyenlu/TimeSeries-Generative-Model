@@ -21,6 +21,25 @@ def cycle(dataloader):
             yield data
 
 
+def sample2buffer(samples,labels,iter,num_samples=6):
+    _,c,_ = samples.shape
+    fig, axs = plt.subplots(2,3,figsize=(20,8))
+    fig.suptitle(f'Synthetic data at epoch {iter}',fontsize=20)
+
+    for i in range(2):
+        for j in range(3):
+            for k in range(c):
+                axs[i, j].plot(samples[i*3+j][k][:])
+        
+            axs[i, j].title.set_text(labels[i*3+j])
+
+    buf = io.BytesIO()
+    plt.savefig(buf,format='jpg')
+    plt.close(fig)
+    buf.seek(0)
+    return buf
+
+
 
 class BaseTrainer(ABC):
 
@@ -165,32 +184,6 @@ class cGANTrainer(BaseTrainer):
         torch.save(ckpt,os.path.join(self.save_path,'checkpoint.pth'))
 
 
-    
-    def visualize(self,epoch):
-        self.generator.eval()
-        num_sample = 6
-        noise = torch.FloatTensor(np.random.normal(0,1,(num_sample,self.latent_dim))).to(self.device)
-        fake_label = torch.randint(0,self.num_classes,(num_sample,))
-        fake_sequence = self.generator(noise,fake_label.to(self.device)).to('cpu').detach().numpy()
-        _,c,_ = fake_sequence.shape
-
-        fig, axs = plt.subplots(2,3,figsize=(20,8))
-        fig.suptitle(f'Synthetic data at epoch {epoch}',fontsize=20)
-
-        for i in range(2):
-            for j in range(3):
-                for k in range(c):
-                    axs[i, j].plot(fake_sequence[i*3+j][k][:])
-            
-                axs[i, j].title.set_text(fake_label[i*3+j].item())
-
-        buf = io.BytesIO()
-        plt.savefig(buf,format='jpg')
-        plt.close(fig)
-        buf.seek(0)
-        return buf
-
-
     def load_weight(self,ckpt):
         if ckpt is None: return 
         data = torch.load(os.path.join(ckpt,"checkpoint.pth"),map_location=self.device)
@@ -199,6 +192,15 @@ class cGANTrainer(BaseTrainer):
         self.g_optimizer.load_state_dict(data['gen_optim'])
         self.d_optimizer.load_state_dict(data['dis_optim'])
 
+
+    def visualize(self,epoch):
+        self.generator.eval()
+        num_sample = 6
+        noise = torch.FloatTensor(np.random.normal(0,1,(num_sample,self.latent_dim))).to(self.device)
+        fake_label = torch.randint(0,self.num_classes,(num_sample,))
+        fake_sequence = self.generator(noise,fake_label.to(self.device)).to('cpu').detach().numpy()
+        buf = sample2buffer(fake_sequence,fake_label.item(),epoch)
+        return buf
     
 
 
@@ -238,7 +240,7 @@ class DiffusionTrainer(BaseTrainer):
 
             self.writer.add_scalar('loss',loss.item(),iter)
             self.writer.add_scalar('lr',lr,iter)
-            tqdm.write(f"[Iter:{iter}][loss:{loss.item()}]")
+            tqdm.write(f"[Iter:{iter}/{self.max_iter}][loss:{loss.item()}]")
 
             if (iter+1) % self.save_iter == 0:
                 '''Visualize SYnthetic data'''
@@ -271,22 +273,96 @@ class DiffusionTrainer(BaseTrainer):
         samples , labels = self.model.generate_mts(batch_size=num_samples,use_label=True)
         samples = samples.to('cpu').detach().numpy()
         labels = labels.to('cpu').detach().numpy()
-
-        fig, axs = plt.subplots(2,3,figsize=(20,8))
-        fig.suptitle(f'Synthetic data at epoch {iter}',fontsize=20)
-
-        _,c,_ = samples.shape
-
-        for i in range(2):
-            for j in range(3):
-                for k in range(c):
-                    axs[i, j].plot(samples[i*3+j][k][:])
-            
-                axs[i, j].title.set_text(labels[i*3+j].item())
-
-        buf = io.BytesIO()
-        plt.savefig(buf,format='jpg')
-        plt.close(fig)
-        buf.seek(0)
+        buf = sample2buffer(samples,labels,iter)
         return buf
+        
     
+
+
+class ClassifyTrainer(BaseTrainer):
+    def __init__(self,model,optimizer,criterion,
+                 scheduler,
+                 num_classes,
+                 max_iter,
+                 writer,save_path):
+        
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model = model
+        self.optimizer = optimizer
+        self.criterion = criterion
+        self.scheduler = scheduler
+        self.max_iter = max_iter
+        self.writer = writer
+        self.save_path = save_path
+        self.num_classes = num_classes
+
+        self.model.to(self.device)
+
+    
+    def train(self, train_dataloader, test_dataloader):
+        n = len(train_dataloader)
+        m = len(test_dataloader)
+
+        for iter in tqdm(range(self.max_iter)):
+            train_total_loss = 0
+            test_total_loss = 0
+            train_total_accuracy = 0
+            test_total_accuracy = 0
+
+            '''Train model with train dataset'''
+            self.model.train()
+            for train_data, train_label in train_dataloader:
+                self.model.zero_grad()
+                train_data = train_data.to(self.device)
+                train_label = train_label.to(self.device)
+                onehot_label = F.one_hot(train_label.long(),num_classes=self.num_classes).float()
+                pred = self.model(train_data)
+                train_loss = self.criterion(pred,onehot_label)
+                train_loss.backward()
+                train_total_loss += train_loss.item()
+                train_total_accuracy += (torch.argmax(pred) == train_label).sum().item()
+                self.optimizer.step()
+
+            '''Evaluate model with test dataset'''
+            self.model.eval()
+            for test_data, test_label in test_dataloader:
+                test_data = test_data.to(self.device)
+                test_label = test_label.to(self.device)
+                onehot_label = F.one_hot(train_label.long(),num_classes=self.num_classes).float()
+                pred = self.model(train_data)
+                test_loss = self.criterion(pred,onehot_label)
+                test_total_loss += test_loss.item()
+                test_total_accuracy += (torch.argmax(pred) == test_label).sum().item()
+
+            
+            
+            # lr = self.scheduler.step(iter)
+            tqdm.write(f"[Epoch:{iter}/{self.max_iter}][Train Loss:{train_total_loss/n:.4f}][Train Accuracy:{train_total_accuracy/n:.4f}][Test Loss:{test_total_loss/m:.4f}][Test Accuracy:{test_total_accuracy/m:.4f}]")
+
+            self.writer.add_scalar('loss/train_loss',train_total_loss/n,iter)
+            self.writer.add_scalar('loss/test_loss',test_total_loss/m,iter)
+            self.writer.add_scalar('accuracy/train_accuracy',train_total_accuracy/n,iter)
+            self.writer.add_scalar('accuracy/test_accuracy',test_total_accuracy/m,iter)
+            # self.writer.add_scalar('lr',lr,iter)
+
+
+            self.save_weight(iter)
+    
+
+    def save_weight(self, iter):
+        data = {
+            'iter':iter,
+            'model':self.model.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+        }
+        
+        torch.save(data,os.path.join(self.save_path,"checkpoint.pth"))
+    
+    def load_weight(self, ckpt):
+        data = torch.load(ckpt,map_location=self.device)
+        self.model.load_state_dict(data['model'])
+        self.optimizer.load_state_dict(data['optimizer'])
+    
+    
+
+

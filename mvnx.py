@@ -27,7 +27,7 @@ class PreprocessMVNX:
 
     def parse_mvnx_file(self,file,use_xzy = True):
         '''
-        Function for preprocessing jointAngle in mvnx file
+        Function for processing jointAngle data in mvnx file
         '''
         tree = ET.parse(file)
         root = tree.getroot()
@@ -42,7 +42,7 @@ class PreprocessMVNX:
         
         frames = subject.find(namespace + 'frames')
         ZXY = []
-        XZY = []
+        XZY = [] # use XZY for shoulder joint angle to prevent gimbal lock
         for frame in frames[3:]:
             jointangle = frame.find(namespace + 'jointAngle')
             ZXY.append([float(num) for num in jointangle.text.split(' ')])
@@ -64,6 +64,7 @@ class PreprocessMVNX:
         TEST_DATA = []
         TRAIN_LABEL = []
         TEST_LABEL = []
+        
         all_tasks = np.array(self.config['tasks'])
 
         for type in self.config['types']:
