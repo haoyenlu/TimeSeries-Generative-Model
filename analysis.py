@@ -1,7 +1,4 @@
-import argparse
 import torch
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
 import numpy as np
 from pathlib import Path
 import os

@@ -53,7 +53,7 @@ class UpsampleBlock(nn.Module):
 
 
 class Unet1D(nn.Module):
-    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim):
+    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim,kernel_size):
         super(Unet1D,self).__init__()
 
         self.seq_len = seq_len
@@ -61,6 +61,7 @@ class Unet1D(nn.Module):
         self.num_classes = num_classes
         self.hidden_dim = hidden_ch
         self.emb_dim = emb_dim
+        self.kernel_size = kernel_size
 
         blocks = []
         
@@ -68,26 +69,26 @@ class Unet1D(nn.Module):
         prev_ch = feature_dim
         for i in range(6):
             blocks.append(
-                DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",downsample=False,norm=True),
+                DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",downsample=False,norm=True),
             )
             blocks.append(
-                DownSampleBlock(in_ch=hidden_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",downsample=True,norm=False)
+                DownSampleBlock(in_ch=hidden_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",downsample=True,norm=False)
             )
             prev_ch = hidden_ch
         
         '''Decoder (Upsample)'''
         for i in range(6):
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=True,norm=False),
+                UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
             )
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch*2,out_ch=hidden_ch,num_classes=num_classes,kernel=3,padding="same",upsample=False,norm=True),
+                UpsampleBlock(in_ch=hidden_ch*2,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",upsample=False,norm=True),
             )
 
         self.blocks = nn.ModuleList(blocks)
 
         self.last = nn.Sequential(
-            nn.Conv1d(hidden_ch,feature_dim,kernel_size=5,padding="same"),
+            nn.Conv1d(hidden_ch,feature_dim,kernel_size=kernel_size,padding="same"),
             nn.Sigmoid()
         )
 
