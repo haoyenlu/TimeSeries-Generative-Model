@@ -43,5 +43,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data = np.load(args.data,allow_pickle=True).item()
-    visualize_ts_lineplot(data['data'],data['labels'],path=os.path.join(args.save,Path(args.data).stem+".png"))
+    visualize_ts_lineplot(data['data'],data['label'],path=os.path.join(args.save,Path(args.data).stem+".png"))
 
