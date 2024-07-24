@@ -22,7 +22,7 @@ def visualize_ts_lineplot(
     ids = np.random.choice(X.shape[0],size=num,replace=False)
     for i , sample_id in enumerate(ids):
         for feat_id in range(X.shape[1]):
-            sns.lineplot(x=range(X.shape[2]),y = X[sample_id,feat_id:],ax=axs[i])
+            sns.lineplot(x=range(X.shape[2]),y = X[sample_id,feat_id,:],ax=axs[i])
     
         if Y is not None:
             axs[i].tick_params(labelsize=tick_size,which='both')
