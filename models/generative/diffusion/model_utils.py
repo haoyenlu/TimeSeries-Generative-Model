@@ -194,12 +194,12 @@ class AdaInsNorm(nn.Module):
         x_mean = x.mean(dim=-1).view(bs,ch,1)
         return x_std, x_mean
 
-    def forward(self,x,timestep,label):
-
+    def forward(self,x,timestep,label=None):
         size = x.size()
         bs ,ch = size[:2]
         x_ = x.view(bs,ch,-1)
-        emb = self.timestep_emb(timestep) + self.label_emb(label)
+        emb = self.timestep_emb(timestep)
+        emb = emb + self.label_emb(label) if label is not None else emb
         emb = emb.view(bs,ch,-1)
         x_std, x_mean = self.c_norm(x_,bs,ch,eps=self.eps)
         y_std,y_mean = self.c_norm(emb,bs,ch,eps=self.eps)

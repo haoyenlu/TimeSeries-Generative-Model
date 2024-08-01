@@ -1,5 +1,5 @@
 '''
-Time Series Diffision Model: https://github.com/Y-debug-sys/Diffusion-TS
+Time Series Diffision Model: modified (https://github.com/Y-debug-sys/Diffusion-TS)
 '''
 
 import torch
@@ -188,6 +188,7 @@ class Diffusion(nn.Module):
         device = self.betas.device
         img = torch.randn(shape, device=device)
         label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if use_label else None
+
         for t in reversed(range(0, self.num_timesteps)):
             img, _ = self.p_sample(img, t,label=label)
 
@@ -200,11 +201,12 @@ class Diffusion(nn.Module):
 
         # [-1, 0, 1, 2, ..., T-1] when sampling_timesteps == total_timesteps
         times = torch.linspace(-1, total_timesteps - 1, steps=sampling_timesteps + 1)
-
         times = list(reversed(times.int().tolist()))
         time_pairs = list(zip(times[:-1], times[1:]))  # [(T-1, T-2), (T-2, T-3), ..., (1, 0), (0, -1)]
+
         img = torch.randn(shape, device=device)
         label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if use_label else None
+
         for time, time_next in tqdm(time_pairs, desc='sampling loop time step'):
             time_cond = torch.full((batch,), time, device=device, dtype=torch.long)
             pred_noise, x_start, *_ = self.model_predictions(img, time_cond, clip_x_start=clip_denoised,label=label)
@@ -244,6 +246,17 @@ class Diffusion(nn.Module):
                 extract(self.sqrt_one_minus_alphas_cumprod, t, x_start.shape) * noise
         )
 
+    def _fft_loss(self,model_out,target):
+        '''Fourier Transform Loss'''
+        fourier_loss = torch.tensor([0.])
+        fft1 = torch.fft.fft(model_out.transpose(1, 2), norm='forward')
+        fft2 = torch.fft.fft(target.transpose(1, 2), norm='forward')
+        fft1, fft2 = fft1.transpose(1, 2), fft2.transpose(1, 2)
+        fourier_loss = self.loss_fn(torch.real(fft1), torch.real(fft2), reduction='none')\
+                        + self.loss_fn(torch.imag(fft1), torch.imag(fft2), reduction='none')
+        
+        return fourier_loss
+
     def _train_loss(self, x_start, t, target=None, noise=None, padding_masks=None,label=None):
         noise = default(noise, lambda: torch.randn_like(x_start))
         if target is None:
@@ -254,13 +267,9 @@ class Diffusion(nn.Module):
 
         train_loss = self.loss_fn(model_out, target, reduction='none')
 
-        fourier_loss = torch.tensor([0.])
+       
         if self.use_ff:
-            fft1 = torch.fft.fft(model_out.transpose(1, 2), norm='forward')
-            fft2 = torch.fft.fft(target.transpose(1, 2), norm='forward')
-            fft1, fft2 = fft1.transpose(1, 2), fft2.transpose(1, 2)
-            fourier_loss = self.loss_fn(torch.real(fft1), torch.real(fft2), reduction='none')\
-                           + self.loss_fn(torch.imag(fft1), torch.imag(fft2), reduction='none')
+            fourier_loss = self._fft_loss(model_out,target)
             train_loss +=  self.ff_weight * fourier_loss
         
         train_loss = reduce(train_loss, 'b ... -> b (...)', 'mean')
@@ -275,143 +284,9 @@ class Diffusion(nn.Module):
 
     def return_components(self, x, t: int):
         b, c, n, device, feature_size, = *x.shape, x.device, self.feature_size
-        assert n == feature_size, f'number of variable must be {feature_size}'
+        assert c == feature_size, f'number of variable must be {feature_size}'
         t = torch.tensor([t])
         t = t.repeat(b).to(device)
         x = self.q_sample(x, t)
         trend, season, residual = self.model(x, t, return_res=True)
         return trend, season, residual, x
-
-    def fast_sample_infill(self, shape, target, sampling_timesteps, partial_mask=None, clip_denoised=True, model_kwargs=None):
-        batch, device, total_timesteps, eta = shape[0], self.betas.device, self.num_timesteps, self.eta
-
-        # [-1, 0, 1, 2, ..., T-1] when sampling_timesteps == total_timesteps
-        times = torch.linspace(-1, total_timesteps - 1, steps=sampling_timesteps + 1)
-
-        times = list(reversed(times.int().tolist()))
-        time_pairs = list(zip(times[:-1], times[1:]))  # [(T-1, T-2), (T-2, T-3), ..., (1, 0), (0, -1)]
-        img = torch.randn(shape, device=device)
-
-        for time, time_next in tqdm(time_pairs, desc='conditional sampling loop time step'):
-            time_cond = torch.full((batch,), time, device=device, dtype=torch.long)
-            pred_noise, x_start, *_ = self.model_predictions(img, time_cond, clip_x_start=clip_denoised)
-
-            if time_next < 0:
-                img = x_start
-                continue
-
-            alpha = self.alphas_cumprod[time]
-            alpha_next = self.alphas_cumprod[time_next]
-            sigma = eta * ((1 - alpha / alpha_next) * (1 - alpha_next) / (1 - alpha)).sqrt()
-            c = (1 - alpha_next - sigma ** 2).sqrt()
-            pred_mean = x_start * alpha_next.sqrt() + c * pred_noise
-            noise = torch.randn_like(img)
-
-            img = pred_mean + sigma * noise
-            img = self.langevin_fn(sample=img, mean=pred_mean, sigma=sigma, t=time_cond,
-                                   tgt_embs=target, partial_mask=partial_mask, **model_kwargs)
-            target_t = self.q_sample(target, t=time_cond)
-            img[partial_mask] = target_t[partial_mask]
-
-        img[partial_mask] = target[partial_mask]
-
-        return img
-
-    def sample_infill(
-        self,
-        shape, 
-        target,
-        partial_mask=None,
-        clip_denoised=True,
-        model_kwargs=None,
-    ):
-        """
-        Generate samples from the model and yield intermediate samples from
-        each timestep of diffusion.
-        """
-        batch, device = shape[0], self.betas.device
-        img = torch.randn(shape, device=device)
-        for t in tqdm(reversed(range(0, self.num_timesteps)),
-                      desc='conditional sampling loop time step', total=self.num_timesteps):
-            img = self.p_sample_infill(x=img, t=t, clip_denoised=clip_denoised, target=target,
-                                       partial_mask=partial_mask, model_kwargs=model_kwargs)
-        
-        img[partial_mask] = target[partial_mask]
-        return img
-    
-    def p_sample_infill(
-        self,
-        x,
-        target,
-        t: int,
-        partial_mask=None,
-        clip_denoised=True,
-        model_kwargs=None
-    ):
-        b, *_, device = *x.shape, self.betas.device
-        batched_times = torch.full((x.shape[0],), t, device=x.device, dtype=torch.long)
-        model_mean, _, model_log_variance, _ = \
-            self.p_mean_variance(x=x, t=batched_times, clip_denoised=clip_denoised)
-        noise = torch.randn_like(x) if t > 0 else 0.  # no noise if t == 0
-        sigma = (0.5 * model_log_variance).exp()
-        pred_img = model_mean + sigma * noise
-
-        pred_img = self.langevin_fn(sample=pred_img, mean=model_mean, sigma=sigma, t=batched_times,
-                                    tgt_embs=target, partial_mask=partial_mask, **model_kwargs)
-        
-        target_t = self.q_sample(target, t=batched_times)
-        pred_img[partial_mask] = target_t[partial_mask]
-
-        return pred_img
-
-    def langevin_fn(
-        self,
-        coef,
-        partial_mask,
-        tgt_embs,
-        learning_rate,
-        sample,
-        mean,
-        sigma,
-        t,
-        coef_=0.
-    ):
-    
-        if t[0].item() < self.num_timesteps * 0.05:
-            K = 0
-        elif t[0].item() > self.num_timesteps * 0.9:
-            K = 3
-        elif t[0].item() > self.num_timesteps * 0.75:
-            K = 2
-            learning_rate = learning_rate * 0.5
-        else:
-            K = 1
-            learning_rate = learning_rate * 0.25
-
-        input_embs_param = torch.nn.Parameter(sample)
-
-        with torch.enable_grad():
-            for i in range(K):
-                optimizer = torch.optim.Adagrad([input_embs_param], lr=learning_rate)
-                optimizer.zero_grad()
-
-                x_start = self.output(x=input_embs_param, t=t)
-
-                if sigma.mean() == 0:
-                    logp_term = coef * ((mean - input_embs_param) ** 2 / 1.).mean(dim=0).sum()
-                    infill_loss = (x_start[partial_mask] - tgt_embs[partial_mask]) ** 2
-                    infill_loss = infill_loss.mean(dim=0).sum()
-                else:
-                    logp_term = coef * ((mean - input_embs_param)**2 / sigma).mean(dim=0).sum()
-                    infill_loss = (x_start[partial_mask] - tgt_embs[partial_mask]) ** 2
-                    infill_loss = (infill_loss/sigma.mean()).mean(dim=0).sum()
-            
-                loss = logp_term + infill_loss
-                loss.backward()
-                optimizer.step()
-                epsilon = torch.randn_like(input_embs_param.data)
-                input_embs_param = torch.nn.Parameter((input_embs_param.data + coef_ * sigma.mean().item() * epsilon).detach())
-
-        sample[~partial_mask] = input_embs_param.data[~partial_mask]
-        return sample
-    

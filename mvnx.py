@@ -13,21 +13,28 @@ from functools import partial
 
 
 class PreprocessMVNX:
-    def __init__(self,config):
+    def __init__(self,features, types, tasks, cutoff_length, resample):
         '''
         Output Training dataset shape should be (B,T,C) for tensorflow, (B,C,T) for pytorch
         '''
-        self.config = config
+        self.features = features
+        self.types = types
+        self.tasks = tasks
+        self.cutoff_length = cutoff_length
+        self.resample =  resample
 
-        if self.config['resample'] == 'numpy':
-            self.resample = partial(self.np_pad_resample,max_length = self.config['cutoff_length'])
-        elif self.config['resample'] == 'scipy':
-            self.resample = partial(self.scipy_resample,max_length = self.config['cutoff_length'])
+        if self.resample == 'numpy':
+            self.resample_fn = partial(self.np_pad_resample,max_length = self.config['cutoff_length'])
         
-
-    def parse_mvnx_file(self,file,use_xzy = True):
+        elif self.resample== 'scipy':
+            self.resample_fn = partial(self.scipy_resample,max_length = self.config['cutoff_length'])
+        
+        else:
+            raise Exception("Resample method not defined!")
+        
+    def _parse_mvnx_file(self,file,use_xzy = True):
         '''
-        Function for processing jointAngle data in mvnx file
+        Processing jointAngle data in mvnx file
         '''
         tree = ET.parse(file)
         root = tree.getroot()
@@ -58,47 +65,52 @@ class PreprocessMVNX:
         return df_zxy
 
     def get_dataset(self,path,test_patient  = set()):
-        self.ulf_filepath = path
-
-        TRAIN_DATA = []
-        TEST_DATA = []
-        TRAIN_LABEL = []
-        TEST_LABEL = []
+        '''
+        Upper Limb Functionality Dataset
         
-        all_tasks = np.array(self.config['tasks'])
+        Structure:
+        Types -> Patient -> trial file
+        '''
+        TASKS = {task.upper():[] for task in self.tasks}
+        TEST_PATIENT_TASKS = {task.upper():[] for task in self.tasks}
+
+        print("Processing ULF Folder!")
 
         for type in self.config['types']:
-            print(f"Processing {type} Folder.")
-            type_dir = os.path.join(self.ulf_filepath,type)
+
+            type_dir = os.path.join(path,type)
             for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=False):
+
                 patient_dir = os.path.join(type_dir,patient)
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
-                    subject , task , hand = Path(file).stem.split('_')
-                    df = self.parse_mvnx_file(os.path.join(patient_dir,file))
 
-                    if len(df) > self.config['cutoff_length']: continue
+                    subject , task , data = self._get_data(file)
 
-                    # Resample to max_length
-                    temp_data = df[self.config['features']].to_numpy() # T,C
-                    resample_data = np.zeros((self.config['cutoff_length'],temp_data.shape[1]))
+                    T,C = data.shape
+                    if T > self.cutoff_length: continue
 
-                    for i in range(temp_data.shape[1]):
-                        resample_data[:,i] = self.resample(temp_data[:,i])
+                    resample_data = np.zeros((self.cutoff_length,C))
 
-                    assert resample_data.shape == (self.config['cutoff_length'],len(self.config['features'])), f"Error while parsing MVNX data, expected shape {(len(self.config['features']),self.config['cutoff_length'])}, get shape {resample_data.shape}"
-                    
-                    temp_label = np.where(all_tasks == task.upper())
+                    for i in range(C):
+                        resample_data[:,i] = self.resample_fn(data[:,i])
 
-                    if subject in test_patient: 
-                        TEST_DATA.append(resample_data)
-                        TEST_LABEL.append(temp_label)
-                    else: 
-                        TRAIN_DATA.append(resample_data)
-                        TRAIN_LABEL.append(temp_label)
+                    assert resample_data.shape == (self.cutoff_length,C), f"Error while parsing MVNX data, expected shape {(self.cutoff_length,len(self.features))}, get shape {resample_data.shape}"
 
+                    task = task.upper()
 
-        return (np.array(TRAIN_DATA), np.array(TRAIN_LABEL).reshape(-1,1)), (np.array(TEST_DATA), np.array(TEST_LABEL).reshape(-1,1))
+                    if subject not in test_patient:
+                        TASKS[task].append(resample_data)
+                    else:
+                        TEST_PATIENT_TASKS[task].append(resample_data)
+
+        return TASKS, TEST_PATIENT_TASKS
     
+
+    def _get_data(self,file) :# shape=(T,C)
+        subject , task , hand = Path(file).stem.split('_')
+        df = self._parse_mvnx_file(file)
+        data = df[self.config['features']].to_numpy() 
+        return subject, task, data
 
     
 

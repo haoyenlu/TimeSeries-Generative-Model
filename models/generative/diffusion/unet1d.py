@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-from models.generative.diffusion.transformer_utils import AdaInsNorm
+from models.generative.diffusion.model_utils import AdaInsNorm
 
 
 class DownSampleBlock(nn.Module):
@@ -53,7 +53,7 @@ class UpsampleBlock(nn.Module):
 
 
 class Unet1D(nn.Module):
-    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim,kernel_size):
+    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim,kernel_size,depth):
         super(Unet1D,self).__init__()
 
         self.seq_len = seq_len
@@ -62,12 +62,13 @@ class Unet1D(nn.Module):
         self.hidden_dim = hidden_ch
         self.emb_dim = emb_dim
         self.kernel_size = kernel_size
+        self.depth = depth
 
         blocks = []
         
         '''Encoder (Downsample)'''
         prev_ch = feature_dim
-        for i in range(6):
+        for i in range(depth):
             blocks.append(
                 DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",downsample=False,norm=True),
             )
@@ -77,7 +78,7 @@ class Unet1D(nn.Module):
             prev_ch = hidden_ch
         
         '''Decoder (Upsample)'''
-        for i in range(6):
+        for i in range(depth):
             blocks.append(
                 UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
             )
@@ -94,21 +95,21 @@ class Unet1D(nn.Module):
 
     
 
-    def forward(self,x,timestep,label): # Pytorch (N,C,L)
+    def forward(self,x,timestep,label=None): # Pytorch (N,C,L)
 
         _x = x
         res = []
         # Encoding
         cnt = 0
-        while cnt < 6:
+        while cnt < self.depth:
             _x = self.blocks[cnt*2](_x,timestep,label)
             res.append(_x)
             _x = self.blocks[cnt*2 + 1](_x,timestep,label) # downsample
             cnt += 1
         
         # Decoding
-        res_cnt = 5
-        while cnt < 12:
+        res_cnt = self.depth - 1
+        while cnt < self.depth * 2:
             _x = self.blocks[cnt*2](_x,timestep,label) # upsample
             _x = torch.concat([_x,res[res_cnt]],dim=1)
             _x = self.blocks[cnt*2 + 1](_x,timestep,label)
