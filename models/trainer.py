@@ -228,11 +228,11 @@ class DiffusionTrainer(BaseTrainer):
 
         for iter in tqdm(range(self.max_iter)):
             self.model.zero_grad()
-            sequence , label = next(dataloader_cycle)
+            sequence = next(dataloader_cycle)
             sequence = sequence.to(self.device)
-            label = label.to(self.device)
+            # label = label.to(self.device)
 
-            loss = self.model(sequence,target=sequence,label=label)
+            loss = self.model(sequence,target=sequence,label=None)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(),5.)
             self.optimizer.step()

@@ -3,7 +3,7 @@ import numpy as np
 from data_utils import FeatureWiseScaler
 
 class UpperLimbMotionDataset(Dataset):
-    def __init__(self,data,task='T01',labels=None,scale_range=(0,1)):
+    def __init__(self,data,task='T01',scale_range=(0,1)):
         super(UpperLimbMotionDataset,self).__init__()
 
         
@@ -13,14 +13,13 @@ class UpperLimbMotionDataset(Dataset):
         '''Only given specific task data'''
         train_data = np.array(self.data[task])
         
-        print(train_data.shape)
+        print("Train data shape:",train_data.shape)
         
         '''Scaling'''
         scaler = FeatureWiseScaler(scale_range)
         scaler.fit(train_data)
         self.train = scaler.transform(train_data).astype(np.float32)
 
-        self.labels=labels
         
 
             
@@ -31,10 +30,7 @@ class UpperLimbMotionDataset(Dataset):
         
 
     def __getitem__(self, index):
-        if self.labels is not None:
-            return self.train[index,:,:] , self.labels[index,:]
-        else:
-            return self.train[index,:,:], None
+        return self.train[index,:,:]
 
 
 
