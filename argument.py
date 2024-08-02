@@ -36,6 +36,7 @@ def analysis_argument():
     parser.add_argument('--ckpt',type=str)
     parser.add_argument('--config',type=str)
     parser.add_argument('--save',type=str)
+    parser.add_argument('--task',type=str,default='T01')
 
     args = parser.parse_args()
     return args

@@ -6,6 +6,7 @@ import os
 # from models.generative.gan import eeg_cgan
 from models.generative.diffusion.diffusion_ts import Diffusion
 from models.generative.diffusion.unet1d import Unet1D
+from models.generative.diffusion.transformer import Transformer
 
 from utils import load_config
 from model_utils import generate_samples_diffusion , generate_samples_gan
@@ -18,7 +19,10 @@ from argument import analysis_argument
 def main():
     args = analysis_argument()
     config = load_config(args.config)
-    (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
+    # (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
+
+    train_data = np.load(args.data,allow_pickle=True).item()
+    train_data = train_data[args.task]
 
     ckpt = torch.load(os.path.join(args.ckpt,'checkpoint.pth'),map_location=torch.device('cpu'))
 
@@ -28,7 +32,8 @@ def main():
     # samples,labels = generate_samples(generator,num_samples=1000,sample_per_batch=10)
 
     '''Diffusion model'''
-    backbone = Unet1D(**config.get('backbone',dict()))
+    # backbone = Unet1D(**config.get('backbone',dict()))
+    backbone = Transformer(**config.get('backbone',dict()))
     diffusion_model = Diffusion(backbone,**config.get('diffusion',dict()))
     diffusion_model.load_state_dict(ckpt['model'])
 

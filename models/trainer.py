@@ -270,7 +270,6 @@ class DiffusionTrainer(BaseTrainer):
         self.model.eval()
         num_samples = 6
         samples  = self.model.generate_mts(batch_size=num_samples)
-        print(samples)
         samples = samples.to('cpu').detach().numpy()
         # labels = labels.to('cpu').detach().numpy()
         buf = sample2buffer(samples,iter)
