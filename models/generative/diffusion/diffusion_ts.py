@@ -75,6 +75,7 @@ class Diffusion(nn.Module):
         self.feature_size = feature_size
         self.ff_weight = default(reg_weight, math.sqrt(self.seq_length) / 5)
         self.label_dim = label_dim
+        self.use_label = use_label
 
 
         self.model = backbone
@@ -185,18 +186,18 @@ class Diffusion(nn.Module):
         return pred_img, x_start
 
     @torch.no_grad()
-    def sample(self, shape,use_label=False):
+    def sample(self, shape):
         device = self.betas.device
         img = torch.randn(shape, device=device)
-        label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if use_label else None
+        label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if self.use_label else None
 
         for t in reversed(range(0, self.num_timesteps)):
             img, _ = self.p_sample(img, t,label=label)
 
-        return img, label if use_label else img
+        return img, label if self.use_label else img
 
     @torch.no_grad()
-    def fast_sample(self, shape, clip_denoised=True,use_label=False):
+    def fast_sample(self, shape, clip_denoised=True):
         batch, device, total_timesteps, sampling_timesteps, eta = \
             shape[0], self.betas.device, self.num_timesteps, self.sampling_timesteps, self.eta
 
@@ -206,7 +207,7 @@ class Diffusion(nn.Module):
         time_pairs = list(zip(times[:-1], times[1:]))  # [(T-1, T-2), (T-2, T-3), ..., (1, 0), (0, -1)]
 
         img = torch.randn(shape, device=device)
-        label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if use_label else None
+        label = torch.randint(low=0,high=self.label_dim,size=(shape[0],),device=device) if self.use_label else None
 
         for time, time_next in tqdm(time_pairs, desc='sampling loop time step'):
             time_cond = torch.full((batch,), time, device=device, dtype=torch.long)
@@ -225,11 +226,11 @@ class Diffusion(nn.Module):
                   c * pred_noise + \
                   sigma * noise
 
-        return img, label if use_label else img
+        return img, label if self.use_label else img
 
-    def generate_mts(self, batch_size=16,use_label=False):
+    def generate_mts(self, batch_size=16):
         sample_fn = self.fast_sample if self.fast_sampling else self.sample
-        return sample_fn((batch_size, self.feature_size, self.seq_length),use_label=use_label)
+        return sample_fn((batch_size, self.seq_length ,  self.feature_size))
 
     @property
     def loss_fn(self):

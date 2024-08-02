@@ -21,7 +21,7 @@ def cycle(dataloader):
             yield data
 
 
-def sample2buffer(samples,labels,iter,num_samples=6):
+def sample2buffer(samples,iter,num_samples=6):
     _,c,_ = samples.shape
     fig, axs = plt.subplots(2,3,figsize=(20,8))
     fig.suptitle(f'Synthetic data at epoch {iter}',fontsize=20)
@@ -30,8 +30,7 @@ def sample2buffer(samples,labels,iter,num_samples=6):
         for j in range(3):
             for k in range(c):
                 axs[i, j].plot(samples[i*3+j][k][:])
-        
-            axs[i, j].title.set_text(labels[i*3+j])
+
 
     buf = io.BytesIO()
     plt.savefig(buf,format='jpg')
@@ -270,10 +269,10 @@ class DiffusionTrainer(BaseTrainer):
     def visualize(self,iter):
         self.model.eval()
         num_samples = 6
-        samples , labels = self.model.generate_mts(batch_size=num_samples,use_label=True)
+        samples  = self.model.generate_mts(batch_size=num_samples)
         samples = samples.to('cpu').detach().numpy()
-        labels = labels.to('cpu').detach().numpy()
-        buf = sample2buffer(samples,labels,iter)
+        # labels = labels.to('cpu').detach().numpy()
+        buf = sample2buffer(samples,iter)
         return buf
         
     
