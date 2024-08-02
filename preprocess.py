@@ -26,7 +26,7 @@ def main():
     save_path = f'./{args.save}/ulf_all_task.npy'
     np.save(task_data,save_path)
 
-    save_path = f'./{args.save}/ulf_all_task{'_'.join(args.test_patient)}.npy'
+    save_path = f'./{args.save}/ulf_all_task{"_".join(args.test_patient)}.npy'
     np.save(test_task_data,save_path)
 
 
