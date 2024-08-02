@@ -45,7 +45,7 @@ def main():
     save_path = os.path.join(args.save,Path(args.ckpt).stem + '_' + args.task)
     os.makedirs(save_path,exist_ok=True)
 
-    np.save(os.path.join(save_path,'synthesize.npy'), {samples})
+    np.save(os.path.join(save_path,'synthesize.npy'), samples)
 
     plot_pca(real=train_data,fake=samples,save_path=save_path)
     plot_tsne(real=train_data,fake=samples,save_path=save_path)
