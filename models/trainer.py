@@ -231,7 +231,7 @@ class DiffusionTrainer(BaseTrainer):
             sequence = next(dataloader_cycle)
             sequence = sequence.to(self.device)
             # label = label.to(self.device)
-
+            print(sequence.shape)
             loss = self.model(sequence,target=sequence,label=None)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(),5.)
