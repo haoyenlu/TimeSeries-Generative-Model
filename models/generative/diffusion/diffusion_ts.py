@@ -194,7 +194,7 @@ class Diffusion(nn.Module):
         for t in reversed(range(0, self.num_timesteps)):
             img, _ = self.p_sample(img, t,label=label)
 
-        return img, label if self.use_label else img
+        return img
 
     @torch.no_grad()
     def fast_sample(self, shape, clip_denoised=True):
