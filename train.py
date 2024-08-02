@@ -82,7 +82,7 @@ def main():
     config = load_config(args.config)
 
     '''Load Data'''
-    train_dataset = UpperLimbMotionDataset(args.data,args.task,labels=None)
+    train_dataset = UpperLimbMotionDataset(args.data,args.task)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
     
     curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
