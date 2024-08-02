@@ -37,15 +37,15 @@ def main():
     diffusion_model = Diffusion(backbone,**config.get('diffusion',dict()))
     diffusion_model.load_state_dict(ckpt['model'])
 
-    samples , labels = generate_samples_diffusion(diffusion_model,num_samples=1000,sample_per_batch=10)
+    samples  = generate_samples_diffusion(diffusion_model,num_samples=100,sample_per_batch=10)
 
 
-    print(samples.shape,labels.shape)
+    print(samples.shape)
 
-    save_path = os.path.join(args.save,Path(args.ckpt).stem)
+    save_path = os.path.join(args.save,Path(args.ckpt).stem + '_' + args.task)
     os.makedirs(save_path,exist_ok=True)
 
-    np.save(os.path.join(save_path,'synthesize.npy'), {'data':samples,'label':labels})
+    np.save(os.path.join(save_path,'synthesize.npy'), {samples})
 
     plot_pca(real=train_data,fake=samples,save_path=save_path)
     plot_tsne(real=train_data,fake=samples,save_path=save_path)
