@@ -3,6 +3,8 @@ import math
 import torch.nn as nn
 import numpy as np
 
+from tqdm import tqdm
+
 def weight_init(model,init_type='normal'):
     classname = model.__class__.__name__
     if classname.find('Conv2d') != -1:
@@ -51,6 +53,7 @@ def generate_samples_diffusion(model,num_samples=1000,sample_per_batch=10):
         model.to(device)
         model.eval()
 
+        pbar = tqdm(total=num_samples)
         cnt = 0
         while cnt < num_samples:
             num_per_batch = min(sample_per_batch,num_samples - cnt)
@@ -61,5 +64,6 @@ def generate_samples_diffusion(model,num_samples=1000,sample_per_batch=10):
             sample_arr.append(samples)
             # label_arr.append(labels)
             cnt += num_per_batch
+            pbar.update(num_per_batch)
 
         return np.concatenate(sample_arr,axis=0)
