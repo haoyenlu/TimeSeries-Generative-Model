@@ -23,7 +23,7 @@ def main():
 
     os.makedirs(args.save,exist_ok=True)
 
-    preprocessor = PreprocessMVNX(config)
+    preprocessor = PreprocessMVNX(**config)
     task_data, test_task_data = preprocessor.get_dataset(args.mvnx,args.test_patient)   
 
     # Train data
