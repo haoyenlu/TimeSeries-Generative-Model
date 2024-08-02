@@ -22,7 +22,8 @@ def main():
     # (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
 
     train_data = np.load(args.data,allow_pickle=True).item()
-    train_data = train_data[args.task]
+    train_data = np.array(train_data[args.task])
+    print(train_data.shape)
 
     ckpt = torch.load(os.path.join(args.ckpt,'checkpoint.pth'),map_location=torch.device('cpu'))
 
