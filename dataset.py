@@ -11,7 +11,7 @@ class UpperLimbMotionDataset(Dataset):
 
 
         '''Only given specific task data'''
-        train_data = np.concatenate(self.data[task],axis=0)
+        train_data = np.array(self.data[task])
         
         print(train_data.shape)
         
