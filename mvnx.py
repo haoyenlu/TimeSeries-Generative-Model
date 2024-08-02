@@ -76,7 +76,7 @@ class PreprocessMVNX:
 
         print("Processing ULF Folder!")
 
-        for type in self.config['types']:
+        for type in self.types:
 
             type_dir = os.path.join(path,type)
             for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=False):
@@ -109,7 +109,7 @@ class PreprocessMVNX:
     def _get_data(self,file) :# shape=(T,C)
         subject , task , hand = Path(file).stem.split('_')
         df = self._parse_mvnx_file(file)
-        data = df[self.config['features']].to_numpy() 
+        data = df[self.features].to_numpy() 
         return subject, task, data
 
     
