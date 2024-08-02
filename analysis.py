@@ -11,7 +11,7 @@ from models.generative.diffusion.transformer import Transformer
 from utils import load_config
 from model_utils import generate_samples_diffusion , generate_samples_gan
 from utils import load_numpy_data
-from analysis_utils import plot_pca, plot_tsne, plot_umap
+from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
 
 from argument import analysis_argument
@@ -51,6 +51,7 @@ def main():
     plot_pca(real=train_data,fake=samples,save_path=save_path)
     plot_tsne(real=train_data,fake=samples,save_path=save_path)
     plot_umap(real=train_data,fake=samples,save_path=save_path)
+    plot_sample(real=train_data,fake=samples,save_path=save_path)
 
 
 if __name__ == '__main__':
