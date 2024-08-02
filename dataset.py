@@ -11,7 +11,7 @@ class UpperLimbMotionDataset(Dataset):
 
 
         '''Only given specific task data'''
-        train_data = np.array(self.data[task]).transpose(0,2,1) # B,C,T
+        train_data = np.array(self.data[task])
         
         print("Train data shape:",train_data.shape)
         

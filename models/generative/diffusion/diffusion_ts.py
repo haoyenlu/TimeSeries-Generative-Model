@@ -278,13 +278,13 @@ class Diffusion(nn.Module):
         return train_loss.mean()
 
     def forward(self, x, **kwargs):
-        b, c, n, device, feature_size, = *x.shape, x.device, self.feature_size
+        b, n, c, device, feature_size, = *x.shape, x.device, self.feature_size
         assert c == feature_size, f'number of variable must be {feature_size}'
         t = torch.randint(0, self.num_timesteps, (b,), device=device)
         return self._train_loss(x_start=x, t=t, **kwargs)
 
     def return_components(self, x, t: int):
-        b, c, n, device, feature_size, = *x.shape, x.device, self.feature_size
+        b, n, c, device, feature_size, = *x.shape, x.device, self.feature_size
         assert c == feature_size, f'number of variable must be {feature_size}'
         t = torch.tensor([t])
         t = t.repeat(b).to(device)

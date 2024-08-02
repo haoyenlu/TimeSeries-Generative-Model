@@ -131,12 +131,13 @@ class Conv_MLP(nn.Module):
     def __init__(self,in_dim,out_dim,resid_pdrop=0.):
         super().__init__()
         self.sequential = nn.Sequential(
+            Transpose(shape=(1,2)),
             nn.Conv1d(in_dim,out_dim,3,stride=1,padding=1),
             nn.Dropout(p=resid_pdrop)
         )    
     
     def forward(self,x):
-        return self.sequential(x)
+        return self.sequential(x).transpose(1,2)
 
 class Transformer_MLP(nn.Module):
     def __init__(self,n_embd,mlp_hidden_times,act,resid_pdrop):
