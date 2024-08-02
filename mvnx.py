@@ -24,10 +24,10 @@ class PreprocessMVNX:
         self.resample =  resample
 
         if self.resample == 'numpy':
-            self.resample_fn = partial(self.np_pad_resample,max_length = self.config['cutoff_length'])
+            self.resample_fn = partial(self.np_pad_resample,max_length = cutoff_length)
         
         elif self.resample== 'scipy':
-            self.resample_fn = partial(self.scipy_resample,max_length = self.config['cutoff_length'])
+            self.resample_fn = partial(self.scipy_resample,max_length = cutoff_length)
         
         else:
             raise Exception("Resample method not defined!")
