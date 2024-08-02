@@ -10,8 +10,8 @@ class UpperLimbMotionDataset(Dataset):
         self.mode = mode
         
         '''Only given specific task data'''
-        train_data = task_data[task]
-        test_data = test_task_data[task]
+        train_data = np.concatenate(task_data[task],axis=0)
+        test_data = np.concatenate(test_task_data[task],axis=0)
 
         
         '''Scaling'''

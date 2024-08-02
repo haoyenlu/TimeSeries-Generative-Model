@@ -65,6 +65,7 @@ class Diffusion(nn.Module):
             use_ff=False,
             reg_weight=None,
             label_dim=None,
+            use_label=False,
             **kwargs
     ):
         super(Diffusion, self).__init__()

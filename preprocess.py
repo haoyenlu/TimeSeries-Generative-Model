@@ -28,11 +28,11 @@ def main():
 
     # Train data
     save_path = f'./{args.save}/ulf_all_task.npy'
-    np.save(task_data,save_path)
+    np.save(save_path,task_data)
 
     # Test Data
     save_path = f'./{args.save}/ulf_all_task{"_".join(args.test_patient)}.npy'
-    np.save(test_task_data,save_path)
+    np.save(save_path,test_task_data)
 
 
 

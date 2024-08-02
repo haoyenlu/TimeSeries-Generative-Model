@@ -400,13 +400,16 @@ class Transformer(nn.Module):
         max_len=2048,
         kernel_size=5,
         padding =2,
+        use_label=False,
         label_dim=None,
         **kwargs
     ):
         super().__init__()
         self.emb = Conv_MLP(n_feat, d_model, resid_pdrop=resid_pdrop)
         self.inverse = Conv_MLP(d_model, n_feat, resid_pdrop=resid_pdrop)
-        self.label_emb = nn.Sequential(nn.Linear(label_dim,d_model))
+
+        if use_label:
+            self.label_emb = nn.Sequential(nn.Linear(label_dim,d_model)) 
             
 
         self.combine_s = nn.Conv1d(d_model, n_feat, kernel_size=kernel_size, stride=1, padding=padding,
