@@ -12,6 +12,7 @@ from train_utils import LinearLrDecay
 from models.trainer import cGANTrainer, DiffusionTrainer
 from models.generative.GAN import tts_cgan, eeg_cgan
 from models.generative.diffusion import diffusion_ts , unet1d
+from models.generative.diffusion.transformer import Transformer
 
 from argument import train_argument
 
@@ -51,7 +52,8 @@ def get_trainer_GAN(args,config,curr_date):
     return trainer
 
 def get_trainer_diffusion(args,config,curr_date):
-    backbone = unet1d.Unet1D(**config.get('backbone',dict()))
+    # backbone = unet1d.Unet1D(**config.get('backbone',dict()))
+    backbone = Transformer(**config.get('backbone',dict()))
     diffusion_model = diffusion_ts.Diffusion(backbone,**config.get('diffusion',dict()))
     backbone.apply(weight_init)
 
@@ -80,8 +82,7 @@ def main():
     config = load_config(args.config)
 
     '''Load Data'''
-    (train_data,train_label) , (test_data,test_label) = load_numpy_data(args.data)
-    train_dataset = UpperLimbMotionDataset(train_data.transpose(0,2,1),train_label)
+    train_dataset = UpperLimbMotionDataset(args.data,args.task,labels=None)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
     
     curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
