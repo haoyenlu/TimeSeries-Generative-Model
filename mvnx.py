@@ -84,7 +84,7 @@ class PreprocessMVNX:
                 patient_dir = os.path.join(type_dir,patient)
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
 
-                    subject , task , data = self._get_data(file)
+                    subject , task , data = self._get_data(os.path.join(patient_dir,file))
 
                     T,C = data.shape
                     if T > self.cutoff_length: continue
