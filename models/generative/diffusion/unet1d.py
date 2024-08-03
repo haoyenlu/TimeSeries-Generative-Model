@@ -104,7 +104,7 @@ class Unet1D(nn.Module):
 
     def forward(self,x,timestep,label=None): # Pytorch (N,C,L)
 
-        _x = x
+        _x = x.transpose(0,2,1)
         res = []
         # Encoding
         cnt = 0
