@@ -111,7 +111,7 @@ class Unet1D(nn.Module):
         while cnt < self.depth:
             _x = self.down_blocks[cnt*2](_x,timestep,label) # residual
             res.append(_x)
-            _x = self.blocks[cnt*2 + 1](_x,timestep,label) # downsample
+            _x = self.down_blocks[cnt*2 + 1](_x,timestep,label) # downsample
             cnt += 1
         
 
@@ -119,9 +119,9 @@ class Unet1D(nn.Module):
         res_cnt = self.depth -1
         cnt = 0
         while cnt < self.depth:
-            _x = self.blocks[cnt*2](_x,timestep,label) # upsample
+            _x = self.up_blocks[cnt*2](_x,timestep,label) # upsample
             _x = torch.concat([_x,res[res_cnt]],dim=1)
-            _x = self.blocks[cnt*2 + 1](_x,timestep,label) # residual
+            _x = self.up_blocks[cnt*2 + 1](_x,timestep,label) # residual
             res_cnt -= 1
             cnt += 1
         
