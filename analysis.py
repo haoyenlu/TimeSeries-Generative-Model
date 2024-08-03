@@ -33,8 +33,8 @@ def main():
     # samples,labels = generate_samples(generator,num_samples=1000,sample_per_batch=10)
 
     '''Diffusion model'''
-    # backbone = Unet1D(**config.get('backbone',dict()))
-    backbone = Transformer(**config.get('backbone',dict()))
+    backbone = Unet1D(**config.get('backbone',dict()))
+    # backbone = Transformer(**config.get('backbone',dict()))
     diffusion_model = Diffusion(backbone,**config.get('diffusion',dict()))
     diffusion_model.load_state_dict(ckpt['model'])
 
