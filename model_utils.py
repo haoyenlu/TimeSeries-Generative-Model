@@ -27,9 +27,9 @@ def get_trainer_from_config(args,config,curr_date):
     if config['infra'] == 'diffusion':
         
         if config['model'] == 'unet':
-            backbone = unet1d.Unet1D(**config.get('backbone'),dict())
+            backbone = unet1d.Unet1D(**config.get('backbone',dict()))
         elif config['model'] == 'transformer':
-            backbone = Transformer(**config.get('backbone'),dict())
+            backbone = Transformer(**config.get('backbone',dict()))
         else:
             raise Exception("Only allow unet or transformer backbone")
         
