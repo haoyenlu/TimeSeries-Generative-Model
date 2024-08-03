@@ -53,7 +53,7 @@ class UpsampleBlock(nn.Module):
 
 
 class Unet1D(nn.Module):
-    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim,kernel_size,depth):
+    def __init__(self,seq_len,feature_dim,num_classes,hidden_ch,emb_dim,kernel_size):
         super(Unet1D,self).__init__()
 
         self.seq_len = seq_len
