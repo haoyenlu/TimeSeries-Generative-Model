@@ -30,7 +30,7 @@ def main():
     samples  = trainer.generate_samples(num_samples=100,num_per_batch=10)
     print(samples.shape)
 
-    save_path = os.path.join(args.save,Path(args.ckpt).stem, args.task)
+    save_path = os.path.join(args.save,args.curr_date,args.task)
     os.makedirs(save_path,exist_ok=True)
 
     np.save(os.path.join(save_path,'synthesize.npy'), samples)
