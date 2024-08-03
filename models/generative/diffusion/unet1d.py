@@ -68,7 +68,7 @@ class Unet1D(nn.Module):
         
         '''Encoder (Downsample)'''
         prev_ch = feature_dim
-        for i in range(depth):
+        for i in range(self.depth):
             blocks.append(
                 DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",downsample=False,norm=True),
             )
@@ -84,7 +84,7 @@ class Unet1D(nn.Module):
         
         '''Decoder (Upsample)'''
         prev_ch = hidden_ch[-1]
-        for i in range(depth-1,-1,-1):
+        for i in range(self.depth-1,-1,-1):
             blocks.append(
                 UpsampleBlock(in_ch=prev_ch ,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
             )
