@@ -76,10 +76,15 @@ class Unet1D(nn.Module):
                 DownSampleBlock(in_ch=hidden_ch[i],out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",downsample=True,norm=False)
             )
             prev_ch = hidden_ch[i]
+
+        self.down_blocks = nn.ModuleList(blocks)
+
+
+        blocks = []
         
         '''Decoder (Upsample)'''
         prev_ch = hidden_ch[-1]
-        for i in range(depth-2,-1,-1):
+        for i in range(depth-1,-1,-1):
             blocks.append(
                 UpsampleBlock(in_ch=prev_ch ,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
             )
@@ -88,7 +93,7 @@ class Unet1D(nn.Module):
             )
             prev_ch = hidden_ch[i]
 
-        self.blocks = nn.ModuleList(blocks)
+        self.up_blocks = nn.ModuleList(blocks)
 
         self.last = nn.Sequential(
             nn.Conv1d(hidden_ch,feature_dim,kernel_size=kernel_size,padding="same"),
@@ -104,17 +109,19 @@ class Unet1D(nn.Module):
         # Encoding
         cnt = 0
         while cnt < self.depth:
-            _x = self.blocks[cnt*2](_x,timestep,label)
+            _x = self.down_blocks[cnt*2](_x,timestep,label) # residual
             res.append(_x)
             _x = self.blocks[cnt*2 + 1](_x,timestep,label) # downsample
             cnt += 1
         
+
         # Decoding
-        res_cnt = self.depth - 1
-        while cnt < self.depth * 2:
+        res_cnt = self.depth -1
+        cnt = 0
+        while cnt < self.depth:
             _x = self.blocks[cnt*2](_x,timestep,label) # upsample
             _x = torch.concat([_x,res[res_cnt]],dim=1)
-            _x = self.blocks[cnt*2 + 1](_x,timestep,label)
+            _x = self.blocks[cnt*2 + 1](_x,timestep,label) # residual
             res_cnt -= 1
             cnt += 1
         
