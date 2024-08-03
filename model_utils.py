@@ -14,10 +14,6 @@ from models.generative.diffusion.transformer import Transformer
 
 def get_trainer_from_config(args,config,curr_date):
         
-    '''Logger'''
-    log = os.path.join(args.log,curr_date)
-    os.makedirs(log,exist_ok=True)
-    writer = SummaryWriter(log)
 
     '''Checkpoint'''    
     ckpt = os.path.join(args.ckpt,curr_date)
@@ -42,7 +38,7 @@ def get_trainer_from_config(args,config,curr_date):
 
         trainer = DiffusionTrainer(infra,optimizer,
                             scheduler,args.max_iter,args.save_iter,
-                            ckpt,writer)
+                            ckpt)
 
     elif config['infra'] == 'gan':
 

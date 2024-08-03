@@ -228,27 +228,22 @@ class cGANTrainer(BaseTrainer):
 
 
 class DiffusionTrainer(BaseTrainer):
-    def __init__(self,model,optimizer,scheduler,
-                 max_iter,save_iter,
-                 save_path,writer):
+    def __init__(self,model,optimizer,scheduler,save_path):
         
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.writer = writer
-        self.max_iter = max_iter
-        self.save_iter = save_iter
         self.save_path = save_path
 
         self.model.to(self.device)
 
-    def train(self,dataloader):
+    def train(self,dataloader,max_iter,save_iter,writer):
         dataloader_cycle = cycle(dataloader)
 
         self.model.train()
 
-        for iter in tqdm(range(self.max_iter)):
+        for iter in tqdm(range(max_iter)):
             self.model.zero_grad()
             sequence = next(dataloader_cycle)
             sequence = sequence.to(self.device)
@@ -260,16 +255,16 @@ class DiffusionTrainer(BaseTrainer):
             self.optimizer.step()
             lr = self.scheduler.step(iter)
 
-            self.writer.add_scalar('loss',loss.item(),iter)
-            self.writer.add_scalar('lr',lr,iter)
+            writer.add_scalar('loss',loss.item(),iter)
+            writer.add_scalar('lr',lr,iter)
             tqdm.write(f"[Iter:{iter}/{self.max_iter}][loss:{loss.item()}]")
 
-            if (iter+1) % self.save_iter == 0:
+            if (iter+1) % save_iter == 0:
                 '''Visualize SYnthetic data'''
                 plot_buf = self.visualize(iter)
                 image = PIL.Image.open(plot_buf)
                 image = ToTensor()(image).unsqueeze(0)
-                self.writer.add_image('Image',image[0],iter)
+                writer.add_image('Image',image[0],iter)
                 self.save_weight(iter)
             
 

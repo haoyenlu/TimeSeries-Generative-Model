@@ -34,9 +34,13 @@ def main():
     if args.load_ckpt is not None:
         trainer.load_weight(args.load_ckpt)
 
+    '''Logger'''
+    log = os.path.join(args.log,curr_date)
+    os.makedirs(log,exist_ok=True)
+    writer = SummaryWriter(log)
 
     '''Start Training'''
-    trainer.train(train_dataloader)
+    trainer.train(train_dataloader,args.max_iter,args.save_iter,writer)
 
 
 
