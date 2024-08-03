@@ -1,3 +1,7 @@
+infra: gan
+model: tts
+
+
 generator:
   seq_len: 1024
   channels: 24

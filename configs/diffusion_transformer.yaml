@@ -1,3 +1,6 @@
+infra: diffusion
+model: transformer
+
 diffusion:
   seq_length: 1024
   feature_size: 24
@@ -6,7 +9,7 @@ diffusion:
   sampling_timesteps: 100
   loss_type: 'l2'
   beta_schedule: 'linear'
-  use_ff: False
+  use_ff: True
   use_label: False
 
 

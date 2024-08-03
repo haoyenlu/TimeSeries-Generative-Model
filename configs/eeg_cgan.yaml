@@ -1,3 +1,6 @@
+infra: gan
+model: eeg
+
 generator:
   sequence_len: 1024
   feature_dim: 24
