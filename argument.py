@@ -13,6 +13,7 @@ def train_argument():
     parser.add_argument('--ckpt',type=str,default='./checkpoint')
     parser.add_argument('--load_ckpt',type=str,default=None)
     parser.add_argument('--task',type=str,default='T01')
+    parser.add_argument('--backbone','-b',type=str,default="transformer")
 
     args = parser.parse_args()
     return args

@@ -52,8 +52,15 @@ def get_trainer_GAN(args,config,curr_date):
     return trainer
 
 def get_trainer_diffusion(args,config,curr_date):
-    # backbone = unet1d.Unet1D(**config.get('backbone',dict()))
-    backbone = Transformer(**config.get('backbone',dict()))
+    
+    if args.backbone == 'unet':
+        backbone = unet1d.Unet1D(**config.get('backbone',dict()))
+    elif args.backbone == 'transformer':
+        backbone = Transformer(**config.get('backbone',dict()))
+    else:
+        raise Exception("Only allow unet or transformer backbone")
+    
+
     diffusion_model = diffusion_ts.Diffusion(backbone,**config.get('diffusion',dict()))
     backbone.apply(weight_init)
 
