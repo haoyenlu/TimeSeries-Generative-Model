@@ -126,7 +126,7 @@ class Unet1D(nn.Module):
             cnt += 1
         
         _x = self.last(_x)
-        return _x
+        return _x.transpose(1,2)
 
 
         
