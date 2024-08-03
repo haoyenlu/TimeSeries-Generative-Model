@@ -38,6 +38,7 @@ def analysis_argument():
     parser.add_argument('--config',type=str)
     parser.add_argument('--save',type=str)
     parser.add_argument('--task',type=str,default='T01')
+    parser.add_argument('--curr_date',type=str)
 
     args = parser.parse_args()
     return args

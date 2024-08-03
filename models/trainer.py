@@ -54,6 +54,10 @@ class BaseTrainer(ABC):
     def load_weight(self,ckpt):
         pass
 
+    @abstractmethod
+    def generate_samples(self,num_samples,num_per_batch):
+        pass
+
 
 class cGANTrainer(BaseTrainer):
     def __init__(self,generator,discriminator,
@@ -202,6 +206,25 @@ class cGANTrainer(BaseTrainer):
         return buf
     
 
+    def generate_samples(self, num_samples, num_per_batch):
+        samples = []
+        labels = []
+
+
+        self.generator.eval()
+
+        cnt = 0
+        while cnt < num_samples:
+            num= min(num_per_batch,num_samples - cnt)
+            noise = torch.FloatTensor(np.random.normal(0,1,(num,self.latent_dim))).to(self.device)
+            fake_label = torch.randint(0,self.num_classes,(num,)).to(self.device)
+            fake_sequence = self.generator(noise,label=None).to('cpu').detach().numpy()
+            samples.append(fake_sequence)
+            labels.append(fake_label.to('cpu').detach().numpy())
+            cnt += num
+        
+        return np.concatenate(samples,axis=0), np.concatenate(labels,axis=0)
+
 
 
 class DiffusionTrainer(BaseTrainer):
@@ -274,7 +297,25 @@ class DiffusionTrainer(BaseTrainer):
         # labels = labels.to('cpu').detach().numpy()
         buf = sample2buffer(samples,iter)
         return buf
-        
+    
+    def generate_samples(self, num_samples, num_per_batch):
+        sample_arr = []
+        self.model.eval()
+
+        pbar = tqdm(total=num_samples)
+        cnt = 0
+        while cnt < num_samples:
+            num = min(num_per_batch,num_samples - cnt)
+            samples  = self.model.generate_mts(batch_size=num)
+            samples = samples.to('cpu').detach().numpy()
+            # labels = labels.to('cpu').detach().numpy()
+
+            sample_arr.append(samples)
+            # label_arr.append(labels)
+            cnt += num
+            pbar.update(num)
+
+        return np.concatenate(sample_arr,axis=0)
     
 
 
