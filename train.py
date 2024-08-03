@@ -30,19 +30,20 @@ def main():
     curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
     trainer = get_trainer_from_config(args,config,curr_date)
 
-    '''Load checkpoint if any'''
+    # load checkpoint
     if args.load_ckpt is not None:
         trainer.load_weight(args.load_ckpt)
 
-    '''Logger'''
+    # logger
     log = os.path.join(args.log,curr_date)
     os.makedirs(log,exist_ok=True)
     writer = SummaryWriter(log)
-
+    
+    # Learning rate scheduler
     scheduler = LinearLrDecay(trainer.optimizer,config['optimizer']['lr'],0.0,0,args.max_iter)
 
 
-    '''Start Training'''
+    # training
     trainer.train(train_dataloader,args.max_iter,args.save_iter,scheduler,writer)
 
 

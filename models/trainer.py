@@ -256,7 +256,7 @@ class DiffusionTrainer(BaseTrainer):
 
             writer.add_scalar('loss',loss.item(),iter)
             writer.add_scalar('lr',lr,iter)
-            tqdm.write(f"[Iter:{iter}/{self.max_iter}][loss:{loss.item()}]")
+            tqdm.write(f"[Iter:{iter}/{max_iter}][loss:{loss.item()}]")
 
             if (iter+1) % save_iter == 0:
                 '''Visualize SYnthetic data'''
