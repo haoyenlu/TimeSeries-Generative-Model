@@ -228,7 +228,7 @@ class cGANTrainer(BaseTrainer):
 
 
 class DiffusionTrainer(BaseTrainer):
-    def __init__(self,model,optimizer,scheduler,save_path):
+    def __init__(self,model,optimizer,save_path):
         
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')

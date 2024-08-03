@@ -35,9 +35,7 @@ def get_trainer_from_config(args,config,curr_date):
         optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, infra.parameters()),**config.get('optimizer',dict()))
 
 
-        trainer = DiffusionTrainer(infra,optimizer,
-                            args.max_iter,args.save_iter,
-                            ckpt)
+        trainer = DiffusionTrainer(infra,optimizer,ckpt)
 
     elif config['infra'] == 'gan':
 
