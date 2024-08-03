@@ -233,12 +233,11 @@ class DiffusionTrainer(BaseTrainer):
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.optimizer = optimizer
-        self.scheduler = scheduler
         self.save_path = save_path
 
         self.model.to(self.device)
 
-    def train(self,dataloader,max_iter,save_iter,writer):
+    def train(self,dataloader,max_iter,save_iter,scheduler,writer):
         dataloader_cycle = cycle(dataloader)
 
         self.model.train()
@@ -253,7 +252,7 @@ class DiffusionTrainer(BaseTrainer):
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(),5.)
             self.optimizer.step()
-            lr = self.scheduler.step(iter)
+            lr = scheduler.step(iter)
 
             writer.add_scalar('loss',loss.item(),iter)
             writer.add_scalar('lr',lr,iter)

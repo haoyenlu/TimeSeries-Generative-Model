@@ -39,8 +39,11 @@ def main():
     os.makedirs(log,exist_ok=True)
     writer = SummaryWriter(log)
 
+    scheduler = LinearLrDecay(trainer.optimizer,config['optimizer']['lr'],0.0,0,args.max_iter)
+
+
     '''Start Training'''
-    trainer.train(train_dataloader,args.max_iter,args.save_iter,writer)
+    trainer.train(train_dataloader,args.max_iter,args.save_iter,scheduler,writer)
 
 
 

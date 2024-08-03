@@ -33,11 +33,10 @@ def get_trainer_from_config(args,config,curr_date):
 
         infra = diffusion_ts.Diffusion(backbone,**config.get('diffusion',dict()))
         optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, infra.parameters()),**config.get('optimizer',dict()))
-        scheduler = LinearLrDecay(optimizer,config['optimizer']['lr'],0.0,0,args.max_iter)
 
 
         trainer = DiffusionTrainer(infra,optimizer,
-                            scheduler,args.max_iter,args.save_iter,
+                            args.max_iter,args.save_iter,
                             ckpt)
 
     elif config['infra'] == 'gan':
