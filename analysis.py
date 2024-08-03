@@ -26,10 +26,8 @@ def main():
     print(train_data.shape)
 
     trainer = get_trainer_from_config(args,config,curr_date=args.curr_date)
-
+    trainer.load_weight(os.path.join(args.ckpt,args.curr_date,"checkpoint.pth"))
     samples  = trainer.generate_samples(num_samples=100,num_per_batch=10)
-
-
     print(samples.shape)
 
     save_path = os.path.join(args.save,Path(args.ckpt).stem, args.task)
