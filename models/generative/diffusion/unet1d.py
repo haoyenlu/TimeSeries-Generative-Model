@@ -96,7 +96,7 @@ class Unet1D(nn.Module):
         self.up_blocks = nn.ModuleList(blocks)
 
         self.last = nn.Sequential(
-            nn.Conv1d(hidden_ch,feature_dim,kernel_size=kernel_size,padding="same"),
+            nn.Conv1d(hidden_ch[0],feature_dim,kernel_size=kernel_size,padding="same"),
             nn.Sigmoid()
         )
 
