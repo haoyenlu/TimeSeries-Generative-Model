@@ -14,10 +14,9 @@ backbone:
   seq_len: 1024
   feature_dim: 24
   num_classes: 30
-  hidden_ch: 64
+  hidden_ch: [64,32,16,8]
   emb_dim: 32
   kernel_size: 5
-  depth: 4
 
 optimizer:
   lr: 0.0001

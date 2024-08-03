@@ -62,7 +62,7 @@ class Unet1D(nn.Module):
         self.hidden_dim = hidden_ch
         self.emb_dim = emb_dim
         self.kernel_size = kernel_size
-        self.depth = depth
+        self.depth = len(hidden_ch)
 
         blocks = []
         
@@ -70,21 +70,23 @@ class Unet1D(nn.Module):
         prev_ch = feature_dim
         for i in range(depth):
             blocks.append(
-                DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",downsample=False,norm=True),
+                DownSampleBlock(in_ch=prev_ch,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",downsample=False,norm=True),
             )
             blocks.append(
-                DownSampleBlock(in_ch=hidden_ch,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",downsample=True,norm=False)
+                DownSampleBlock(in_ch=hidden_ch[i],out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",downsample=True,norm=False)
             )
-            prev_ch = hidden_ch
+            prev_ch = hidden_ch[i]
         
         '''Decoder (Upsample)'''
-        for i in range(depth):
+        prev_ch = hidden_ch[-1]
+        for i in range(depth-2,-1,-1):
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch ,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
+                UpsampleBlock(in_ch=prev_ch ,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",upsample=True,norm=False),
             )
             blocks.append(
-                UpsampleBlock(in_ch=hidden_ch*2,out_ch=hidden_ch,num_classes=num_classes,kernel=kernel_size,padding="same",upsample=False,norm=True),
+                UpsampleBlock(in_ch=hidden_ch[i]*2,out_ch=hidden_ch[i],num_classes=num_classes,kernel=kernel_size,padding="same",upsample=False,norm=True),
             )
+            prev_ch = hidden_ch[i]
 
         self.blocks = nn.ModuleList(blocks)
 
