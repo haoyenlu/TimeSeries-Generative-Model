@@ -27,7 +27,12 @@ def main():
     train_dataset = UpperLimbMotionDataset(args.data,args.task)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
     
-    curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+    if args.curr_date is None:
+        curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+    else:
+        curr_date = args.curr_date
+
+
     trainer = get_trainer_from_config(args,config,curr_date)
 
     # load checkpoint

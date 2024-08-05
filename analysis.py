@@ -12,6 +12,7 @@ from utils import load_config
 from model_utils import  get_trainer_from_config
 from utils import load_numpy_data
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
+from data_utils import FeatureWiseScaler
 
 
 from argument import analysis_argument
@@ -23,6 +24,10 @@ def main():
 
     train_data = np.load(args.data,allow_pickle=True).item()
     train_data = np.array(train_data[args.task])
+    # Scale down the original sample
+    scaler = FeatureWiseScaler((0,1))
+    scaler.fit(train_data)
+    train_data = scaler.transform(train_data).astype(np.float32)
     print(train_data.shape)
 
     trainer = get_trainer_from_config(args,config,curr_date=args.curr_date)
