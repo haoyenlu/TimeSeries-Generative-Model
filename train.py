@@ -4,17 +4,19 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import os
 from datetime import datetime
+import numpy as np
 
 from utils import load_numpy_data, load_config
 from dataset import UpperLimbMotionDataset
 from model_utils import weight_init, get_trainer_from_config
 from train_utils import LinearLrDecay
-from models.trainer import cGANTrainer, DiffusionTrainer
-from models.generative.GAN import tts_cgan, eeg_cgan
-from models.generative.diffusion import diffusion_ts , unet1d
-from models.generative.diffusion.transformer import Transformer
+
+from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
 from argument import train_argument
+
+
+
 
 
 
@@ -52,6 +54,21 @@ def main():
     trainer.train(train_dataloader,args.max_iter,args.save_iter,scheduler,writer)
 
 
+    # generate samples
+    samples = trainer.generate_samples(num_samples=100,num_per_batch=10)
+    save_path = os.path.join(args.save,curr_date,args.task)
+    os.makedirs(save_path,exist_ok=True)
+
+    np.save(os.path.join(save_path,'synthesize.npy'), samples)
+
+
+    train_data = train_dataset._get_numpy()
+
+
+    plot_pca(real=train_data,fake=samples,save_path=save_path)
+    plot_tsne(real=train_data,fake=samples,save_path=save_path)
+    plot_umap(real=train_data,fake=samples,save_path=save_path)
+    plot_sample(real=train_data,fake=samples,save_path=save_path)
 
 if __name__ == '__main__':
     main()

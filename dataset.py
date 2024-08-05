@@ -33,5 +33,8 @@ class UpperLimbMotionDataset(Dataset):
         return self.train[index,:,:]
 
 
+    def _get_numpy(self):
+        return self.train
+
 
     
