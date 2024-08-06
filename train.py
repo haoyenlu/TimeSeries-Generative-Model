@@ -80,7 +80,7 @@ def main():
         # generate samples
         samples = trainer.generate_samples(num_samples=100,num_per_batch=10)
 
-        save_folder = os.path.join(output.task)
+        save_folder = os.path.join(output,task)
         np.save(os.path.join(save_folder,'synthesize.npy'), samples)
 
         # analyze with pca and tsne
