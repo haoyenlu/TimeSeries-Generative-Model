@@ -9,12 +9,12 @@ def train_argument():
     parser.add_argument('--max_iter',type=int,default=1000)
     parser.add_argument('--save_iter',type=int,default=100)
     parser.add_argument('--n_critic',type=int,default=5) # Only for GAN
-    parser.add_argument('--log',type=str,default="./log")
+    parser.add_argument('--log',type=str,default=None)
     parser.add_argument('--ckpt',type=str,default='./checkpoint')
     parser.add_argument('--load_ckpt',type=str,default=None)
     parser.add_argument('--task',nargs='+',type=str)
-    parser.add_argument('--curr_date',type=str,default=None)
     parser.add_argument('--save',type=str)
+    parser.add_argument('--verbal',action='store_true')
     
 
     args = parser.parse_args()

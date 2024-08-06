@@ -12,13 +12,7 @@ from models.generative.diffusion import diffusion_ts , unet1d
 from models.generative.diffusion.transformer import Transformer
 
 
-def get_trainer_from_config(args,config,curr_date):
-        
-
-    '''Checkpoint'''    
-    ckpt = os.path.join(args.ckpt,curr_date)
-    os.makedirs(ckpt,exist_ok=True)
-
+def get_trainer_from_config(args,config):
 
     if config['infra'] == 'diffusion':
         
@@ -35,7 +29,7 @@ def get_trainer_from_config(args,config,curr_date):
         optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, infra.parameters()),**config.get('optimizer',dict()))
 
 
-        trainer = DiffusionTrainer(infra,optimizer,ckpt)
+        trainer = DiffusionTrainer(infra,optimizer)
 
     elif config['infra'] == 'gan':
 
@@ -62,8 +56,7 @@ def get_trainer_from_config(args,config,curr_date):
                             criterion,
                             config['lambda_cls'],config['lambda_gp'],
                             args.max_iter,args.save_iter,args.n_critic,
-                            config['generator']['num_classes'],config['generator']['latent_dim'],
-                            ckpt)
+                            config['generator']['num_classes'],config['generator']['latent_dim'])
     
     else:
         raise Exception("Only allow diffusion")

@@ -228,16 +228,16 @@ class cGANTrainer(BaseTrainer):
 
 
 class DiffusionTrainer(BaseTrainer):
-    def __init__(self,model,optimizer,save_path):
+    def __init__(self,model,optimizer):
         
         self.model = model
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.optimizer = optimizer
-        self.save_path = save_path
 
         self.model.to(self.device)
 
-    def train(self,dataloader,max_iter,save_iter,scheduler,writer):
+    def train(self,dataloader,max_iter,save_iter,scheduler,writer=None,verbal=True,save_path="./checkpoint.pth"):
+
         dataloader_cycle = cycle(dataloader)
 
         self.model.train()
@@ -254,43 +254,35 @@ class DiffusionTrainer(BaseTrainer):
             self.optimizer.step()
             lr = scheduler.step(iter)
 
-            writer.add_scalar('loss',loss.item(),iter)
-            writer.add_scalar('lr',lr,iter)
-            tqdm.write(f"[Iter:{iter}/{max_iter}][loss:{loss.item()}]")
+            if writer is not None:
+                writer.add_scalar('loss',loss.item(),iter)
+                writer.add_scalar('lr',lr,iter)
+
+            if verbal:
+                tqdm.write(f"[Iter:{iter}/{max_iter}][loss:{loss.item()}]")
 
             if (iter+1) % save_iter == 0:
                 '''Visualize SYnthetic data'''
                 plot_buf = self.visualize(iter)
                 image = PIL.Image.open(plot_buf)
                 image = ToTensor()(image).unsqueeze(0)
-                writer.add_image('Image',image[0],iter)
-                self.save_weight(iter)
+                self.save_weight(save_path)
+
+                if writer is not None:
+                    writer.add_image('Image',image[0],iter)
     
 
-    def save_initial_setting(self):
-        data = {
-            'model' : self.model.state_dict(),
-            'opt': self.optimizer.state_dict()
-        }
-        torch.save(data,os.path.join(self.save_path,"initial_setting.pth"))
 
-    def load_initial_setting(self):
-        data = torch.load(os.path.join(self.save_path,"initial_setting.pth"))
-        self.model.load_state_dict(data['model'])
-        self.optimizer.load_state_dict(data['opt'])
-
-    def save_weight(self, iter):
+    def save_weight(self, save_path):
         data = {
-            'epoch': iter + 1,
             'model':self.model.state_dict(),
             'opt': self.optimizer.state_dict()
         }
-        torch.save(data,os.path.join(self.save_path,"checkpoint.pth"))
+        torch.save(data,save_path)
 
 
-
-    def load_weight(self):
-        data = torch.load(os.path.join(self.save_path,"checkpoint.pth"))
+    def load_weight(self , save_path):
+        data = torch.load(save_path)
         self.model.load_state_dict(data['model'])
         self.optimizer.load_state_dict(data['opt'])
 
