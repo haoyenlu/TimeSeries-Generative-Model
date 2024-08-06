@@ -63,7 +63,7 @@ def get_trainer_from_config(args,config,curr_date):
                             config['lambda_cls'],config['lambda_gp'],
                             args.max_iter,args.save_iter,args.n_critic,
                             config['generator']['num_classes'],config['generator']['latent_dim'],
-                            writer,ckpt)
+                            ckpt)
     
     else:
         raise Exception("Only allow diffusion")

@@ -265,7 +265,19 @@ class DiffusionTrainer(BaseTrainer):
                 image = ToTensor()(image).unsqueeze(0)
                 writer.add_image('Image',image[0],iter)
                 self.save_weight(iter)
-            
+    
+
+    def save_initial_setting(self):
+        data = {
+            'model' : self.model.state_dict(),
+            'opt': self.optimizer.state_dict()
+        }
+        torch.save(data,os.path.join(self.save_path,"initial_setting.pth"))
+
+    def load_initial_setting(self):
+        data = torch.load(os.path.join(self.save_path,"initial_setting.pth"))
+        self.model.load_state_dict(data['model'])
+        self.optimizer.load_state_dict(data['opt'])
 
     def save_weight(self, iter):
         data = {
@@ -276,9 +288,9 @@ class DiffusionTrainer(BaseTrainer):
         torch.save(data,os.path.join(self.save_path,"checkpoint.pth"))
 
 
-    def load_weight(self, ckpt):
-        if ckpt is None: return
-        data = torch.load(ckpt)
+
+    def load_weight(self):
+        data = torch.load(os.path.join(self.save_path,"checkpoint.pth"))
         self.model.load_state_dict(data['model'])
         self.optimizer.load_state_dict(data['opt'])
 

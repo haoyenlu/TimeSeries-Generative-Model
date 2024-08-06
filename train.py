@@ -26,22 +26,25 @@ def main():
     config = load_config(args.config)
 
     if args.curr_date is None:
-        curr_date = datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+        curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
     else:
         curr_date = args.curr_date
 
+    # load ulf data
+    data = np.load(args.data, allow_pickle=True).item()
+
+
+    # save the initial setting - reused trainer for training other task
+    trainer = get_trainer_from_config(args,config,curr_date)
+    trainer.save_initial_setting()
 
     for task in args.task:
-        '''Load Data'''
-        train_dataset = UpperLimbMotionDataset(args.data,task)
+        print(f"---- Training on {task} ------")
+
+        # Load Data
+        train_dataset = UpperLimbMotionDataset(data[task])
         train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
         
-
-        trainer = get_trainer_from_config(args,config,curr_date)
-
-        # load checkpoint
-        if args.load_ckpt is not None:
-            trainer.load_weight(args.load_ckpt)
 
         # logger
         log = os.path.join(args.log,curr_date,task)
@@ -51,6 +54,8 @@ def main():
         # Learning rate scheduler
         scheduler = LinearLrDecay(trainer.optimizer,config['optimizer']['lr'],0.0,0,args.max_iter)
 
+        # load initial setting before training
+        trainer.load_initial_setting()
 
         # training
         trainer.train(train_dataloader,args.max_iter,args.save_iter,scheduler,writer)

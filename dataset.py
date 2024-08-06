@@ -3,15 +3,12 @@ import numpy as np
 from data_utils import FeatureWiseScaler
 
 class UpperLimbMotionDataset(Dataset):
-    def __init__(self,data,task='T01',scale_range=(0,1)):
+    def __init__(self,data,scale_range=(0,1)):
         super(UpperLimbMotionDataset,self).__init__()
-
-        
-        self.data = np.load(data,allow_pickle=True).item()
 
 
         '''Only given specific task data'''
-        train_data = np.array(self.data[task])
+        train_data = np.array(data)
         
         print("Train data shape:",train_data.shape)
         
