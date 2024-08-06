@@ -34,6 +34,10 @@ def main():
     log = os.path.join(args.log,curr_date) # log
     output = os.path.join(args.save,curr_date) # save folder path
 
+    os.makedirs(checkpoint_path,exist_ok=True)
+    os.makedirs(log,exist_ok=True)
+    os.makedirs(output,exist_ok=True)
+
     # file name
     initial_setting = "initial_setting.pth"
     best_weight = "best_weight.pth"
