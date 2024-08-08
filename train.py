@@ -122,7 +122,7 @@ def train_classification():
 
 def preprocess_data(data_path):
     data_dict = np.load(data_path,allow_pickle=True).item()
-    tasks = data_dict.keys()
+    tasks = np.array(data_dict.keys())
         
     data = []
     label = []
