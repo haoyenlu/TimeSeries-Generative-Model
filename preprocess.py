@@ -39,9 +39,9 @@ def preprocess_synthesize():
     synthesize_data = {}
 
     for task in tqdm(os.listdir(args.data)):
-        curr_path = os.path.join(args.data,task)
+        file = os.path.join(args.data,task,"synthesize.npy")
         
-        synthesized = np.load(curr_path,"synthesize.npy",allow_pickle=True)
+        synthesized = np.load(file,allow_pickle=True)
         synthesize_data[task] = synthesized
 
     
