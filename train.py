@@ -131,7 +131,8 @@ def preprocess_data(data_path):
         np_value = np.array(value)
         B , T, C = np_value.shape
         data.append(np_value)
-        l = np.argwhere(key == tasks)
+        l = np.argwhere(tasks == key)
+        print(l)
         label.append(l * B)
     
     data = np.concatenate(data)
