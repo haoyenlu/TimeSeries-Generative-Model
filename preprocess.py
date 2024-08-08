@@ -1,13 +1,10 @@
-import argparse
 import yaml
 import numpy as np
 import os
-
+from tqdm import tqdm
 from mvnx import PreprocessMVNX
-from utils import save_to_numpy, load_numpy_data
-from data_utils import FeatureWiseScaler
 
-from argument import preprocess_argument
+from argument import preprocess_argument , preprocess_synthesize_argument
 
 
 
@@ -33,6 +30,25 @@ def main():
     # Test Data
     save_path = f'./{args.save}/ulf_all_task{"_".join(args.test_patient)}.npy'
     np.save(save_path,test_task_data)
+
+
+
+def preprocess_synthesize():
+    args = preprocess_synthesize_argument()
+
+    synthesize_data = {}
+
+    for task in tqdm(os.listdir(args.data)):
+        curr_path = os.path.join(args.data,task)
+        
+        synthesized = np.load(curr_path,"synthesize.npy",allow_pickle=True)
+        synthesize_data[task] = synthesized
+
+    
+    np.save(os.path.join(args.save,'ulf_all_task_synthesize.npy'),synthesize_data)
+
+        
+
 
 
 

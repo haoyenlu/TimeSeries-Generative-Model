@@ -32,6 +32,14 @@ def preprocess_argument():
     args = parser.parse_args()
     return args
 
+def preprocess_synthesize_argument():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data',type=str)
+    parser.add_argument('--save',type=str)
+
+    args = parser.parse_args()
+    return args
+
 
 def analysis_argument():
     parser = argparse.ArgumentParser()

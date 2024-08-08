@@ -1,7 +1,4 @@
 import torch
-import numpy as np
-import matplotlib.pyplot as plt
-import io
 
 '''L2 Norm'''
 def gradient_panelty(y,x,device):
@@ -40,5 +37,9 @@ class LinearLrDecay(object):
                 param_group['lr'] = lr
         return lr
     
+
+class ExponentialLrDecay(object):
+    def __init__(self,optimizer, global_step, start_lr):
+        pass
 
 
