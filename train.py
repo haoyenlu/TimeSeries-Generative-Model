@@ -131,11 +131,11 @@ def preprocess_data(data_path):
         B , T, C = np_value.shape
         data.append(np_value)
         l = np.argwhere(tasks == key)
-        print(l * B)
-        label.append(l * B)
+        print([l] * B)
+        label.append([l] * B)
     
     data = np.concatenate(data)
-    label = np.concatenate(label)
+    label = np.concatenate(label).unsqueeze()
 
     print(data.shape)
     print(label.shape)
