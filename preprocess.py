@@ -56,4 +56,4 @@ def preprocess_synthesize():
 
 
 if __name__ == '__main__':
-    main()
+    preprocess_synthesize()
