@@ -13,7 +13,7 @@ from train_utils import LinearLrDecay
 
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
-from argument import train_argument
+from argument import train_argument, train_classification_argument
 
 
 
@@ -95,7 +95,7 @@ def train_generative():
 
 
 def train_classification():
-    args = train_argument()
+    args = train_classification_argument()
     config = load_config(args.config)
 
     # curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
