@@ -145,4 +145,4 @@ def preprocess_data(data_path):
 
 
 if __name__ == '__main__':
-    pass
+    train_classification()
