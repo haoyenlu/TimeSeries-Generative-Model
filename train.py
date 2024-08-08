@@ -123,7 +123,7 @@ def train_classification():
 def preprocess_data(data_path):
     data_dict = np.load(data_path,allow_pickle=True).item()
     tasks = np.array(data_dict.keys())
-        
+    print(tasks)
     data = []
     label = []
 
@@ -131,6 +131,7 @@ def preprocess_data(data_path):
         np_value = np.array(value)
         B , T, C = np_value.shape
         data.append(np_value)
+        print(key)
         l = np.argwhere(tasks == key)
         print(l)
         label.append(l * B)
