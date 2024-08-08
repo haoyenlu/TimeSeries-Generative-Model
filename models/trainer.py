@@ -318,30 +318,22 @@ class DiffusionTrainer(BaseTrainer):
 
 
 class ClassifyTrainer(BaseTrainer):
-    def __init__(self,model,optimizer,criterion,
-                 scheduler,
-                 num_classes,
-                 max_iter,
-                 writer,save_path):
+    def __init__(self,model,optimizer,criterion,num_classes):
         
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.model = model
         self.optimizer = optimizer
         self.criterion = criterion
-        self.scheduler = scheduler
-        self.max_iter = max_iter
-        self.writer = writer
-        self.save_path = save_path
         self.num_classes = num_classes
 
         self.model.to(self.device)
 
     
-    def train(self, train_dataloader, test_dataloader):
+    def train(self, train_dataloader, test_dataloader , max_iter = 10000, writer=None, save_path='./save'):
         n = len(train_dataloader)
         m = len(test_dataloader)
 
-        for iter in tqdm(range(self.max_iter)):
+        for iter in tqdm(range(max_iter)):
             train_total_loss = 0
             test_total_loss = 0
             train_total_accuracy = 0
@@ -366,38 +358,35 @@ class ClassifyTrainer(BaseTrainer):
             for test_data, test_label in test_dataloader:
                 test_data = test_data.to(self.device)
                 test_label = test_label.to(self.device)
-                onehot_label = F.one_hot(train_label.long(),num_classes=self.num_classes).float()
-                pred = self.model(train_data)
+                onehot_label = F.one_hot(test_label.long(),num_classes=self.num_classes).float()
+                pred = self.model(test_data)
                 test_loss = self.criterion(pred,onehot_label)
                 test_total_loss += test_loss.item()
                 test_total_accuracy += (torch.argmax(pred) == test_label).sum().item()
 
             
             
-            # lr = self.scheduler.step(iter)
-            tqdm.write(f"[Epoch:{iter}/{self.max_iter}][Train Loss:{train_total_loss/n:.4f}][Train Accuracy:{train_total_accuracy/n:.4f}][Test Loss:{test_total_loss/m:.4f}][Test Accuracy:{test_total_accuracy/m:.4f}]")
+            tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss/n:.4f}][Train Accuracy:{train_total_accuracy/n:.4f}][Test Loss:{test_total_loss/m:.4f}][Test Accuracy:{test_total_accuracy/m:.4f}]")
 
-            self.writer.add_scalar('loss/train_loss',train_total_loss/n,iter)
-            self.writer.add_scalar('loss/test_loss',test_total_loss/m,iter)
-            self.writer.add_scalar('accuracy/train_accuracy',train_total_accuracy/n,iter)
-            self.writer.add_scalar('accuracy/test_accuracy',test_total_accuracy/m,iter)
-            # self.writer.add_scalar('lr',lr,iter)
+            writer.add_scalar('loss/train_loss',train_total_loss/n,iter)
+            writer.add_scalar('loss/test_loss',test_total_loss/m,iter)
+            writer.add_scalar('accuracy/train_accuracy',train_total_accuracy/n,iter)
+            writer.add_scalar('accuracy/test_accuracy',test_total_accuracy/m,iter)
 
 
-            self.save_weight(iter)
+            self.save_weight(save_path)
     
 
-    def save_weight(self, iter):
+    def save_weight(self, save_path):
         data = {
-            'iter':iter,
             'model':self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
         }
         
-        torch.save(data,os.path.join(self.save_path,"checkpoint.pth"))
+        torch.save(data,save_path)
     
-    def load_weight(self, ckpt):
-        data = torch.load(ckpt,map_location=self.device)
+    def load_weight(self, save_path):
+        data = torch.load(save_path,map_location=self.device)
         self.model.load_state_dict(data['model'])
         self.optimizer.load_state_dict(data['optimizer'])
     

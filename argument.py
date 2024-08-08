@@ -21,6 +21,21 @@ def train_argument():
     return args
 
 
+def train_classification_argument():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train_data',type=str)
+    parser.add_argument('--test_data',type=str)
+    parser.add_argument('--config',type=str)
+    parser.add_argument('--max_iter',type=int)
+    parser.add_argument('--save_iter',type=int)
+    parser.add_argument('--log',type=str)
+    parser.add_argument('--ckpt',type=str)
+    parser.add_argument('--save',type=str)
+
+    args = parser.parse_args()
+    return args
+
+
 def preprocess_argument():
     parser = argparse.ArgumentParser()
     parser.add_argument('--mvnx',type=str,default=None)

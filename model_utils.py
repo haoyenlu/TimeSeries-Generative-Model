@@ -6,10 +6,11 @@ import os
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 from train_utils import LinearLrDecay
-from models.trainer import cGANTrainer, DiffusionTrainer
+from models.trainer import cGANTrainer, DiffusionTrainer, ClassifyTrainer
 from models.generative.GAN import tts_cgan, eeg_cgan
 from models.generative.diffusion import diffusion_ts , unet1d
 from models.generative.diffusion.transformer import Transformer
+from models.classification.model import InceptionTime
 
 
 def get_trainer_from_config(args,config):
@@ -58,8 +59,19 @@ def get_trainer_from_config(args,config):
                             args.max_iter,args.save_iter,args.n_critic,
                             config['generator']['num_classes'],config['generator']['latent_dim'])
     
+
+    elif config['infra'] == 'classification':
+
+        if config['model'] == 'inception-time':
+            model = InceptionTime(**config.get('inception-time',dict()))
+            optimizer = torch.optim.Adam(model.parameters(),**config.get(optimizer,dict()))
+            criterion = torch.nn.CrossEntropyLoss()
+
+            trainer = ClassifyTrainer(model,optimizer,criterion,config['num_classes'])
+
+
     else:
-        raise Exception("Only allow diffusion")
+        raise Exception("Not supported type")
     
 
     return trainer

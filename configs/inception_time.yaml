@@ -1,0 +1,23 @@
+infra: classification
+model: inception-time
+
+inception-time:
+  sequence_len: 1024
+  feature_size: 24
+  label_dim: 30
+  inception_filter: 32
+  fcn_filter: 128
+  depth: 6
+  fcn_layers: 6
+  kernels: [10,20,40]
+  dropout: 0.2
+  use_residual: True
+  use_bottleneck: True
+
+
+optimizer:
+  lr: 0.001
+  betas: [0.9,0.99]
+
+
+num_classes: 30

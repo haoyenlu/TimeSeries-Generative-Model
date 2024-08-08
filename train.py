@@ -21,7 +21,7 @@ from argument import train_argument
 
 
 
-def main():
+def train_generative():
     args = train_argument()
     config = load_config(args.config)
 
@@ -94,5 +94,55 @@ def main():
 
 
 
+def train_classification():
+    args = train_argument()
+    config = load_config(args.config)
+
+    # curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
+
+
+    
+    # # folder path
+    # checkpoint_path = os.path.join(args.ckpt,curr_date) # checkpoint
+    # log = os.path.join(args.log,curr_date) # log
+    # output = os.path.join(args.save,curr_date) # save folder path
+
+    # os.makedirs(checkpoint_path,exist_ok=True)
+    # os.makedirs(log,exist_ok=True)
+    # os.makedirs(output,exist_ok=True)
+
+
+    # best_weight = 'best_weight.pth'
+
+    '''TODO: preprocess the label '''
+    train_data, train_label = preprocess_data(args.train_data)
+
+
+
+
+def preprocess_data(data_path):
+    data_dict = np.load(data_path,allow_pickle=True).item()
+    tasks = data_dict.keys()
+        
+    data = []
+    label = []
+
+    for key, value in data_dict.items():
+        np_value = np.array(value)
+        B , T, C = np_value.shape
+        data.append(np_value)
+        l = np.argwhere(key == tasks)
+        label.append(l * B)
+    
+    data = np.concatenate(data)
+    label = np.concatenate(label)
+
+    print(data.shape)
+    print(label.shape)
+    return data, label
+
+
+
+
 if __name__ == '__main__':
-    main()
+    pass

@@ -3,11 +3,10 @@ import torch.nn as nn
 
 
 class InceptionModule(nn.Module):
-  def __init__(self,input_dim,filter_size=32,kernels=[10,20,40],use_bottleneck=True,use_attn=False):
+  def __init__(self,input_dim,filter_size=32,kernels=[10,20,40],use_bottleneck=True):
     super(InceptionModule,self).__init__()
     self.bottleneck_size = filter_size
     self.use_bottleneck = use_bottleneck
-    self.use_attn = use_attn
     self.filter_size = filter_size
     self.input_inception = nn.Conv1d(input_dim,self.bottleneck_size,kernel_size=1,padding='same',bias=False)
 
@@ -83,9 +82,9 @@ class FCNLayer(nn.Module):
 
 
 class InceptionTime(nn.Module):
-    def __init__(self,batch_size,sequence_len,feature_size,label_dim, 
+    def __init__(self,sequence_len,feature_size,label_dim, 
                 inception_filter=32,fcn_filter = 128,depth=6,fcn_layers = 6,kernels = [10,20,40],dropout=0.2,
-                use_residual=True, use_bottleneck=True,use_attn=False,use_embedding=False):
+                use_residual=True, use_bottleneck=True):
         
         super(InceptionTime,self).__init__()
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -94,9 +93,7 @@ class InceptionTime(nn.Module):
         self.label_dim = label_dim
         self.depth = depth
         self.use_residual = use_residual
-        self.use_embedding = use_embedding
         self.filter_size = inception_filter
-        self.batch_size = batch_size
 
         self.inceptions = []
         self.shortcuts = []
@@ -110,7 +107,6 @@ class InceptionTime(nn.Module):
                 inception_filter,
                 kernels,
                 use_bottleneck,
-                use_attn = use_attn,
             ))
 
             if use_residual and d % 2 == 1: 
