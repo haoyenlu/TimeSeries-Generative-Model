@@ -23,3 +23,8 @@ class FeatureWiseScaler:
 
     def transform(self,X):
         return ((X-self.mins) / (self.maxs - self.mins + EPS)) * (self.max_v - self.min_v) + self.min_v
+    
+
+    def fit_transform(self,X):
+        self.fit(X)
+        return self.transform(X)

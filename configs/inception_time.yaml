@@ -21,3 +21,4 @@ optimizer:
 
 
 num_classes: 30
+batch_size: 32

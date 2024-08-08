@@ -27,7 +27,6 @@ def train_classification_argument():
     parser.add_argument('--test_data',type=str)
     parser.add_argument('--config',type=str)
     parser.add_argument('--max_iter',type=int)
-    parser.add_argument('--save_iter',type=int)
     parser.add_argument('--log',type=str)
     parser.add_argument('--ckpt',type=str)
     parser.add_argument('--save',type=str)

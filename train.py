@@ -14,10 +14,7 @@ from train_utils import LinearLrDecay
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
 from argument import train_argument, train_classification_argument
-
-
-
-
+from data_utils import FeatureWiseScaler
 
 
 
@@ -98,24 +95,37 @@ def train_classification():
     args = train_classification_argument()
     config = load_config(args.config)
 
-    # curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
-
-
+    curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
     
-    # # folder path
-    # checkpoint_path = os.path.join(args.ckpt,curr_date) # checkpoint
-    # log = os.path.join(args.log,curr_date) # log
-    # output = os.path.join(args.save,curr_date) # save folder path
+    # folder path
+    checkpoint_path = os.path.join(args.ckpt,curr_date) # checkpoint
+    log = os.path.join(args.log,curr_date) # log
+    output = os.path.join(args.save,curr_date) # save folder path
 
-    # os.makedirs(checkpoint_path,exist_ok=True)
-    # os.makedirs(log,exist_ok=True)
-    # os.makedirs(output,exist_ok=True)
+    os.makedirs(checkpoint_path,exist_ok=True)
+    os.makedirs(log,exist_ok=True)
+    os.makedirs(output,exist_ok=True)
 
 
-    # best_weight = 'best_weight.pth'
+    best_weight = 'best_weight.pth'
 
-    '''TODO: preprocess the label '''
     train_data, train_label = preprocess_data(args.train_data)
+    test_data, test_label = preprocess_data(args.test_data)
+    
+    train_dataloader = DataLoader([train_data,train_label],config['batch_size'],shuffle=True)
+    test_dataloader = DataLoader([test_data,test_label],config['batch_size'],shuffle=True)
+
+    # logger
+    if args.log is not None:
+        os.makedirs(log,exist_ok=True)
+        writer = SummaryWriter(log)
+    else:
+        writer = None
+
+
+    trainer = get_trainer_from_config(args,config)
+    trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_weight))
+
 
 
 
@@ -126,9 +136,12 @@ def preprocess_data(data_path):
     data = []
     label = []
 
+    scaler = FeatureWiseScaler((0,1))
+
     for key, value in data_dict.items():
         np_value = np.array(value)
         B , T, C = np_value.shape
+        np_value = scaler.fit_transform(np_value)
         data.append(np_value)
         l = np.argwhere(tasks == key)
         label.append([l] * B)
@@ -136,8 +149,6 @@ def preprocess_data(data_path):
     data = np.concatenate(data)
     label = np.concatenate(label).squeeze()
 
-    print(data.shape)
-    print(label.shape)
     return data, label
 
 
