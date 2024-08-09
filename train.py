@@ -112,6 +112,12 @@ def train_classification():
     train_data, train_label = preprocess_data(args.train_data)
     test_data, test_label = preprocess_data(args.test_data)
     
+    if args.aug_data is not None:
+        aug_data, aug_label = preprocess_data(args.aug_data,scale=False)
+        train_data = np.concatenate([train_data,aug_data],axis=0)
+        train_label = np.concatenate([train_label,aug_label],axis=0)
+        print(train_data.shape, train_label.shape)
+
     train_dataset = ULF_Classification_Dataset(train_data,train_label)
     test_dataset = ULF_Classification_Dataset(test_data,test_label)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
@@ -137,7 +143,7 @@ def train_classification():
 
 
 
-def preprocess_data(data_path):
+def preprocess_data(data_path,scale=True):
     data_dict = np.load(data_path,allow_pickle=True).item()
     tasks = np.array(list(data_dict.keys()))
     data = []
@@ -148,7 +154,7 @@ def preprocess_data(data_path):
     for key, value in data_dict.items():
         np_value = np.array(value)
         B , T, C = np_value.shape
-        np_value = scaler.fit_transform(np_value)
+        if scale: np_value = scaler.fit_transform(np_value)
         data.append(np_value)
         l = np.argwhere(tasks == key)
         label.append([l] * B)

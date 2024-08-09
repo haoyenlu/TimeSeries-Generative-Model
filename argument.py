@@ -24,6 +24,7 @@ def train_argument():
 def train_classification_argument():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train_data',type=str)
+    parser.add_argument('--aug_data',type=str,default=None)
     parser.add_argument('--test_data',type=str)
     parser.add_argument('--config',type=str)
     parser.add_argument('--max_iter',type=int)
