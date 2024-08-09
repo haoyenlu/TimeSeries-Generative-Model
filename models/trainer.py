@@ -336,6 +336,8 @@ class ClassifyTrainer():
             test_total_loss = 0
             train_total_accuracy = 0
             test_total_accuracy = 0
+            train_cnt = 0
+            test_cnt = 0
 
             '''Train model with train dataset'''
             self.model.train()
@@ -347,10 +349,11 @@ class ClassifyTrainer():
                 pred = self.model(train_data)
                 train_loss = self.criterion(pred,onehot_label)
                 train_loss.backward()
-                train_total_loss += train_loss.item() / train_data.size(0)
+                train_total_loss += train_loss.item()
 
                 _ ,pred_label = torch.max(pred,1)
-                train_total_accuracy += ((train_label == pred_label).sum().item()) * 100 / train_label.size(0)
+                train_total_accuracy += ((train_label == pred_label).sum().item())
+                train_cnt += train_data.size(0)
 
                 self.optimizer.step()
 
@@ -364,10 +367,13 @@ class ClassifyTrainer():
                 test_loss = self.criterion(pred,onehot_label)
                 test_total_loss += test_loss.item() / test_data.size(0)
                 _ , pred_label = torch.max(pred,1)
-                print(test_label,pred_label,(test_label == pred_label).sum())
-                test_total_accuracy += ((test_label == pred_label).sum().item()) * 100 / test_label.size(0)
+                test_total_accuracy += ((test_label == pred_label).sum().item())
+                test_cnt += test_data.size(0)
 
-            
+            train_total_loss /= train_cnt
+            train_total_accuracy /= train_cnt
+            test_total_loss /= test_cnt
+            test_total_accuracy /= test_cnt
             
             tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss:.4f}][Train Accuracy:{train_total_accuracy:.4f}][Test Loss:{test_total_loss:.4f}][Test Accuracy:{test_total_accuracy:.4f}]")
 
