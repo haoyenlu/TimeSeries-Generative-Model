@@ -112,8 +112,8 @@ def train_classification():
     train_data, train_label = preprocess_data(args.train_data)
     test_data, test_label = preprocess_data(args.test_data)
     
-    train_dataset = ULF_Classification_Dataset(train_data,train_label)
-    test_dataset = ULF_Classification_Dataset(test_data,test_label)
+    train_dataset = ULF_Classification_Dataset(train_data.transpose(0,2,1),train_label)
+    test_dataset = ULF_Classification_Dataset(test_data.transpose(0,2,1),test_label)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
     test_dataloader = DataLoader(test_dataset,config['batch_size'],shuffle=True)
 
