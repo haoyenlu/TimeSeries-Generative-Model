@@ -331,6 +331,8 @@ class ClassifyTrainer():
     
     def train(self, train_dataloader, test_dataloader , max_iter = 10000, writer=None, save_path='./save'):
 
+        best_test_accuracy = 0
+
         for iter in tqdm(range(max_iter)):
             train_total_loss = 0
             test_total_loss = 0
@@ -382,8 +384,9 @@ class ClassifyTrainer():
             writer.add_scalar('accuracy/train_accuracy',train_total_accuracy,iter)
             writer.add_scalar('accuracy/test_accuracy',test_total_accuracy,iter)
 
-
-            self.save_weight(save_path)
+            if test_total_accuracy > best_test_accuracy:
+                best_test_accuracy = test_total_accuracy
+                self.save_weight(save_path)
     
 
     def save_weight(self, save_path):

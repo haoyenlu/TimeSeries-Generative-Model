@@ -134,7 +134,7 @@ def train_classification():
     trainer = get_trainer_from_config(args,config)
     trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_weight))
 
-
+    trainer.load_weight(os.path.join(checkpoint_path,best_weight))
     predictions = trainer.make_prediction(test_data)
     plot_confusion_matrix(test_label,predictions,output)
 
