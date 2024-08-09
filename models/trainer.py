@@ -416,5 +416,5 @@ class ClassifyTrainer():
             _ , pred = torch.max(output,1)
             pred_labels.append(pred.to('cpu').numpy())
             cnt += _num
-        return np.array(pred_labels).squeeze()
+        return np.concatenate(pred_labels,axis=0).squeeze()
     
