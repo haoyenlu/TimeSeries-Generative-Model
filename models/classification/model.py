@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class InceptionModule(nn.Module):
-  def __init__(self,input_dim,filter_size=32,kernels=[10,20,40],use_bottleneck=True):
+  def __init__(self,input_dim,filter_size=32,kernels=[10,20,40],use_bottleneck=True,dropout_rate=0.2):
     super(InceptionModule,self).__init__()
     self.bottleneck_size = filter_size
     self.use_bottleneck = use_bottleneck
@@ -25,6 +25,7 @@ class InceptionModule(nn.Module):
 
     self.bn = nn.BatchNorm1d((len(kernels) + 1) * filter_size)
     self.act = nn.GELU()
+    self.dropout = nn.Dropout(dropout_rate)
 
 
   def forward(self,x): # NCL
@@ -46,6 +47,7 @@ class InceptionModule(nn.Module):
 
     x = torch.concat(x_list,dim=1) 
     x = self.bn(x)
+    x = self.dropout(x)
     x = self.act(x)
 
     return x
@@ -107,6 +109,7 @@ class InceptionTime(nn.Module):
                 inception_filter,
                 kernels,
                 use_bottleneck,
+                dropout_rate=dropout
             ))
 
             if use_residual and d % 2 == 1: 
@@ -128,7 +131,6 @@ class InceptionTime(nn.Module):
         
         self.fcn = nn.Sequential(*self.fcn)
         self.out = nn.Linear(fcn_filter * (sequence_len // 2 ** (fcn_layers)),label_dim)
-        # self.out = nn.Linear(prev,label_dim)
         self.dropout = nn.Dropout(dropout)
         self.softmax = nn.Softmax()
 
