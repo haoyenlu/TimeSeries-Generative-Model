@@ -134,7 +134,7 @@ class InceptionTime(nn.Module):
 
     def forward(self,x): # input shape: (N,L,C)
         assert self.sequence_len == x.shape[1] and self.feature_size == x.shape[2]
-        x = x.transpose(0,2,1)
+        x = x.transpose(2,1)
 
 
         res_input = x
