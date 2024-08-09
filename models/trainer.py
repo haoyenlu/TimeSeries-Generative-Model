@@ -330,8 +330,6 @@ class ClassifyTrainer():
 
     
     def train(self, train_dataloader, test_dataloader , max_iter = 10000, writer=None, save_path='./save'):
-        n = len(train_dataloader)
-        m = len(test_dataloader)
 
         for iter in tqdm(range(max_iter)):
             train_total_loss = 0
@@ -343,35 +341,40 @@ class ClassifyTrainer():
             self.model.train()
             for train_data, train_label in train_dataloader:
                 self.model.zero_grad()
-                train_data = train_data.to(self.device)
+                train_data = train_data.to(self.device).float()
                 train_label = train_label.to(self.device)
                 onehot_label = F.one_hot(train_label.long(),num_classes=self.num_classes).float()
                 pred = self.model(train_data)
                 train_loss = self.criterion(pred,onehot_label)
                 train_loss.backward()
-                train_total_loss += train_loss.item()
-                train_total_accuracy += (torch.argmax(pred) == train_label).sum().item()
+                train_total_loss += train_loss.item() / train_data.size(0)
+
+                _ ,pred_label = torch.max(pred,1)
+                train_total_accuracy += ((train_label == pred_label).sum().item()) * 100 / train_label.size(0)
+
                 self.optimizer.step()
 
             '''Evaluate model with test dataset'''
             self.model.eval()
             for test_data, test_label in test_dataloader:
-                test_data = test_data.to(self.device)
+                test_data = test_data.to(self.device).float()
                 test_label = test_label.to(self.device)
                 onehot_label = F.one_hot(test_label.long(),num_classes=self.num_classes).float()
                 pred = self.model(test_data)
                 test_loss = self.criterion(pred,onehot_label)
-                test_total_loss += test_loss.item()
-                test_total_accuracy += (torch.argmax(pred) == test_label).sum().item()
+                test_total_loss += test_loss.item() / test_data.size(0)
+
+                _ , pred_label = torch.max(pred,1)
+                test_total_accuracy += ((test_label == pred_label).sum().item()) * 100 / test_label.size(0)
 
             
             
-            tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss/n:.4f}][Train Accuracy:{train_total_accuracy/n:.4f}][Test Loss:{test_total_loss/m:.4f}][Test Accuracy:{test_total_accuracy/m:.4f}]")
+            tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss:.4f}][Train Accuracy:{train_total_accuracy:.4f}][Test Loss:{test_total_loss:.4f}][Test Accuracy:{test_total_accuracy:.4f}]")
 
-            writer.add_scalar('loss/train_loss',train_total_loss/n,iter)
-            writer.add_scalar('loss/test_loss',test_total_loss/m,iter)
-            writer.add_scalar('accuracy/train_accuracy',train_total_accuracy/n,iter)
-            writer.add_scalar('accuracy/test_accuracy',test_total_accuracy/m,iter)
+            writer.add_scalar('loss/train_loss',train_total_loss,iter)
+            writer.add_scalar('loss/test_loss',test_total_loss,iter)
+            writer.add_scalar('accuracy/train_accuracy',train_total_accuracy,iter)
+            writer.add_scalar('accuracy/test_accuracy',test_total_accuracy,iter)
 
 
             self.save_weight(save_path)
@@ -393,3 +396,19 @@ class ClassifyTrainer():
     
 
 
+    def make_prediction(self,data,num_per_batch=32):
+        self.model.eval()
+        B, T, C = data.shape
+
+        pred_labels = []
+        cnt = 0
+        while cnt < B:
+            _num = min(num_per_batch, B - cnt)
+            _train_data = torch.from_numpy(data[cnt:cnt + _num,:,:]).to(self.device).float()
+            output = self.model(_train_data)
+
+            _ , pred = torch.max(output,1)
+            pred_labels.append(pred.item())
+            cnt += _num
+        return np.array(pred_labels).squeeze()
+    

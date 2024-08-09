@@ -11,7 +11,7 @@ from dataset import ULF_Classification_Dataset, ULF_Generative_Dataset
 from model_utils import  get_trainer_from_config
 from train_utils import LinearLrDecay
 
-from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
+from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_confusion_matrix
 
 from argument import train_argument, train_classification_argument
 from data_utils import FeatureWiseScaler
@@ -112,8 +112,8 @@ def train_classification():
     train_data, train_label = preprocess_data(args.train_data)
     test_data, test_label = preprocess_data(args.test_data)
     
-    train_dataset = ULF_Classification_Dataset(train_data.transpose(0,2,1),train_label)
-    test_dataset = ULF_Classification_Dataset(test_data.transpose(0,2,1),test_label)
+    train_dataset = ULF_Classification_Dataset(train_data,train_label)
+    test_dataset = ULF_Classification_Dataset(test_data,test_label)
     train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
     test_dataloader = DataLoader(test_dataset,config['batch_size'],shuffle=True)
 
@@ -127,6 +127,10 @@ def train_classification():
 
     trainer = get_trainer_from_config(args,config)
     trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_weight))
+
+
+    predictions = trainer.make_prediction(test_data)
+    plot_confusion_matrix(test_label,predictions,output)
 
 
 

@@ -4,6 +4,8 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import os
 import umap
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 def plot_pca(real,fake,save_path='./save'):
   _ , seq_len , feats = real.shape
@@ -63,3 +65,15 @@ def plot_sample(real,fake,save_path='./save'):
 
   plt.savefig(os.path.join(save_path,"sample.png"))
   plt.close()
+
+
+
+
+
+def plot_confusion_matrix(real,prediction,save_path='./save'):
+    fig = plt.figure(figsize = (12,12))
+    cm = confusion_matrix(real, prediction)
+    f = sns.heatmap(cm, annot=True, fmt='d')
+    f.figure.suptitle("Prediciton")
+    f.figure.savefig(os.path.join(save_path,"confugison_matrix.png"))
+    plt.close(fig)
