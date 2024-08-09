@@ -64,7 +64,7 @@ def get_trainer_from_config(args,config):
 
         if config['model'] == 'inception-time':
             model = InceptionTime(**config.get('inception-time',dict()))
-            optimizer = torch.optim.Adam(model.parameters(),**config.get(optimizer,dict()))
+            optimizer = torch.optim.Adam(model.parameters(),**config.get('optimizer',dict()))
             criterion = torch.nn.CrossEntropyLoss()
 
             trainer = ClassifyTrainer(model,optimizer,criterion,config['num_classes'])
