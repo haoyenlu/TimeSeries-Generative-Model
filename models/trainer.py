@@ -364,7 +364,7 @@ class ClassifyTrainer():
                 test_loss = self.criterion(pred,onehot_label)
                 test_total_loss += test_loss.item() / test_data.size(0)
                 _ , pred_label = torch.max(pred,1)
-                print(test_label,pred_label,test_label == pred_label)
+                print(test_label,pred_label,(test_label == pred_label).sum())
                 test_total_accuracy += ((test_label == pred_label).sum().item()) * 100 / test_label.size(0)
 
             
