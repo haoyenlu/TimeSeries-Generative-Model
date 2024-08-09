@@ -132,11 +132,11 @@ class InceptionTime(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.softmax = nn.Softmax()
 
-    def forward(self,x): # input shape: (N,C,L)
-        assert self.sequence_len == x.shape[2] and self.feature_size == x.shape[1]
+    def forward(self,x): # input shape: (N,L,C)
+        assert self.sequence_len == x.shape[1] and self.feature_size == x.shape[2]
         x = x.transpose(0,2,1)
 
-        
+
         res_input = x
         s_index = 0
         for d in range(self.depth):
