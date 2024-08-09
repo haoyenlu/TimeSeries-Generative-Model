@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 
 from utils import load_config
-from dataset import UpperLimbMotionDataset
+from dataset import ULF_Classification_Dataset, ULF_Generative_Dataset
 from model_utils import  get_trainer_from_config
 from train_utils import LinearLrDecay
 
@@ -51,7 +51,7 @@ def train_generative():
         print(f"---- Training on {task} ------")
 
         # Load Data
-        train_dataset = UpperLimbMotionDataset(data[task])
+        train_dataset = ULF_Generative_Dataset(data[task])
         train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True) 
         
 
@@ -112,8 +112,10 @@ def train_classification():
     train_data, train_label = preprocess_data(args.train_data)
     test_data, test_label = preprocess_data(args.test_data)
     
-    train_dataloader = DataLoader([train_data,train_label],config['batch_size'],shuffle=True)
-    test_dataloader = DataLoader([test_data,test_label],config['batch_size'],shuffle=True)
+    train_dataset = ULF_Classification_Dataset(train_data,train_label)
+    test_dataset = ULF_Classification_Dataset(test_data,test_label)
+    train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
+    test_dataloader = DataLoader(test_dataset,config['batch_size'],shuffle=True)
 
     # logger
     if args.log is not None:
@@ -125,6 +127,7 @@ def train_classification():
 
     trainer = get_trainer_from_config(args,config)
     trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_weight))
+
 
 
 
