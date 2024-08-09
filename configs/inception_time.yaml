@@ -9,7 +9,7 @@ inception-time:
   fcn_filter: 4
   depth: 2
   fcn_layers: 2
-  kernels: [5,10,15]
+  kernels: [10,20,40]
   dropout: 0.5
   use_residual: False
   use_bottleneck: True
