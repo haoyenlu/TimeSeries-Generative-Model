@@ -112,11 +112,11 @@ class InceptionTime(nn.Module):
             if use_residual and d % 2 == 1: 
                 self.shortcuts.append(ResidualLayer(
                     input_dim = residual_prev,
-                    output_dim = (len(kernels)+2) * inception_filter
+                    output_dim = (len(kernels)+1) * inception_filter
                 ))
                 residual_prev = prev
 
-            prev = (len(kernels) + 2) * inception_filter
+            prev = (len(kernels) + 1) * inception_filter
 
         self.inceptions = nn.ModuleList(self.inceptions)
         self.shortcuts = nn.ModuleList(self.shortcuts)
