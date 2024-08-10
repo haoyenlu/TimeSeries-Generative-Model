@@ -129,6 +129,7 @@ def train_classification():
 
 
     '''Train without augmentation'''
+    print("Start training without Augmentation.")
     trainer = get_trainer_from_config(args,config)
     trainer.save_weight(os.path.join(checkpoint_path,initial_weight))
     trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_original_weight))
@@ -139,6 +140,7 @@ def train_classification():
 
     '''Train with augmentation'''
     if args.aug_data is not None:
+        print("Start training with Augmentation.")
         aug_data, aug_label = preprocess_data(args.aug_data,scale=False)
         train_data = np.concatenate([train_data,aug_data],axis=0)
         train_label = np.concatenate([train_label,aug_label],axis=0)
