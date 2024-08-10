@@ -70,11 +70,11 @@ def plot_sample(real,fake,save_path='./save'):
 
 
 
-def plot_confusion_matrix(real,prediction,save_path='./save'):
+def plot_confusion_matrix(real,prediction,save_path='./save',title="Prediction"):
     fig = plt.figure(figsize = (12,12))
     acc = accuracy_score(real,prediction)
     cm = confusion_matrix(real, prediction)
     f = sns.heatmap(cm, annot=True, fmt='d')
-    f.figure.suptitle(f"Prediciton ACC:{acc}")
-    f.figure.savefig(os.path.join(save_path,"confugison_matrix.png"))
+    f.figure.suptitle(f"{title} | ACC:{acc*100:.2f}%")
+    f.figure.savefig(os.path.join(save_path,f"{title}.png"))
     plt.close(fig)

@@ -106,23 +106,6 @@ def train_classification():
     os.makedirs(log,exist_ok=True)
     os.makedirs(output,exist_ok=True)
 
-
-    best_weight = 'best_weight.pth'
-
-    train_data, train_label = preprocess_data(args.train_data)
-    test_data, test_label = preprocess_data(args.test_data)
-    
-    if args.aug_data is not None:
-        aug_data, aug_label = preprocess_data(args.aug_data,scale=False)
-        train_data = np.concatenate([train_data,aug_data],axis=0)
-        train_label = np.concatenate([train_label,aug_label],axis=0)
-        print(train_data.shape, train_label.shape)
-
-    train_dataset = ULF_Classification_Dataset(train_data,train_label)
-    test_dataset = ULF_Classification_Dataset(test_data,test_label)
-    train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
-    test_dataloader = DataLoader(test_dataset,config['batch_size'],shuffle=True)
-
     # logger
     if args.log is not None:
         os.makedirs(log,exist_ok=True)
@@ -130,13 +113,43 @@ def train_classification():
     else:
         writer = None
 
+    best_original_weight = 'best_original_weight.pth'
+    best_augmentation_weight = 'best_augmentation_weight.pth'
+    initial_weight = 'initial_weight.pth'
 
+    train_data, train_label = preprocess_data(args.train_data)
+    test_data, test_label = preprocess_data(args.test_data)
+    
+    
+    train_dataset = ULF_Classification_Dataset(train_data,train_label)
+    test_dataset = ULF_Classification_Dataset(test_data,test_label)
+    train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
+    test_dataloader = DataLoader(test_dataset,config['batch_size'],shuffle=True)
+
+
+
+    '''Train without augmentation'''
     trainer = get_trainer_from_config(args,config)
-    trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_weight))
-
-    trainer.load_weight(os.path.join(checkpoint_path,best_weight))
+    trainer.save_weight(os.path.join(checkpoint_path,initial_weight))
+    trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_original_weight))
+    trainer.load_weight(os.path.join(checkpoint_path,best_original_weight))
     predictions = trainer.make_prediction(test_data)
-    plot_confusion_matrix(test_label,predictions,output)
+    plot_confusion_matrix(test_label,predictions,output,title="Original_Prediction")
+
+
+    '''Train with augmentation'''
+    if args.aug_data is not None:
+        aug_data, aug_label = preprocess_data(args.aug_data,scale=False)
+        train_data = np.concatenate([train_data,aug_data],axis=0)
+        train_label = np.concatenate([train_label,aug_label],axis=0)
+
+        train_dataset = ULF_Classification_Dataset(train_data,train_label)
+        train_dataloader = DataLoader(train_dataset,config['batch_size'],shuffle=True)
+        trainer.load_weight(os.path.join(checkpoint_path,initial_weight)) # load initial weight
+        trainer.train(train_dataloader,test_dataloader,args.max_iter,writer,os.path.join(checkpoint_path,best_augmentation_weight))
+        trainer.load_weight(os.path.join(checkpoint_path,best_augmentation_weight))
+        predictions = trainer.make_prediction(test_data)
+        plot_confusion_matrix(test_label,predictions,output,title="Augmented_Prediction")
 
 
 
