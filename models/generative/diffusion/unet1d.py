@@ -39,7 +39,7 @@ class UpsampleBlock(nn.Module):
             blocks.append(nn.Upsample(scale_factor=2))
         
         blocks.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding="same"))
-        # block.append(nn.BatchNorm1d(out_ch))
+        blocks.append(nn.BatchNorm1d(out_ch))
         blocks.append(nn.LeakyReLU(0.2))
 
         self.blocks =  nn.Sequential(*blocks)
