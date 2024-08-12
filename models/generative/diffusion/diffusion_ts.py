@@ -159,7 +159,7 @@ class Diffusion(nn.Module):
         return posterior_mean, posterior_variance, posterior_log_variance_clipped
     
     def output(self, x, t,label=None):
-        model_output = self.model(x, t,label=label)
+        model_output = self.model(x, t)
         return model_output
 
     def model_predictions(self, x, t, clip_x_start=False,label=None):
