@@ -20,9 +20,9 @@ class DownSampleBlock(nn.Module):
 
         self.blocks =  nn.Sequential(*blocks)
     
-    def forward(self,x,timestep,emb_label):
+    def forward(self,x,timestep):
         if self.norm:
-            x = self.ln(x,timestep,emb_label)
+            x = self.ln(x,timestep)
 
         x = self.blocks(x)
         return x
@@ -39,14 +39,14 @@ class UpsampleBlock(nn.Module):
             blocks.append(nn.Upsample(scale_factor=2))
         
         blocks.append(nn.Conv1d(in_ch,out_ch,kernel_size=kernel,padding="same"))
-        blocks.append(nn.BatchNorm1d(out_ch))
+        # blocks.append(nn.BatchNorm1d(out_ch))
         blocks.append(nn.LeakyReLU(0.2))
 
         self.blocks =  nn.Sequential(*blocks)
 
-    def forward(self,x,timestep,emb_label):
+    def forward(self,x,timestep):
         if self.norm:
-            x = self.ln(x,timestep,emb_label)
+            x = self.ln(x,timestep)
 
         x = self.blocks(x)
         return x
@@ -102,16 +102,16 @@ class Unet1D(nn.Module):
 
     
 
-    def forward(self,x,timestep,label=None): # Pytorch (N,C,L)
+    def forward(self,x,timestep): # Pytorch (N,C,L)
 
         _x = x.transpose(1,2)
         res = []
         # Encoding
         cnt = 0
         while cnt < self.depth:
-            _x = self.down_blocks[cnt*2](_x,timestep,label) # residual
+            _x = self.down_blocks[cnt*2](_x,timestep) # residual
             res.append(_x)
-            _x = self.down_blocks[cnt*2 + 1](_x,timestep,label) # downsample
+            _x = self.down_blocks[cnt*2 + 1](_x,timestep) # downsample
             cnt += 1
         
 
@@ -119,9 +119,9 @@ class Unet1D(nn.Module):
         res_cnt = self.depth -1
         cnt = 0
         while cnt < self.depth:
-            _x = self.up_blocks[cnt*2](_x,timestep,label) # upsample
+            _x = self.up_blocks[cnt*2](_x,timestep) # upsample
             _x = torch.concat([_x,res[res_cnt]],dim=1)
-            _x = self.up_blocks[cnt*2 + 1](_x,timestep,label) # residual
+            _x = self.up_blocks[cnt*2 + 1](_x,timestep) # residual
             res_cnt -= 1
             cnt += 1
         

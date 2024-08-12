@@ -184,7 +184,6 @@ class AdaInsNorm(nn.Module):
         self.num_classes =num_classes
         self.in_ch = in_ch
         self.eps = eps
-        self.label_emb = nn.Embedding(num_classes,in_ch*4)
         self.timestep_emb = SinusoidalPosEmb(in_ch*4)
     
     def c_norm(self,x,bs,ch,eps=1e-7):
@@ -194,12 +193,11 @@ class AdaInsNorm(nn.Module):
         x_mean = x.mean(dim=-1).view(bs,ch,1)
         return x_std, x_mean
 
-    def forward(self,x,timestep,label=None):
+    def forward(self,x,timestep):
         size = x.size()
         bs ,ch = size[:2]
         x_ = x.view(bs,ch,-1)
         emb = self.timestep_emb(timestep)
-        emb = emb + self.label_emb(label) if label is not None else emb
         emb = emb.view(bs,ch,-1)
         x_std, x_mean = self.c_norm(x_,bs,ch,eps=self.eps)
         y_std,y_mean = self.c_norm(emb,bs,ch,eps=self.eps)
