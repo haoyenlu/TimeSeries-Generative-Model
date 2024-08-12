@@ -246,9 +246,8 @@ class DiffusionTrainer(BaseTrainer):
             self.model.zero_grad()
             sequence = next(dataloader_cycle)
             sequence = sequence.to(self.device)
-            # label = label.to(self.device)
 
-            loss = self.model(sequence,target=sequence,label=None)
+            loss = self.model(sequence,target=sequence)
             loss.backward()
             nn.utils.clip_grad_norm_(self.model.parameters(),5.)
             self.optimizer.step()
@@ -292,7 +291,6 @@ class DiffusionTrainer(BaseTrainer):
         num_samples = 6
         samples  = self.model.generate_mts(batch_size=num_samples)
         samples = samples.to('cpu').detach().numpy()
-        # labels = labels.to('cpu').detach().numpy()
         buf = sample2buffer(samples,iter)
         return buf
     
@@ -306,10 +304,8 @@ class DiffusionTrainer(BaseTrainer):
             num = min(num_per_batch,num_samples - cnt)
             samples  = self.model.generate_mts(batch_size=num)
             samples = samples.to('cpu').detach().numpy()
-            # labels = labels.to('cpu').detach().numpy()
 
             sample_arr.append(samples)
-            # label_arr.append(labels)
             cnt += num
             pbar.update(num)
 
