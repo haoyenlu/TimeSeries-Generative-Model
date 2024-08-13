@@ -28,8 +28,6 @@ backbone:
   max_len: 1024
   kernel_size: 5
   padding: 2 
-  label_dim: 30
-  use_label: False
 
 optimizer:
   lr: 0.00001
