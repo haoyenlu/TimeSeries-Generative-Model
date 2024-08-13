@@ -156,18 +156,20 @@ class InceptionTime(nn.Module):
 class BasicLSTM(nn.Module):
 	def __init__(self,sequence_len,feature_size,num_classes,
 				hidden_size,num_layers,
-				fcn_filter):
+				fcn_filter,dropout):
 		super(BasicLSTM,self).__init__()
 		self.lstm = nn.LSTM(feature_size,hidden_size,num_layers,batch_first=True)
 		self.fcn = FCNLayer(hidden_size,fcn_filter,5,stride=2,padding=2)
 		self.out = nn.Linear(fcn_filter * (sequence_len // 2),num_classes)
 		self.softmax = nn.Softmax(dim=1)
+		self.dropout = nn.Dropout(dropout)
 
 
 	def forward(self,x): # input shape: (N,L,C)
 		x , (h_n, c_n) = self.lstm(x)
 		x = self.fcn(x.transpose(2,1))
 		x = torch.flatten(x,start_dim=1)
+		x = self.dropout(x)
 		x = self.out(x)
 		x = self.softmax(x)
 		return x
