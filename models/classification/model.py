@@ -186,13 +186,14 @@ class BasicConv1d(nn.Module):
 			prev = hidden
 		
 		self.blocks = nn.Sequential(*blocks)
-		self.out = nn.Linear(sequence_len // 2 ** (len(hidden_size)),num_classes)
+		self.out = nn.Linear(prev * (sequence_len // 2 ** (len(hidden_size))),num_classes)
 		self.softmax = nn.Softmax(dim=1)
 
 	def forward(self,x): # input shape: (N,L,C)
 		x = x.transpose(2,1)
 		x = self.blocks(x)
-		x = torch.mean(x,dim=1)
+		x = torch.flatten(x,start_dim=1)
+		# x = torch.mean(x,dim=1)
 		x = self.out(x)
 		x = self.softmax(x)
 		return x
