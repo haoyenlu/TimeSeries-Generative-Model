@@ -165,8 +165,7 @@ class BasicLSTM(nn.Module):
 
 
 	def forward(self,x): # input shape: (N,L,C)
-		x = self.lstm(x)
-		print(x)
+		x , (h_n, c_n) = self.lstm(x)
 		x = torch.flatten(x,start_dim=1)
 		x = self.out(x)
 		x = self.softmax(x)
