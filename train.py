@@ -187,4 +187,4 @@ def preprocess_data(data_path,scale=True):
 
 
 if __name__ == '__main__':
-    train_classification()
+    train_generative()
