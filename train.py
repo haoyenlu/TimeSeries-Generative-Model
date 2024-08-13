@@ -16,6 +16,8 @@ from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_con
 from argument import train_argument, train_classification_argument
 from data_utils import FeatureWiseScaler
 
+from tqdm import tqdm
+
 
 
 def train_generative():
@@ -166,6 +168,7 @@ def preprocess_data(data_path,scale=True):
 
     scaler = FeatureWiseScaler((0,1))
 
+    pbar = tqdm(total=len(data_dict.items()))
     for key, value in data_dict.items():
         np_value = np.array(value)
         B , T, C = np_value.shape
@@ -173,6 +176,7 @@ def preprocess_data(data_path,scale=True):
         data.append(np_value)
         l = np.argwhere(tasks == key)
         label.append([l] * B)
+        pbar.update(1)
     
     data = np.concatenate(data)
     label = np.concatenate(label).squeeze()
