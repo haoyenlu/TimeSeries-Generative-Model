@@ -8,7 +8,7 @@ BasicLSTM:
   hidden_size: 32
   num_layers: 4
   fcn_filter: 4
-  droupout: 0.3
+  dropout: 0.3
 
 
 
