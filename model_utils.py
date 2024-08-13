@@ -10,7 +10,7 @@ from models.trainer import cGANTrainer, DiffusionTrainer, ClassifyTrainer
 from models.generative.GAN import tts_cgan, eeg_cgan
 from models.generative.diffusion import diffusion_ts , unet1d
 from models.generative.diffusion.transformer import Transformer
-from models.classification.model import InceptionTime, BasicLSTM
+from models.classification.model import InceptionTime, BasicLSTM , BasicConv1d
 
 
 def get_trainer_from_config(args,config):
@@ -68,6 +68,9 @@ def get_trainer_from_config(args,config):
         
         if config['model'] == 'basicLSTM':
             model = BasicLSTM(**config.get('BasicLSTM',dict()))
+
+        if config['model'] == 'basicConv1d':
+            model = BasicConv1d(**config.get('BasicConv1d',dict()))
 
         optimizer = torch.optim.Adam(model.parameters(),**config.get('optimizer',dict()))
         criterion = torch.nn.CrossEntropyLoss()

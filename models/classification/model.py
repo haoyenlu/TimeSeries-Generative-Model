@@ -173,3 +173,29 @@ class BasicLSTM(nn.Module):
 		x = self.out(x)
 		x = self.softmax(x)
 		return x
+	
+
+class BasicConv1d(nn.Module):
+	def __init__(self,sequence_len, feature_size,num_classes,hidden_size):
+		super(BasicConv1d,self).__init__()
+
+		blocks = []
+		prev = feature_size
+		for hidden in hidden_size:
+			blocks.append(nn.Conv1d(prev,hidden,kernel_size=5,stride=2,padding=2))
+			prev = hidden
+		
+		self.blocks = nn.Sequential(*blocks)
+		self.out = nn.Linear(sequence_len // 2 ** (len(hidden_size)),num_classes)
+		self.softmax = nn.Softmax(dim=1)
+
+	def forward(self,x): # input shape: (N,L,C)
+		x = x.transpose(2,1)
+		x = self.blocks(x)
+		x = torch.mean(x,dim=1)
+		x = self.out(x)
+		x = self.softmax(x)
+		return x
+	
+		
+		
