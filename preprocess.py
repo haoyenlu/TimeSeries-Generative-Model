@@ -24,11 +24,11 @@ def preprocess_original():
     task_data, test_task_data = preprocessor.get_dataset(args.mvnx,args.test_patient)   
 
     # Train data
-    save_path = f'./{args.save}/ulf_all_task.npy'
+    save_path = f'./{args.save}/ulf_train_no_{"_".join(args.test_patient)}.npy'
     np.save(save_path,task_data)
 
     # Test Data
-    save_path = f'./{args.save}/ulf_all_task{"_".join(args.test_patient)}.npy'
+    save_path = f'./{args.save}/ulf_test_{"_".join(args.test_patient)}.npy'
     np.save(save_path,test_task_data)
 
 
