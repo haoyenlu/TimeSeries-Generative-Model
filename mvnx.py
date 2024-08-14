@@ -64,7 +64,7 @@ class PreprocessMVNX:
         
         return df_zxy
 
-    def get_dataset(self,path,test_patient  = set()):
+    def get_dataset(self,path):
         '''
         Upper Limb Functionality Dataset
         
