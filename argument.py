@@ -52,7 +52,7 @@ def preprocess_synthesize_argument():
     parser.add_argument('--data',type=str)
     parser.add_argument('--save',type=str)
 
-    args = parser.parse_args()
+    args = parser.parse_arg
     return args
 
 

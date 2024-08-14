@@ -9,7 +9,7 @@ from argument import preprocess_argument , preprocess_synthesize_argument
 
 
 
-def main():
+def preprocess_original():
     args = preprocess_argument()
 
     with open(args.config) as file:
@@ -56,4 +56,4 @@ def preprocess_synthesize():
 
 
 if __name__ == '__main__':
-    preprocess_synthesize()
+    preprocess_original()
