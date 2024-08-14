@@ -23,8 +23,8 @@ def preprocess_original():
     preprocessor = PreprocessMVNX(**config)
     data = preprocessor.get_dataset(args.mvnx)   
 
-    # Train data
-    save_path = f'./{args.save}/ulf_new_{"_".join(args.test_patient)}.npy'
+    # save data
+    save_path = f'./{args.save}/ulf_new.npy'
     np.save(save_path,data)
 
 
