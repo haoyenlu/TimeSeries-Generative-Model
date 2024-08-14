@@ -96,6 +96,8 @@ class PreprocessMVNX:
 
                     assert subject == p
 
+
+
                     T,C = data.shape
                     if T > self.cutoff_length: continue
 
@@ -109,7 +111,9 @@ class PreprocessMVNX:
                     task = task.upper()
 
                     if task not in TASK[type][p]:
-                        TASK[type][p][task].append(data)
+                        TASK[type][p][task] = []
+
+                    TASK[type][p][task].append(data)
 
                 TASK[type][p][task] = np.concatenate(TASK[type][p][task],axis=0)
 
