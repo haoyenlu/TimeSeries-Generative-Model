@@ -10,7 +10,7 @@ from pathlib import Path
 from scipy.signal import resample
 
 from functools import partial
-
+from collections import defaultdict
 
 class PreprocessMVNX:
     def __init__(self,features, types, tasks, cutoff_length, resample):
@@ -71,20 +71,30 @@ class PreprocessMVNX:
         Structure:
         Types -> Patient -> trial file
         '''
-        TASKS = {task.upper():[] for task in self.tasks}
-        TEST_PATIENT_TASKS = {task.upper():[] for task in self.tasks}
+        
+        print("Start Processing ULF dataset!")
 
-        print("Processing ULF Folder!")
+        TASK = dict()
 
         for type in self.types:
+            if type not in TASK:
+                TASK[type] = dict()
 
             type_dir = os.path.join(path,type)
+
             for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=False):
+                p , _ = patient.split('_')
+
+                if p not in TASK[type]:
+                    TASK[type][p] = dict()
 
                 patient_dir = os.path.join(type_dir,patient)
+
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
 
                     subject , task , data = self._get_data(os.path.join(patient_dir,file))
+
+                    assert subject == p
 
                     T,C = data.shape
                     if T > self.cutoff_length: continue
@@ -98,12 +108,12 @@ class PreprocessMVNX:
 
                     task = task.upper()
 
-                    if subject not in test_patient:
-                        TASKS[task].append(resample_data)
-                    else:
-                        TEST_PATIENT_TASKS[task].append(resample_data)
+                    if task not in TASK[type][p]:
+                        TASK[type][p][task].append(data)
 
-        return TASKS, TEST_PATIENT_TASKS
+                TASK[type][p][task] = np.concatenate(TASK[type][p][task],axis=0)
+
+        return TASK
     
 
     def _get_data(self,file) :# shape=(T,C)

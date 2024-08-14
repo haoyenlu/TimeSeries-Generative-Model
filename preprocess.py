@@ -21,15 +21,12 @@ def preprocess_original():
     os.makedirs(args.save,exist_ok=True)
 
     preprocessor = PreprocessMVNX(**config)
-    task_data, test_task_data = preprocessor.get_dataset(args.mvnx,args.test_patient)   
+    data = preprocessor.get_dataset(args.mvnx,args.test_patient)   
 
     # Train data
-    save_path = f'./{args.save}/ulf_train_no_{"_".join(args.test_patient)}.npy'
-    np.save(save_path,task_data)
+    save_path = f'./{args.save}/ulf_new_{"_".join(args.test_patient)}.npy'
+    np.save(save_path,data)
 
-    # Test Data
-    save_path = f'./{args.save}/ulf_test_{"_".join(args.test_patient)}.npy'
-    np.save(save_path,test_task_data)
 
 
 
