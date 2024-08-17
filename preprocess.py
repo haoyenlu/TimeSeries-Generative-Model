@@ -2,7 +2,7 @@ import yaml
 import numpy as np
 import os
 from tqdm import tqdm
-from mvnx import PreprocessMVNX
+from mvnx import MvnxParser
 
 from argument import preprocess_argument , preprocess_synthesize_argument
 
@@ -20,7 +20,7 @@ def preprocess_original():
 
     os.makedirs(args.save,exist_ok=True)
 
-    preprocessor = PreprocessMVNX(**config)
+    preprocessor = MvnxParser(**config)
     data = preprocessor.get_dataset(args.mvnx)   
 
     # save data

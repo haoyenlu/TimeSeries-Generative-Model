@@ -3,29 +3,25 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 import os
 import re
-import yaml
 from tqdm import tqdm
 
 from pathlib import Path
-from scipy.signal import resample
-
 from functools import partial
-from collections import defaultdict
 
-class PreprocessMVNX:
-    def __init__(self,features, types, tasks, cutoff_length, resample):
+class MvnxParser:
+    def __init__(self,features, types, tasks, max_length, resample):
         '''
-        Output Training dataset shape should be (B,T,C) for tensorflow, (B,C,T) for pytorch
+        Output Training dataset shape should be (B,T,C)
         '''
         self.features = features
         self.types = types
         self.tasks = tasks
-        self.cutoff_length = cutoff_length
+        self.cutoff_length = max_length
         self.resample =  resample
-        self.resample_fn = partial(self.np_interp_resample,max_length=cutoff_length)
+        self.resample_fn = partial(self.np_interp_resample,max_length=max_length)
 
         
-    def _parse_mvnx_file(self,file,use_xzy = True):
+    def _parse_jointangle(self,file,use_xzy = True):
         '''
         Processing jointAngle data in mvnx file
         '''
@@ -53,54 +49,51 @@ class PreprocessMVNX:
         df_xzy = pd.DataFrame(np.array(XZY),columns=label)
 
         if use_xzy:
-            df_zxy[['jRightShoulder_x','jRightShoulder_y','jRightShoulder_z','jLeftShoulder_x','jLeftShoulder_y','jLeftShoulder_z']] = df_xzy[['jRightShoulder_x','jRightShoulder_y','jRightShoulder_z','jLeftShoulder_x','jLeftShoulder_y','jLeftShoulder_z']]
+            for column in ['jRightShoulder_x','jRightShoulder_y','jRightShoulder_z','jLeftShoulder_x','jLeftShoulder_y','jLeftShoulder_z']:
+                df_zxy[column] = df_xzy[column]
         
         return df_zxy
 
-    def get_dataset(self,path):
+    def process_folder(self,path):
         '''
         Upper Limb Functionality Dataset
         
         Structure:
         Types -> Patient -> trial file
         '''
-        
         print("Start Processing ULF dataset!")
 
         TASK = dict()
-
         for type in self.types:
             if type not in TASK:
                 TASK[type] = dict()
 
             type_dir = os.path.join(path,type)
-
             for patient in tqdm(os.listdir(type_dir),desc="Patient",leave=False):
                 p , _ = patient.split('_')
-
                 if p not in TASK[type]:
                     TASK[type][p] = dict()
 
                 patient_dir = os.path.join(type_dir,patient)
-
                 for file in tqdm(os.listdir(patient_dir),desc="File",leave=True):
 
-                    subject , task , data = self._get_data(os.path.join(patient_dir,file))
-
+                    subject , task , data = self._process_data_from_file(os.path.join(patient_dir,file))
                     assert subject == p
 
-                    # Discard data exceed cutoff length
+                    # Discard data exceed max length
                     T,C = data.shape
-                    if T > self.cutoff_length: continue
+                    if T > self.max_length: continue
 
-                    resample_data = np.zeros((self.cutoff_length,C))
+                    # Resample Data
+                    resample_shape = (self.maxlength,C)
+                    resample_data = np.zeros(resample_shape)
                     for i in range(C):
                         resample_data[:,i] = self.resample_fn(data[:,i])
 
-                    assert resample_data.shape == (self.cutoff_length,C), f"Error while parsing MVNX data, expected shape {(self.cutoff_length,len(self.features))}, get shape {resample_data.shape}"
+                    assert resample_data.shape == resample_shape, f"Resample Error, expected shape {resample_shape}, get shape {resample_data.shape}."
 
+                    # Append Data
                     task = task.upper()
-
                     if task not in TASK[type][p]:
                         TASK[type][p][task] = []
 
@@ -110,9 +103,9 @@ class PreprocessMVNX:
         return TASK
     
 
-    def _get_data(self,file) :# shape=(T,C)
+    def _process_data_from_file(self,file) :# shape=(T,C)
         subject , task , hand = Path(file).stem.split('_')
-        df = self._parse_mvnx_file(file)
+        df = self._parse_jointangle(file)
         data = df[self.features].to_numpy() 
         return subject, task, data
 
