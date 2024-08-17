@@ -1,15 +1,5 @@
 import numpy as np
-from typing import Optional , Tuple, Union
-from dtaidistance import dtw_barycenter
 import random
-from tqdm import tqdm
-
-import logging
-
-
-logger = logging.getLogger("augmentation")
-logger.setLevel(logging.DEBUG)
-
 
 
 class FeatureWiseScaler:
@@ -39,47 +29,28 @@ class FeatureWiseScaler:
         return self.transform(X)
     
 
+class TimeWarping:
+    def __init__(self,num_operation=10,warp_factor=0.2):
+        self.num_operation = num_operation
+        self.warp_factor = warp_factor
 
-class DTWBarycentricAveraging:
-    def __init__(self):
-        super(DTWBarycentricAveraging, self).__init__()
+    
+    def generate(self,X: np.ndarray):
+        B, T, C = X.shape
 
-    def generate(
-        self,
-        X: np.ndarray,
-        n_samples: int = 1,
-        **kwargs,
-    ) -> np.ndarray :
-
-        # Draw random sample from the dataset
-        random_samples = random.choices(range(X.shape[0]), k=n_samples)
-        initial_timeseries = X[random_samples]
-
-        self._dtwba(
-                X_subset=X,
-                n_samples=n_samples,
-                initial_timeseries=initial_timeseries,
-                **kwargs,
-            )
-
-    def _dtwba(
-        self,
-        X_subset: np.ndarray,
-        n_samples: int,
-        initial_timeseries: Optional[np.ndarray],
-        **kwargs,
-    ) -> np.ndarray:
-        samples = []
-        
-        pbar = tqdm(total=n_samples)
-        for i, st in enumerate(initial_timeseries):
-            samples.append(
-                dtw_barycenter.dba(
-                    s=X_subset,
-                    c=st,
-                    nb_initial_samples=1,
-                    **kwargs,
-                )
-            )
-            pbar.update(1)
-        return np.array(samples)
+        warped_series = X.copy()
+        for i in range(B):
+            for j in range(C):
+                for _ in range(self.num_operation):
+                    operation_type = random.choice(['insert','delete'])
+                    index = random.randint(1,T-2)
+                    if operation_type == 'insert':
+                        insertion_value = (warped_series[i,index - 1,j] + warped_series[i,index,j]) * 0.5
+                        warp_amount = insertion_value * self.warp_factor * random.uniform(-1,1)
+                        warped_series[i,:,j] = np.insert(warped_series[i,:,j],index,insertion_value + warp_amount)
+                    
+                    elif operation_type == 'delete':
+                        warped_series[i,:,j] = np.delete(warped_series[i,:,j],index)
+                    else:
+                        raise ValueError('Invalid operation type')
+        return warped_series
