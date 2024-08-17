@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Optional , Tuple, Union
 from dtaidistance import dtw_barycenter
+import random
 
 import logging
 
@@ -50,7 +51,7 @@ class DTWBarycentricAveraging:
     ) -> np.ndarray :
 
         # Draw random sample from the dataset
-        random_samples = np.random.choice(range(X.shape[0]), k=n_samples)
+        random_samples = random.choices(range(X.shape[0]), k=n_samples)
         initial_timeseries = X[random_samples]
 
         self._dtwba(
