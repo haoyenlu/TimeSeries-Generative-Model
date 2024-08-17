@@ -55,7 +55,7 @@ class TimeWarping:
         scale = np.random.choice(self.scales)
 
         # Warp the window
-        warped_window = np.interp(np.linspace(0, window_size, int(window_size * scale)), np.arange(window_size), time_series[start: start + window_size])
+        warped_window = np.interp(np.linspace(0, window_size, window_size), np.arange(window_size), time_series[start: start + window_size])
 
         # Replace the original window with the warped window
         warped_series = np.copy(time_series)
