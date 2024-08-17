@@ -63,6 +63,6 @@ class TimeWarping:
 
         print(warped_series.shape)
         # Rescale the entire series to maintain the original length
-        warped_series = np.interp(np.arange(n), np.linspace(0, n, n), warped_series)
+        warped_series = np.interp(np.arange(n), np.linspace(0, n, len(warped_series)), warped_series)
 
         return warped_series
