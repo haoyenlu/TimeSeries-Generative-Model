@@ -4,7 +4,7 @@ import argparse
 from collections import defaultdict
 
 from data_utils import FeatureWiseScaler , DTWBarycentricAveraging
-from analysis_utils import plot_pca, plot_tsne, plot_umap
+from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
 import logging
 
@@ -59,6 +59,7 @@ for task in tasks:
     plot_pca(real=train_data,fake=train_data_aug,save_path=args.save)
     plot_tsne(real=train_data,fake=train_data_aug,save_path=args.save)
     plot_umap(real=train_data,fake=train_data_aug,save_path=args.save)
+    plot_sample(real=train_data,fake=train_data_aug,save_path=args.save)
 
 
 
