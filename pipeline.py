@@ -60,7 +60,7 @@ for task in tasks:
     plot_tsne(real=train_data,fake=train_data_aug,save_path=args.save)
     plot_umap(real=train_data,fake=train_data_aug,save_path=args.save)
     plot_sample(real=train_data,fake=train_data_aug,save_path=args.save)
-
+    break
 
 
 
