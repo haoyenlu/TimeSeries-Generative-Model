@@ -70,13 +70,16 @@ class DTWBarycentricAveraging:
         **kwargs,
     ) -> np.ndarray:
         samples = []
-        for i, st in tqdm(enumerate(initial_timeseries)):
+        
+        pbar = tqdm(total=n_samples)
+        for i, st in enumerate(initial_timeseries):
             samples.append(
                 dtw_barycenter.dba(
                     s=X_subset,
                     c=st,
-                    nb_initial_samples=n_samples,
+                    nb_initial_samples=1,
                     **kwargs,
                 )
             )
+            pbar.update(1)
         return np.array(samples)
