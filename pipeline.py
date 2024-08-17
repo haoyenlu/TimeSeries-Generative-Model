@@ -46,7 +46,7 @@ for type, type_dict in data.items():
 
 # TODO: Data augmentation and Preprocessing
 scaler = FeatureWiseScaler(feature_range=(0,1))
-TW = TimeWarping(num_operation=20,warp_factor=0.25)
+TW = TimeWarping(window_ratio=0.1,scales=[0.5,1,1.5,2])
 tasks = train_dataset.keys()
 
 for task in tasks:
