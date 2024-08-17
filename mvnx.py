@@ -113,7 +113,7 @@ class PreprocessMVNX:
                     if task not in TASK[type][p]:
                         TASK[type][p][task] = []
 
-                    TASK[type][p][task].append(data)
+                    TASK[type][p][task].append(resample_data)
 
                 TASK[type][p][task] = np.concatenate(TASK[type][p][task],axis=0)
 
