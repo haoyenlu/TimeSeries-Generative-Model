@@ -8,6 +8,8 @@ from utils import load_config
 from data_utils import FeatureWiseScaler , WindowWarping
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
+from tqdm import tqdm
+
 
 curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
 
@@ -53,7 +55,7 @@ all_data = []
 all_data_aug = []
 all_label = []
 all_label_aug = []
-for task in tasks:
+for task in tqdm(tasks):
     train_data = np.concatenate(train_dataset[task],axis=0)
     train_data = scaler.fit_transform(train_data)
     train_data_aug = augmenter.generate(train_data)
