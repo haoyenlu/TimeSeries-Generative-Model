@@ -9,6 +9,7 @@ from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 import logging
 
 logger = logging.getLogger('main')
+logging.basicConfig()
 
 # Argument
 
@@ -38,7 +39,6 @@ for type, type_dict in data.items():
 
     for patient , patient_dict in type_dict.items():
         for task , task_data in patient_dict.items():
-            print(task_data.shape)
             if patient not in args.test_patient:
                 train_dataset[task].append(task_data)
             else:
