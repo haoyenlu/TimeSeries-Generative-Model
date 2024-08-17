@@ -1,6 +1,6 @@
 import numpy as np
 import argparse
-
+import os
 from collections import defaultdict
 from datetime import datetime
 
@@ -22,6 +22,10 @@ parser.add_argument('--include_healthy','-ih',action='store_true')
 parser.add_argument('--save','-s',type=str)
 args = parser.parse_args()
 
+
+# DIRECTORY
+save_dir = os.path.join(args.save,curr_date)
+os.makedirs(save_dir)
 
 # TODO: preprocess dataset
 # Data Structure - Healthy - H01 ~ H05 - TASK- data
@@ -58,10 +62,10 @@ for task in tasks:
     train_data = scaler.fit_transform(train_data)
     train_data_aug = DTW.generate(train_data, n_samples=100)
 
-    plot_pca(real=train_data,fake=train_data_aug,save_path=args.save)
-    plot_tsne(real=train_data,fake=train_data_aug,save_path=args.save)
-    plot_umap(real=train_data,fake=train_data_aug,save_path=args.save)
-    plot_sample(real=train_data,fake=train_data_aug,save_path=args.save)
+    plot_pca(real=train_data,fake=train_data_aug,save_path=save_dir)
+    plot_tsne(real=train_data,fake=train_data_aug,save_path=save_dir)
+    plot_umap(real=train_data,fake=train_data_aug,save_path=save_dir)
+    plot_sample(real=train_data,fake=train_data_aug,save_path=save_dir)
     break
 
 
