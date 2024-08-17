@@ -29,7 +29,7 @@ class FeatureWiseScaler:
         return self.transform(X)
     
 
-class TimeWarping:
+class WindowWarping:
     def __init__(self,window_ratio = 0.1,scales=[0.5,1,1.5,2]):
         self.window_ratio = window_ratio
         self.scales = scales

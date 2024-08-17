@@ -4,7 +4,7 @@ import os
 from collections import defaultdict
 from datetime import datetime
 
-from data_utils import FeatureWiseScaler , TimeWarping
+from data_utils import FeatureWiseScaler , WindowWarping
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
 
 
@@ -46,13 +46,13 @@ for type, type_dict in data.items():
 
 # TODO: Data augmentation and Preprocessing
 scaler = FeatureWiseScaler(feature_range=(0,1))
-TW = TimeWarping(window_ratio=0.2,scales=[0.1,0.5,1,1.5,2,2.5])
+augmenter = WindowWarping(window_ratio=0.2,scales=[0.1,0.5,1,1.5,2,2.5])
 tasks = train_dataset.keys()
 
 for task in tasks:
     train_data = np.concatenate(train_dataset[task],axis=0)
     train_data = scaler.fit_transform(train_data)
-    train_data_aug = TW.generate(train_data)
+    train_data_aug = augmenter.generate(train_data)
 
     plot_sample(train_data,train_data_aug,save_dir)
     plot_pca(train_data,train_data_aug,save_dir)
@@ -60,7 +60,11 @@ for task in tasks:
     plot_umap(train_data,train_data_aug,save_dir)
     break
 
-    # TODO: train generative model on train_datas
+    # TODO: train generative model on train_data
+
+
+# TODO: train classification on augmentation and original dataset and test with test dataset
+
 
 
 

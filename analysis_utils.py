@@ -8,6 +8,7 @@ from sklearn.metrics import confusion_matrix, accuracy_score
 import seaborn as sns
 
 def plot_pca(real,fake,save_path='./save'):
+  print('Geneating PCA plot')
   _ , seq_len , feats = real.shape
   pca = PCA(2)
   real_transform = pca.fit_transform(real.reshape(-1,seq_len * feats))
@@ -21,6 +22,7 @@ def plot_pca(real,fake,save_path='./save'):
 
 
 def plot_tsne(real,fake,save_path='./save'):
+  print('Generating TSNE plot')
   _ , seq_len , feats = real.shape
   X = np.concatenate([real.reshape(-1,feats*seq_len),fake.reshape(-1,feats*seq_len)])
   Y = np.concatenate([np.ones(real.shape[0]),np.zeros(fake.shape[0])])
@@ -34,6 +36,7 @@ def plot_tsne(real,fake,save_path='./save'):
 
 
 def plot_umap(real,fake,save_path='./save'):
+  print('Generating UMAP plot')
   reducer = umap.UMAP()
   _ , seq_len , feats = real.shape
   X = np.concatenate([real.reshape(-1,feats * seq_len),fake.reshape(-1,feats* seq_len)])
@@ -51,14 +54,16 @@ def plot_sample(real,fake,save_path='./save'):
   real_num , seq_len , feats = real.shape
   fake_num , seq_len , feats = fake.shape
 
-  real_random = np.random.randint(0,real_num,size=3)
-  fake_random = np.random.randint(0,fake_num,size=3)
+  num = min(real_num, fake_num)
+
+  index = np.random.randint(0,num,size=3)
+
 
   fig, axs = plt.subplots(3,2,figsize=(8,6))
   for i in range(3):
     for f in range(feats):
-      axs[i,0].plot(real[real_random[i],:,f])
-      axs[i,1].plot(fake[fake_random[i],:,f])
+      axs[i,0].plot(real[index[i],:,f])
+      axs[i,1].plot(fake[index[i],:,f])
   
   axs[0,0].set_title("Real")
   axs[0,1].set_title("Fake")
@@ -71,6 +76,7 @@ def plot_sample(real,fake,save_path='./save'):
 
 
 def plot_confusion_matrix(real,prediction,save_path='./save',title="Prediction"):
+    print('Generating confusion matrix plot')
     fig = plt.figure(figsize = (12,12))
     acc = accuracy_score(real,prediction)
     cm = confusion_matrix(real, prediction)
