@@ -51,7 +51,8 @@ DTW = DTWBarycentricAveraging()
 tasks = train_dataset.keys()
 
 for task in tasks:
-    train_data = scaler.fit_transform(train_dataset[task])
+    train_data = np.concatenate(train_dataset[task],axis=0)
+    train_data = scaler.fit_transform(train_data)
     train_data_aug = DTW.generate(train_data, n_samples=100)
 
     plot_pca(real=train_data,fake=train_data_aug,save_path=args.save)
