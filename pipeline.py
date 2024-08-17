@@ -6,6 +6,10 @@ from collections import defaultdict
 from data_utils import FeatureWiseScaler , DTWBarycentricAveraging
 from analysis_utils import plot_pca, plot_tsne, plot_umap
 
+import logging
+
+logger = logging.getLogger('main')
+
 # Argument
 
 parser = argparse.ArgumentParser()
@@ -21,12 +25,14 @@ args = parser.parse_args()
 #                - Stroke - P02 ~ P30 - TASK - data
 
 
+logger.info('Loading Data')
 data = np.load(args.data,allow_pickle=True).item()
 
 
 train_dataset = defaultdict(list)
 test_dataset = defaultdict(list)
 
+logger.info('Processing Data')
 for type, type_dict in data.items():
     if not args.include_healthy and type == 'Healthies': continue
 
@@ -38,6 +44,7 @@ for type, type_dict in data.items():
                 test_dataset[task].append(task_data)
 
 
+logger.info('Preprocessing and Augmenting Data')
 # TODO: Data augmentation and Preprocessing
 scaler = FeatureWiseScaler(feature_range=(0,1))
 DTW = DTWBarycentricAveraging()
