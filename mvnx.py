@@ -22,15 +22,8 @@ class PreprocessMVNX:
         self.tasks = tasks
         self.cutoff_length = cutoff_length
         self.resample =  resample
+        self.resample_fn = partial(self.np_interp_resample,max_length=cutoff_length)
 
-        if self.resample == 'numpy':
-            self.resample_fn = partial(self.np_pad_resample,max_length = cutoff_length)
-        
-        elif self.resample== 'scipy':
-            self.resample_fn = partial(self.scipy_resample,max_length = cutoff_length)
-        
-        else:
-            raise Exception("Resample method not defined!")
         
     def _parse_mvnx_file(self,file,use_xzy = True):
         '''
@@ -96,13 +89,11 @@ class PreprocessMVNX:
 
                     assert subject == p
 
-
-
+                    # Discard data exceed cutoff length
                     T,C = data.shape
                     if T > self.cutoff_length: continue
 
                     resample_data = np.zeros((self.cutoff_length,C))
-
                     for i in range(C):
                         resample_data[:,i] = self.resample_fn(data[:,i])
 
@@ -136,12 +127,12 @@ class PreprocessMVNX:
         assert len(resample_sequence) == max_length
         return resample_sequence
     
-    def scipy_resample(self,sequence,max_length):
-        return resample(sequence,max_length)
+    def np_interp_resample(self,sequence,max_length):
+        n = len(sequence)
+        resample_sequence = np.interp(np.arange(max_length), np.linspace(0,max_length,n),sequence)
+        return resample_sequence
  
 
-    def minmax_scaler(self,sequence):
-        return (sequence - np.min(sequence)) / (np.max(sequence) - np.min(sequence))
 
 
 
