@@ -58,8 +58,10 @@ class TimeWarping:
         warped_window = np.interp(np.linspace(0, window_size, int(window_size*scale)), np.arange(window_size), time_series[start: start + window_size])
         print(warped_window.shape)
         # Replace the original window with the warped window
-        warped_series = np.append(time_series[:start],warped_window ,time_series[start+window_size:])
+        warped_series = np.append(time_series[:start], warped_window)
+        warped_series = np.append(warped_series,time_series[start+window_size:])
 
+        print(warped_series.shape)
         # Rescale the entire series to maintain the original length
         warped_series = np.interp(np.arange(n), np.linspace(0, n, n), warped_series)
 
