@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 
 from collections import defaultdict
+from datetime import datetime
 
 from data_utils import FeatureWiseScaler , DTWBarycentricAveraging
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample
@@ -11,8 +12,9 @@ import logging
 logger = logging.getLogger('main')
 logging.basicConfig()
 
-# Argument
+curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
 
+# Argument
 parser = argparse.ArgumentParser()
 parser.add_argument('--data',type=str)
 parser.add_argument('--test_patient','-tp',nargs='+',type=str)
