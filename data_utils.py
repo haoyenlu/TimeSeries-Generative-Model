@@ -50,7 +50,7 @@ class DTWBarycentricAveraging:
     ) -> np.ndarray :
 
         # Draw random sample from the dataset
-        random_samples = np.random.choices(range(X.shape[0]), k=n_samples)
+        random_samples = np.random.choice(range(X.shape[0]), k=n_samples)
         initial_timeseries = X[random_samples]
 
         self._dtwba(
