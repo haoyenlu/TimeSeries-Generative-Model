@@ -2,6 +2,7 @@ import numpy as np
 from typing import Optional , Tuple, Union
 from dtaidistance import dtw_barycenter
 import random
+from tqdm import tqdm
 
 import logging
 
@@ -69,7 +70,7 @@ class DTWBarycentricAveraging:
         **kwargs,
     ) -> np.ndarray:
         samples = []
-        for i, st in enumerate(initial_timeseries):
+        for i, st in tqdm(enumerate(initial_timeseries)):
             samples.append(
                 dtw_barycenter.dba(
                     s=X_subset,
