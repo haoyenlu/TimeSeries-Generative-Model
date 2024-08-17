@@ -38,6 +38,7 @@ for type, type_dict in data.items():
 
     for patient , patient_dict in type_dict.items():
         for task , task_data in patient_dict.items():
+            print(task_data.shape)
             if patient not in args.test_patient:
                 train_dataset[task].append(task_data)
             else:
