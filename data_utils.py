@@ -30,10 +30,9 @@ class FeatureWiseScaler:
     
 
 class TimeWarping:
-    def __init__(self,num_operation=10,warp_factor=0.2):
-        self.num_operation = num_operation
-        self.warp_factor = warp_factor
-
+    def __init__(self,window_ratio = 0.1,scales=[0.5,1,1.5,2]):
+        self.window_ratio = window_ratio
+        self.scales = scales
     
     def generate(self,X: np.ndarray):
         B, T, C = X.shape
@@ -41,16 +40,28 @@ class TimeWarping:
         warped_series = X.copy()
         for i in range(B):
             for j in range(C):
-                for _ in range(self.num_operation):
-                    operation_type = random.choice(['insert','delete'])
-                    index = random.randint(1,T-2)
-                    if operation_type == 'insert':
-                        insertion_value = (warped_series[i,index - 1,j] + warped_series[i,index,j]) * 0.5
-                        warp_amount = insertion_value * self.warp_factor * random.uniform(-1,1)
-                        warped_series[i,:,j] = np.insert(warped_series[i,:,j],index,insertion_value + warp_amount)
-                    
-                    elif operation_type == 'delete':
-                        warped_series[i,:,j] = np.delete(warped_series[i,:,j],index)
-                    else:
-                        raise ValueError('Invalid operation type')
+                warped_series[i,:,j] = self.warping(warped_series[i,:,j])
+
+        return warped_series
+    
+    def warping(self,time_series):
+        n = len(time_series)
+        window_size = int(n * self.window_ratio)
+
+        # Randomly select a window start index
+        start = np.random.randint(0, n - window_size)
+
+        # Randomly select a scaling factor
+        scale = np.random.choice(self.scales)
+
+        # Warp the window
+        warped_window = np.interp(np.linspace(0, window_size, int(window_size * scale)), np.arange(window_size), time_series[start: start + window_size])
+
+        # Replace the original window with the warped window
+        warped_series = np.copy(time_series)
+        warped_series[start: start + window_size] = warped_window
+
+        # Rescale the entire series to maintain the original length
+        warped_series = np.interp(np.arange(n), np.linspace(0, n, len(warped_series)), warped_series)
+
         return warped_series
