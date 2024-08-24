@@ -127,7 +127,7 @@ test_dataloader = DataLoader(test_dataset,cc_config['batch_size'],shuffle=True)
 trainer  = get_trainer_from_config(cc_config)
 trainer.save_weight(os.path.join(ckpt_dir,"initial.pth"))
 trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,'best.pth'))
-trainer.load_weight(os.path.join(ckpt_dir,'best_aug.pth'))
+trainer.load_weight(os.path.join(ckpt_dir,'best.pth'))
 prediction = trainer.make_prediction(all_test_data)
 plot_confusion_matrix(all_test_label, prediction, output_dir, title="Original-Prediction")
 
