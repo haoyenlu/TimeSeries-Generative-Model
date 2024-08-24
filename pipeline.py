@@ -24,7 +24,7 @@ curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
 parser = argparse.ArgumentParser()
 parser.add_argument('--data',type=str)
 parser.add_argument('--test_patient','-tp',nargs='+',type=str)
-parser.add_argument('--include_healthy','-ih',action='store_true')
+parser.add_argument('--ih',action='store_true',help="Include Healthy Patient")
 parser.add_argument('--cc',type=str, help="Classification Config") 
 parser.add_argument('--max_ci',type=int, help="Max Classification Iteration")
 parser.add_argument('--output','-o',type=str)
@@ -53,91 +53,90 @@ writer = SummaryWriter(log_dir)
 # Data Structure - Healthy - H01 ~ H05 - TASK- data
 #                - Stroke - P02 ~ P30 - TASK - data
 
-logger.info("Processing Data")
-data = np.load(args.data,allow_pickle=True).item()
-train_dataset = defaultdict(list)
-test_dataset = defaultdict(list)
+def main(TEST_PATIENT):
+    logger.info(f"Processing Data. Leave {TEST_PATIENT} out")
+    data = np.load(args.data,allow_pickle=True).item()
+    train_dataset = defaultdict(list)
+    test_dataset = defaultdict(list)
 
-for type, type_dict in data.items():
-    if not args.include_healthy and type == 'Healthies': continue
+    for type, type_dict in data.items():
+        if not args.include_healthy and type == 'Healthies': continue
 
-    for patient , patient_dict in type_dict.items():
-        for task , task_data in patient_dict.items():
-            if patient not in args.test_patient:
-                train_dataset[task].append(task_data)
-            else:
-                test_dataset[task].append(task_data)
-
-
-# TODO: Data augmentation and Preprocessing
-scaler = FeatureWiseScaler(feature_range=(0,1))
-augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
-tasks = np.array(list(train_dataset.keys()))
-
-all_train_data = []
-all_train_data_aug = []
-all_train_label = []
-all_train_label_aug = []
-all_test_data = []
-all_test_label = []
-
-with tqdm(total=len(train_dataset.keys())) as pbar:
-    for task in train_dataset.keys():
-
-        train_data = np.concatenate(train_dataset[task],axis=0)
-        train_data = scaler.fit_transform(train_data)
-        train_data_aug = augmenter.generate(train_data)
-
-        test_data = np.concatenate(test_dataset[task],axis=0)
-        test_data = scaler.fit_transform(test_data)
-
-        # TODO: train generative model on train_data for augmentation
+        for patient , patient_dict in type_dict.items():
+            for task , task_data in patient_dict.items():
+                if patient == TEST_PATIENT: test_dataset[task].append(task_data)
+                else: train_dataset[task].append(task_data)
 
 
-        # TODO: generate dataset with label
-        label = np.argwhere(tasks == task)
-        all_train_data.append(train_data)
-        all_train_label.append([label] * train_data.shape[0])
-        all_train_data_aug.append(train_data_aug)
-        all_train_label_aug.append([label] * train_data_aug.shape[0])
-        all_test_data.append(test_data)
-        all_test_label.append([label] * test_data.shape[0])
-        pbar.update(1)
+    # TODO: Data augmentation and Preprocessing
+    scaler = FeatureWiseScaler(feature_range=(0,1))
+    augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
+    tasks = np.array(list(train_dataset.keys()))
 
-all_train_data = np.concatenate(all_train_data,axis=0)
-all_train_label = np.squeeze(np.concatenate(all_train_label,axis=0))
-all_train_data_aug = np.concatenate(all_train_data_aug,axis=0)
-all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
-all_test_data = np.concatenate(all_test_data,axis=0)
-all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
+    all_train_data = []
+    all_train_data_aug = []
+    all_train_label = []
+    all_train_label_aug = []
+    all_test_data = []
+    all_test_label = []
+
+    with tqdm(total=len(train_dataset.keys())) as pbar:
+        for task in train_dataset.keys():
+
+            train_data = np.concatenate(train_dataset[task],axis=0)
+            train_data = scaler.fit_transform(train_data)
+            train_data_aug = augmenter.generate(train_data)
+
+            test_data = np.concatenate(test_dataset[task],axis=0)
+            test_data = scaler.fit_transform(test_data)
+
+            # TODO: train generative model on train_data for augmentation
 
 
-plot_pca(all_train_data,all_test_data,output_dir)
-plot_tsne(all_train_data,all_test_data,output_dir)
-plot_umap(all_train_data,all_test_data,output_dir)
+            # TODO: generate dataset with label
+            label = np.argwhere(tasks == task)
+            all_train_data.append(train_data)
+            all_train_label.append([label] * train_data.shape[0])
+            all_train_data_aug.append(train_data_aug)
+            all_train_label_aug.append([label] * train_data_aug.shape[0])
+            all_test_data.append(test_data)
+            all_test_label.append([label] * test_data.shape[0])
+            pbar.update(1)
 
-# TODO: train classification on augmentation and original dataset and test with test dataset
-train_dataset = ULF_Classification_Dataset(all_train_data,all_train_label)
-test_dataset = ULF_Classification_Dataset(all_test_data,all_test_label)
-train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
-test_dataloader = DataLoader(test_dataset,cc_config['batch_size'],shuffle=True)
+    all_train_data = np.concatenate(all_train_data,axis=0)
+    all_train_label = np.squeeze(np.concatenate(all_train_label,axis=0))
+    all_train_data_aug = np.concatenate(all_train_data_aug,axis=0)
+    all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
+    all_test_data = np.concatenate(all_test_data,axis=0)
+    all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
 
-# IMPORT CLASSIFICATION MODEL
-# train without augmentation
-trainer  = get_trainer_from_config(cc_config)
-trainer.save_weight(os.path.join(ckpt_dir,"initial.pth"))
-trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,'best.pth'))
-trainer.load_weight(os.path.join(ckpt_dir,'best.pth'))
-prediction = trainer.make_prediction(all_test_data)
-plot_confusion_matrix(all_test_label, prediction, output_dir, title="Original-Prediction")
+    # TODO: train classification on augmentation and original dataset and test with test dataset
+    train_dataset = ULF_Classification_Dataset(all_train_data,all_train_label)
+    test_dataset = ULF_Classification_Dataset(all_test_data,all_test_label)
+    train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
+    test_dataloader = DataLoader(test_dataset,cc_config['batch_size'],shuffle=True)
 
-# train with augmentation
-train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
-train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
-trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
-trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,'best_aug.pth'))
-trainer.load_weight(os.path.join(ckpt_dir,'best_aug.pth'))
-prediction = trainer.make_prediction(all_test_data)
-plot_confusion_matrix(all_test_label,prediction,output_dir,title="Augmented-Prediciton")
+    # IMPORT CLASSIFICATION MODEL
+    # train without augmentation
+    logger.info("Train without Augmentation")
+    trainer  = get_trainer_from_config(cc_config)
+    trainer.save_weight(os.path.join(ckpt_dir,"initial.pth"))
+    trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best.pth'))
+    trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best.pth'))
+    prediction = trainer.make_prediction(all_test_data)
+    plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
 
-    
+    # train with augmentation
+    logger.info("Train with Augmentation")
+    train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
+    train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
+    trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
+    trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
+    trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
+    prediction = trainer.make_prediction(all_test_data)
+    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
+
+
+for patient in args.test_patient:
+    main(patient)
+
