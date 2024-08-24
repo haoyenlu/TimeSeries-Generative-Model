@@ -96,7 +96,6 @@ with tqdm(total=len(train_dataset.keys())) as pbar:
 
         # TODO: generate dataset with label
         label = np.argwhere(tasks == task)
-        print(task,label)
         all_train_data.append(train_data)
         all_train_label.append([label] * train_data.shape[0])
         all_train_data_aug.append(train_data_aug)
@@ -111,8 +110,6 @@ all_train_data_aug = np.concatenate(all_train_data_aug,axis=0)
 all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
 all_test_data = np.concatenate(all_test_data,axis=0)
 all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
-
-print(all_train_label)
 
 
 plot_pca(all_train_data,all_test_data,output_dir)
