@@ -65,6 +65,7 @@ def main(TEST_PATIENT):
 
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
+                if task_data.shape[0] == 0: logger.warnning(f"{patient} has no {task} data.")
                 if patient == TEST_PATIENT: test_dataset[task].append(task_data)
                 else: train_dataset[task].append(task_data)
 
@@ -141,7 +142,7 @@ def main(TEST_PATIENT):
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
 
     aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
-    
+    logger.info(f"{TEST_PATIENT}: Accuracy: {accuracy_score*100:.2f} | F1-score: {f1_score*100:.2f}")
     return orig_acc, orig_f1, aug_acc, aug_f1
 
 
