@@ -67,7 +67,6 @@ def main(TEST_PATIENT):
 
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
-                logger.debug(f"{patient}|{task}|{len(task_data)}")
                 if patient == TEST_PATIENT: test_dataset[task].append(task_data)
                 else: train_dataset[task].append(task_data)
 
@@ -90,9 +89,12 @@ def main(TEST_PATIENT):
             train_data = scaler.fit_transform(train_data)
             train_data_aug = augmenter.generate(train_data)
 
-
-            test_data = np.concatenate(test_dataset[task],axis=0)
-            test_data = scaler.fit_transform(test_data)
+            if len(test_dataset) != 0:
+                test_data = np.concatenate(test_dataset[task],axis=0)
+                test_data = scaler.fit_transform(test_data)
+            else:
+                logger.warning(f"{TEST_PATIENT} has no {task} data!")
+                test_data = None
 
             # TODO: train generative model on train_data for augmentation
 
@@ -103,8 +105,9 @@ def main(TEST_PATIENT):
             all_train_label.append([label] * train_data.shape[0])
             all_train_data_aug.append(train_data_aug)
             all_train_label_aug.append([label] * train_data_aug.shape[0])
-            all_test_data.append(test_data)
-            all_test_label.append([label] * test_data.shape[0])
+            if test_data is not None:
+                all_test_data.append(test_data)
+                all_test_label.append([label] * test_data.shape[0])
             pbar.update(1)
 
     all_train_data = np.concatenate(all_train_data,axis=0)
