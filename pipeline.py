@@ -89,7 +89,7 @@ def main(TEST_PATIENT):
             train_data = scaler.fit_transform(train_data)
             train_data_aug = augmenter.generate(train_data)
 
-            if len(test_dataset) != 0:
+            if len(test_dataset[task]) != 0:
                 test_data = np.concatenate(test_dataset[task],axis=0)
                 test_data = scaler.fit_transform(test_data)
             else:
