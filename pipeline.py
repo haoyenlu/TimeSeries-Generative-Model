@@ -118,7 +118,7 @@ plot_umap(all_train_data,all_test_data,output_dir)
 train_dataset = ULF_Classification_Dataset(all_train_data,all_train_label)
 test_dataset = ULF_Classification_Dataset(all_test_data,all_test_label)
 train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
-test_dataloader = DataLoader(test_dataset,cc_config['batch_size'],shuffl=True)
+test_dataloader = DataLoader(test_dataset,cc_config['batch_size'],shuffle=True)
 
 # IMPORT CLASSIFICATION MODEL
 # train without augmentation
