@@ -61,7 +61,7 @@ def main(TEST_PATIENT):
     test_dataset = defaultdict(list)
 
     for type, type_dict in data.items():
-        if not args.include_healthy and type == 'Healthies': continue
+        if not args.ih and type == 'Healthies': continue
 
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
