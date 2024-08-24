@@ -65,7 +65,6 @@ def main(TEST_PATIENT):
     for type, type_dict in data.items():
         if not args.ih and type == 'Healthies': continue
 
-        print(list(type_dict.keys()))
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
                 if len(task_data) == 0: logger.warnning(f"{patient} has no {task} data.")
