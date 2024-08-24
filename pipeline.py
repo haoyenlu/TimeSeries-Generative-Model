@@ -101,11 +101,11 @@ for task in tqdm(tasks):
     all_test_label.append([label] * test_data.shape[0])
 
 all_train_data = np.concatenate(all_train_data,axis=0)
-all_train_label = np.concatenate(all_train_label,axis=0).squeeze()
+all_train_label = np.squeeze(np.concatenate(all_train_label,axis=0))
 all_train_data_aug = np.concatenate(all_train_data_aug,axis=0)
-all_train_label_aug = np.concatenate(all_train_label_aug,axis=0).squeeze()
+all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
 all_test_data = np.concatenate(all_test_data,axis=0)
-all_test_label = np.concatenate(all_test_label,axis=0).squeeze()
+all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
 
 print(all_train_data.shape,all_train_label.shape,all_train_data_aug.shape,all_train_label_aug.shape,all_test_data.shape,all_test_label.shape)
 
