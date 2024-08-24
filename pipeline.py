@@ -86,7 +86,7 @@ def main(TEST_PATIENT):
 
     with tqdm(total=len(train_dataset.keys())) as pbar:
         for task in train_dataset.keys():
-
+            logger.debug(len(test_dataset[task]))
             train_data = np.concatenate(train_dataset[task],axis=0)
             train_data = scaler.fit_transform(train_data)
             train_data_aug = augmenter.generate(train_data)
