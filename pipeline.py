@@ -12,6 +12,7 @@ from data_utils import FeatureWiseScaler , WindowWarping
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_confusion_matrix
 from dataset import ULF_Classification_Dataset
 
+from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
 
 from logger import Logger
@@ -126,6 +127,9 @@ def main(TEST_PATIENT):
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
 
+    orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction)
+
+
     # train with augmentation
     logger.info("Train with Augmentation")
     train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
@@ -136,7 +140,23 @@ def main(TEST_PATIENT):
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
 
+    aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction)
+    
+    return orig_acc, orig_f1, aug_acc, aug_f1
 
+
+total_orig_acc, total_orig_f1, total_aug_acc, total_aug_f1 = [] , [] , [] , []
 for patient in args.test_patient:
-    main(patient)
+    orig_acc, orig_f1, aug_acc, aug_f1 = main(patient)
+    total_orig_acc.append(orig_acc)
+    total_orig_f1.append(orig_f1)
+    total_aug_acc.append(aug_acc)
+    total_aug_f1.append(aug_f1)
+
+
+logger.info(f"Total Original Accuracy:{sum(total_orig_acc)/len(total_orig_acc):.4f}")
+logger.info(f"Total Original F1-score:{sum(total_orig_f1)/len(total_orig_f1):.4f}")
+logger.info(f"Total Augmented Accuracy:{sum(total_aug_acc)/len(total_aug_acc):.4f}")
+logger.info(f"Total Augmented Accuracy:{sum(total_aug_f1)/len(total_aug_f1):.4f}")
+
 

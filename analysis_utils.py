@@ -86,5 +86,3 @@ def plot_confusion_matrix(real,prediction,save_path='./save',title="Prediction")
     plt.close(fig)
 
   
-def plot_f1score(real,prediciton,save_path='./save'):
-	pass 
