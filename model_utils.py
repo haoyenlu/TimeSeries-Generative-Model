@@ -13,7 +13,7 @@ from models.generative.diffusion.transformer import Transformer
 from models.classification.model import InceptionTime, BasicLSTM , BasicConv1d
 
 
-def get_trainer_from_config(args,config):
+def get_trainer_from_config(config):
 
     if config['infra'] == 'diffusion':
         
@@ -32,32 +32,32 @@ def get_trainer_from_config(args,config):
 
         trainer = DiffusionTrainer(infra,optimizer)
 
-    elif config['infra'] == 'gan':
+    # elif config['infra'] == 'gan':
 
-        if config['model'] == 'tts':
-            generator  = tts_cgan.Generator(**config.get('generator',dict()))
-            discriminator = tts_cgan.Discriminator(**config.get('discriminator',dict()))
-        elif config['model'] == 'eeg':
-            generator = eeg_cgan.Generator(**config.get('generator',dict()))
-            discriminator = eeg_cgan.Discriminator(**config.get('discriminator',dict()))
-        else:
-            raise Exception("Only allow tts or eeg GAN model")\
+    #     if config['model'] == 'tts':
+    #         generator  = tts_cgan.Generator(**config.get('generator',dict()))
+    #         discriminator = tts_cgan.Discriminator(**config.get('discriminator',dict()))
+    #     elif config['model'] == 'eeg':
+    #         generator = eeg_cgan.Generator(**config.get('generator',dict()))
+    #         discriminator = eeg_cgan.Discriminator(**config.get('discriminator',dict()))
+    #     else:
+    #         raise Exception("Only allow tts or eeg GAN model")\
             
-        generator.apply(weight_init)
-        discriminator.apply(weight_init)
-        g_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, generator.parameters()),**config.get('g_optim',dict()))
-        d_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, discriminator.parameters()),**config.get('d_optim',dict()))
-        g_scheduler = LinearLrDecay(g_optimizer,config['g_optim']['lr'],0.0,0,args.max_iter)
-        d_scheduler = LinearLrDecay(d_optimizer,config['d_optim']['lr'],0.0,0,args.max_iter)
-        criterion = torch.nn.CrossEntropyLoss()
+    #     generator.apply(weight_init)
+    #     discriminator.apply(weight_init)
+    #     g_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, generator.parameters()),**config.get('g_optim',dict()))
+    #     d_optimizer = torch.optim.Adam(filter(lambda p :p.requires_grad, discriminator.parameters()),**config.get('d_optim',dict()))
+    #     g_scheduler = LinearLrDecay(g_optimizer,config['g_optim']['lr'],0.0,0,args.max_iter)
+    #     d_scheduler = LinearLrDecay(d_optimizer,config['d_optim']['lr'],0.0,0,args.max_iter)
+    #     criterion = torch.nn.CrossEntropyLoss()
 
-        trainer = cGANTrainer(generator,discriminator,
-                            g_optimizer,d_optimizer,
-                            g_scheduler,d_scheduler,
-                            criterion,
-                            config['lambda_cls'],config['lambda_gp'],
-                            args.max_iter,args.save_iter,args.n_critic,
-                            config['generator']['num_classes'],config['generator']['latent_dim'])
+    #     trainer = cGANTrainer(generator,discriminator,
+    #                         g_optimizer,d_optimizer,
+    #                         g_scheduler,d_scheduler,
+    #                         criterion,
+    #                         config['lambda_cls'],config['lambda_gp'],
+    #                         args.max_iter,args.save_iter,args.n_critic,
+    #                         config['generator']['num_classes'],config['generator']['latent_dim'])
     
 
     elif config['infra'] == 'classification':
