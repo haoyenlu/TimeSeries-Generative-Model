@@ -16,9 +16,12 @@ class Logger:
         pass
 
     
-    def warnning(self,text):
+    def warning(self,text):
         print(bcolors.WARNING + "[Warning]:" + f"[{text}]" + bcolors.ENDC)
         
 
     def info(self,text):
         print(bcolors.OKBLUE + "[INFO]:" + f"[{text}]" + bcolors.ENDC)
+
+    def debug(self,text):
+        print(bcolors.OKGREEN + "[DEBUG]:" + f"[{text}]" + bcolors.ENDC)

@@ -7,8 +7,12 @@ import umap
 from sklearn.metrics import confusion_matrix, accuracy_score
 import seaborn as sns
 
+from logger import Logger
+
+logger = Logger()
+
 def plot_pca(real,fake,save_path='./save'):
-	print('Geneating PCA plot')
+	logger.debug('Geneating PCA plot')
 	_ , seq_len , feats = real.shape
 	pca = PCA(2)
 	real_transform = pca.fit_transform(real.reshape(-1,seq_len * feats))
@@ -22,7 +26,7 @@ def plot_pca(real,fake,save_path='./save'):
 
 
 def plot_tsne(real,fake,save_path='./save'):
-	print('Generating TSNE plot')
+	logger.debug('Generating TSNE plot')
 	_ , seq_len , feats = real.shape
 	X = np.concatenate([real.reshape(-1,feats*seq_len),fake.reshape(-1,feats*seq_len)])
 	Y = np.concatenate([np.ones(real.shape[0]),np.zeros(fake.shape[0])])
@@ -36,7 +40,7 @@ def plot_tsne(real,fake,save_path='./save'):
 
 
 def plot_umap(real,fake,save_path='./save'):
-	print('Generating UMAP plot')
+	logger.debug('Generating UMAP plot')
 	reducer = umap.UMAP()
 	_ , seq_len , feats = real.shape
 	X = np.concatenate([real.reshape(-1,feats * seq_len),fake.reshape(-1,feats* seq_len)])
@@ -76,7 +80,7 @@ def plot_sample(real,fake,save_path='./save'):
 
 
 def plot_confusion_matrix(real,prediction,save_path='./save',title="Prediction"):
-    print('Generating confusion matrix plot')
+    logger.debug('Generating confusion matrix plot')
     fig = plt.figure(figsize = (12,12))
     acc = accuracy_score(real,prediction)
     cm = confusion_matrix(real, prediction)
