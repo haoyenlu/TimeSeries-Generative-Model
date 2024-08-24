@@ -81,6 +81,7 @@ all_train_label_aug = []
 all_test_data = []
 all_test_label = []
 for task in tqdm(tasks):
+
     train_data = np.concatenate(train_dataset[task],axis=0)
     train_data = scaler.fit_transform(train_data)
     train_data_aug = augmenter.generate(train_data)
@@ -93,6 +94,7 @@ for task in tqdm(tasks):
 
     # TODO: generate dataset with label
     label = np.argwhere(tasks == task)
+    print(task,label)
     all_train_data.append(train_data)
     all_train_label.append([label] * train_data.shape[0])
     all_train_data_aug.append(train_data_aug)
