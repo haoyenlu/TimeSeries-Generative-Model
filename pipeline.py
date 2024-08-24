@@ -134,7 +134,7 @@ plot_confusion_matrix(all_test_label, prediction, output_dir, title="Original-Pr
 train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
 train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
 trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
-trainer.train(train_dataloader,test_dataloader,args.max_cit,writer,os.path.join(ckpt_dir,'best_aug.pth'))
+trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,'best_aug.pth'))
 prediction = trainer.make_prediction(all_test_data)
 plot_confusion_matrix(all_test_label,prediction,output_dir,title="Augmented-Prediciton")
 
