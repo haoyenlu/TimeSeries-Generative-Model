@@ -93,7 +93,7 @@ for task in tqdm(tasks):
 
 
     # TODO: generate dataset with label
-    label = np.argwhere(tasks == task)
+    label = np.argwhere(np.array(tasks) == task)
     print(task,label)
     all_train_data.append(train_data)
     all_train_label.append([label] * train_data.shape[0])
