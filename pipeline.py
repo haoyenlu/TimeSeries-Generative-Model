@@ -127,7 +127,7 @@ def main(TEST_PATIENT):
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
 
-    orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction)
+    orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average='micro')
 
 
     # train with augmentation
@@ -140,7 +140,7 @@ def main(TEST_PATIENT):
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
 
-    aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction)
+    aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
     
     return orig_acc, orig_f1, aug_acc, aug_f1
 
