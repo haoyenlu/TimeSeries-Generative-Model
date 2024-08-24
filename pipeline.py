@@ -72,7 +72,7 @@ for type, type_dict in data.items():
 # TODO: Data augmentation and Preprocessing
 scaler = FeatureWiseScaler(feature_range=(0,1))
 augmenter = WindowWarping(window_ratio=0.2,scales=[0.1,0.5,1,1.5,2,2.5])
-tasks = train_dataset.keys()
+tasks = np.array(list(train_dataset.keys()))
 
 all_train_data = []
 all_train_data_aug = []
@@ -80,27 +80,30 @@ all_train_label = []
 all_train_label_aug = []
 all_test_data = []
 all_test_label = []
-for task in tqdm(tasks):
 
-    train_data = np.concatenate(train_dataset[task],axis=0)
-    train_data = scaler.fit_transform(train_data)
-    train_data_aug = augmenter.generate(train_data)
+with tqdm(total=len(train_dataset.keys())) as pbar:
+    for task in train_dataset.keys():
 
-    test_data = np.concatenate(test_dataset[task],axis=0)
-    test_data = scaler.fit_transform(test_data)
+        train_data = np.concatenate(train_dataset[task],axis=0)
+        train_data = scaler.fit_transform(train_data)
+        train_data_aug = augmenter.generate(train_data)
 
-    # TODO: train generative model on train_data for augmentation
+        test_data = np.concatenate(test_dataset[task],axis=0)
+        test_data = scaler.fit_transform(test_data)
+
+        # TODO: train generative model on train_data for augmentation
 
 
-    # TODO: generate dataset with label
-    label = np.argwhere(np.array(tasks) == task)
-    print(task,label)
-    all_train_data.append(train_data)
-    all_train_label.append([label] * train_data.shape[0])
-    all_train_data_aug.append(train_data_aug)
-    all_train_label_aug.append([label] * train_data_aug.shape[0])
-    all_test_data.append(test_data)
-    all_test_label.append([label] * test_data.shape[0])
+        # TODO: generate dataset with label
+        label = np.argwhere(tasks == task)
+        print(task,label)
+        all_train_data.append(train_data)
+        all_train_label.append([label] * train_data.shape[0])
+        all_train_data_aug.append(train_data_aug)
+        all_train_label_aug.append([label] * train_data_aug.shape[0])
+        all_test_data.append(test_data)
+        all_test_label.append([label] * test_data.shape[0])
+        pbar.update(1)
 
 all_train_data = np.concatenate(all_train_data,axis=0)
 all_train_label = np.squeeze(np.concatenate(all_train_label,axis=0))
