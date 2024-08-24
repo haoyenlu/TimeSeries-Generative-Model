@@ -107,7 +107,7 @@ all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
 all_test_data = np.concatenate(all_test_data,axis=0)
 all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
 
-print(all_train_data.shape,all_train_label.shape,all_train_data_aug.shape,all_train_label_aug.shape,all_test_data.shape,all_test_label.shape)
+print(all_train_label)
 
 
 plot_pca(all_train_data,all_test_data,output_dir)
