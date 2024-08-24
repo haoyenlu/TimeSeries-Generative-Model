@@ -325,7 +325,7 @@ class ClassifyTrainer():
         self.model.to(self.device)
 
     
-    def train(self, train_dataloader, test_dataloader , max_iter = 10000, writer=None, save_path='./save'):
+    def train(self, train_dataloader, test_dataloader , max_iter = 10000, writer=None, save_path='./save',verbal=True):
 
         best_test_accuracy = 0
 
@@ -373,7 +373,8 @@ class ClassifyTrainer():
             test_total_loss /= test_cnt
             test_total_accuracy /= test_cnt
             
-            tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss:.4f}][Train Accuracy:{train_total_accuracy:.4f}][Test Loss:{test_total_loss:.4f}][Test Accuracy:{test_total_accuracy:.4f}]")
+            if verbal:
+                tqdm.write(f"[Epoch:{iter}/{max_iter}][Train Loss:{train_total_loss:.4f}][Train Accuracy:{train_total_accuracy:.4f}][Test Loss:{test_total_loss:.4f}][Test Accuracy:{test_total_accuracy:.4f}]")
 
             writer.add_scalar('loss/train_loss',train_total_loss,iter)
             writer.add_scalar('loss/test_loss',test_total_loss,iter)
