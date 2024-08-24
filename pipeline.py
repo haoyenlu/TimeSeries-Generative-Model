@@ -65,7 +65,7 @@ def main(TEST_PATIENT):
 
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
-                if task_data.shape[0] == 0: logger.warnning(f"{patient} has no {task} data.")
+                if len(task_data) == 0: logger.warnning(f"{patient} has no {task} data.")
                 if patient == TEST_PATIENT: test_dataset[task].append(task_data)
                 else: train_dataset[task].append(task_data)
 
