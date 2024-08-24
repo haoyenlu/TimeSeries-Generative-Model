@@ -129,7 +129,7 @@ def main(TEST_PATIENT):
     plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
 
     orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average='micro')
-
+    logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f} | F1-score: {orig_f1*100:.2f}")
 
     # train with augmentation
     logger.info("Train with Augmentation")
@@ -142,7 +142,7 @@ def main(TEST_PATIENT):
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
 
     aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
-    logger.info(f"{TEST_PATIENT}: Accuracy: {accuracy_score*100:.2f} | F1-score: {f1_score*100:.2f}")
+    logger.info(f"{TEST_PATIENT}(WITH AUGMENTATION): Accuracy: {aug_acc*100:.2f} | F1-score: {aug_f1*100:.2f}")
     return orig_acc, orig_f1, aug_acc, aug_f1
 
 
