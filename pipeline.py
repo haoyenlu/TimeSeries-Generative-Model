@@ -131,7 +131,7 @@ def main(TEST_PATIENT):
     plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
 
     orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average='micro')
-    logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f} | F1-score: {orig_f1*100:.2f}")
+    logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f}% | F1-score: {orig_f1*100:.2f}%")
 
     # train with augmentation
     logger.info("Train with Augmentation")
@@ -144,7 +144,7 @@ def main(TEST_PATIENT):
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
 
     aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
-    logger.info(f"{TEST_PATIENT}(WITH AUGMENTATION): Accuracy: {aug_acc*100:.2f} | F1-score: {aug_f1*100:.2f}")
+    logger.info(f"{TEST_PATIENT}(WITH AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
     return orig_acc, orig_f1, aug_acc, aug_f1
 
 
@@ -157,9 +157,9 @@ for patient in args.test_patient:
     total_aug_f1.append(aug_f1)
 
 
-logger.info(f"Total Original Accuracy:{sum(total_orig_acc)/len(total_orig_acc):.4f}")
-logger.info(f"Total Original F1-score:{sum(total_orig_f1)/len(total_orig_f1):.4f}")
-logger.info(f"Total Augmented Accuracy:{sum(total_aug_acc)/len(total_aug_acc):.4f}")
-logger.info(f"Total Augmented Accuracy:{sum(total_aug_f1)/len(total_aug_f1):.4f}")
+logger.info(f"Total Original Accuracy:{(sum(total_orig_acc)/len(total_orig_acc))*100:.4f}%")
+logger.info(f"Total Original F1-score:{(sum(total_orig_f1)/len(total_orig_f1))*100:.4f}%")
+logger.info(f"Total Augmented Accuracy:{(sum(total_aug_acc)/len(total_aug_acc))*100:.4f}%")
+logger.info(f"Total Augmented Accuracy:{(sum(total_aug_f1)/len(total_aug_f1))*100:.4f}%")
 
 
