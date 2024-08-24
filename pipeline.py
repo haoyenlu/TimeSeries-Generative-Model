@@ -31,6 +31,7 @@ parser.add_argument('--max_ci',type=int, help="Max Classification Iteration")
 parser.add_argument('--output','-o',type=str)
 parser.add_argument('--ckpt',type=str)
 parser.add_argument('--log',type=str)
+parser.add_argument('--verbal',action='store_true')
 
 args = parser.parse_args()
 
@@ -48,7 +49,8 @@ os.makedirs(log_dir,exist_ok=True)
 cc_config = load_config(args.cc)
 
 # logger
-writer = SummaryWriter(log_dir)
+# writer = SummaryWriter(log_dir)
+writer = None
 
 # TODO: preprocess dataset
 # Data Structure - Healthy - H01 ~ H05 - TASK- data
@@ -63,6 +65,7 @@ def main(TEST_PATIENT):
     for type, type_dict in data.items():
         if not args.ih and type == 'Healthies': continue
 
+        print(list(type_dict.keys()))
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
                 if len(task_data) == 0: logger.warnning(f"{patient} has no {task} data.")
@@ -123,7 +126,7 @@ def main(TEST_PATIENT):
     logger.info("Train without Augmentation")
     trainer  = get_trainer_from_config(cc_config)
     trainer.save_weight(os.path.join(ckpt_dir,"initial.pth"))
-    trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best.pth'))
+    trainer.train(train_dataloader,test_dataloader,args.max_ci,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best.pth'),verbal=args.verbal,writer=writer)
     trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best.pth'))
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
@@ -133,10 +136,10 @@ def main(TEST_PATIENT):
 
     # train with augmentation
     logger.info("Train with Augmentation")
-    train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
+    train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0),verbal=args.verbal)
     train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
     trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
-    trainer.train(train_dataloader,test_dataloader,args.max_ci,writer,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
+    trainer.train(train_dataloader,test_dataloader,args.max_ci,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'),writer=writer)
     trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
     prediction = trainer.make_prediction(all_test_data)
     plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
