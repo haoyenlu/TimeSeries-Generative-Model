@@ -39,8 +39,9 @@ class WindowWarping:
 
         warped_series = X.copy()
         for i in range(B):
-            for j in range(C):
-                warped_series[i,:,j] = self.warping(warped_series[i,:,j])
+            warped_series[i,:,:] = self.warping_channels(warped_series[i,:,:])
+            # for j in range(C):
+            #     warped_series[i,:,j] = self.warping(warped_series[i,:,j])
 
         return warped_series
     
@@ -64,3 +65,21 @@ class WindowWarping:
         warped_series = np.interp(np.arange(n), np.linspace(0, n, len(warped_series)), warped_series)
 
         return warped_series
+    
+    def warping_channels(self,time_series):
+        T, C = time_series.shape
+        window_size = int(T * self.window_ratio)
+
+        start = np.random.randint(0,T-window_size)
+        scale = np.random.choice(self.scales)
+
+        warped = time_series.copy()
+
+        for channel in range(C):
+            warped_window = np.interp(np.linspace(0,window_size,int(window_size * scale)), np.arange(window_size), time_series[start:start + window_size,channel])
+            warped_series = np.append(time_series[:start,channel],warped_window)
+            warped_series = np.append(warped_window,time_series[start + window_size:,channel])
+            warped_series = np.interp(np.arange(T), np.linspace(0, T, len(warped_series)), warped_series)
+            warped[:,channel] = warped_series
+        
+        return warped

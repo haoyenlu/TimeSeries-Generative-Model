@@ -26,7 +26,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--data',type=str)
 parser.add_argument('--test_patient','-tp',nargs='+',type=str)
 parser.add_argument('--ih',action='store_true',help="Include Healthy Patient")
-parser.add_argument('--cc',type=str, help="Classification Config") 
+parser.add_argument('--cc',type=str, help="Classification Model Config") 
+parser.add_arugment('--gc',type=str, help="Generative Model Config")
 parser.add_argument('--max_ci',type=int, help="Max Classification Iteration")
 parser.add_argument('--output','-o',type=str)
 parser.add_argument('--ckpt',type=str)
@@ -47,6 +48,7 @@ os.makedirs(log_dir,exist_ok=True)
 
 # CONFIG
 cc_config = load_config(args.cc)
+gc_config = load_config(args.gc)
 
 # logger
 # writer = SummaryWriter(log_dir)
