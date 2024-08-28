@@ -90,7 +90,7 @@ def main(TEST_PATIENT):
     all_test_data = []
     all_test_label = []
 
-    g_trainer = get_trainer_from_config(args.gc_config)
+    g_trainer = get_trainer_from_config(gc_config)
     g_trainer.save_weight(os.path.join(ckpt_dir,'initial_g.pth'))
 
     with tqdm(total=len(train_dataset.keys())) as pbar:
