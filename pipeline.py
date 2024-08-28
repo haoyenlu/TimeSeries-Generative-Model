@@ -10,7 +10,8 @@ from model_utils import  get_trainer_from_config
 from utils import load_config
 from data_utils import FeatureWiseScaler , WindowWarping
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_confusion_matrix
-from dataset import ULF_Classification_Dataset
+from dataset import ULF_Classification_Dataset, ULF_Generative_Dataset
+from train_utils import LinearLrDecay
 
 from sklearn.metrics import accuracy_score, f1_score
 from tqdm import tqdm
@@ -27,8 +28,10 @@ parser.add_argument('--data',type=str)
 parser.add_argument('--test_patient','-tp',nargs='+',type=str)
 parser.add_argument('--ih',action='store_true',help="Include Healthy Patient")
 parser.add_argument('--cc',type=str, help="Classification Model Config") 
-parser.add_argment('--gc',type=str, help="Generative Model Config")
-parser.add_argument('--max_ci',type=int, help="Max Classification Iteration")
+parser.add_argument('--gc',type=str, help="Generative Model Config")
+parser.add_argument('--max_ci',type=int, help="Max Classification Model Training Iteration")
+parser.add_argument('--max_gi',type=int, help="Max Generative Model Training Iteration")
+parser.add_argument('--save_gi',type=int, help="Generative Model Save Iteration")
 parser.add_argument('--output','-o',type=str)
 parser.add_argument('--ckpt',type=str)
 parser.add_argument('--log',type=str)
@@ -80,10 +83,15 @@ def main(TEST_PATIENT):
 
     all_train_data = []
     all_train_data_aug = []
+    all_train_data_aug_diffusion = []
     all_train_label = []
     all_train_label_aug = []
+    all_train_label_aug_diffusion = []
     all_test_data = []
     all_test_label = []
+
+    g_trainer = get_trainer_from_config(args.gc_config)
+    g_trainer.save_weight(os.path.join(ckpt_dir,'initial_g.pth'))
 
     with tqdm(total=len(train_dataset.keys())) as pbar:
         for task in train_dataset.keys():
@@ -99,7 +107,14 @@ def main(TEST_PATIENT):
                 test_data = None
 
             # TODO: train generative model on train_data for augmentation
-
+            logger.info(f"Training Generative Model on {task}")
+            g_trainer.load_weight(os.path.join(ckpt_dir,'initial_g.pth'))
+            scheduler = LinearLrDecay(g_trainer.optimizer, gc_config['optimizer']['lr'], 0.0, 0, args.max_gi)
+            train_generative_dataset = ULF_Generative_Dataset(train_data)
+            train_generative_dataloader = DataLoader(train_generative_dataset) 
+            g_trainer.train(train_generative_dataloader,args.max_gi,args.save_gi,scheduler,writer,verbal = args.verbal, save_path=os.path.join(ckpt_dir,task,'best_generative_weight.pth'))
+            samples = g_trainer.generate_samples(num_samples=train_data.shape[0],num_per_batch=10)
+            all_train_data_aug_diffusion.append(samples)
 
             # TODO: generate dataset with label
             label = np.argwhere(tasks == task)
@@ -107,6 +122,8 @@ def main(TEST_PATIENT):
             all_train_label.append([label] * train_data.shape[0])
             all_train_data_aug.append(train_data_aug)
             all_train_label_aug.append([label] * train_data_aug.shape[0])
+            all_train_label_aug_diffusion.append([label] * samples.shape[0])
+
             if test_data is not None:
                 all_test_data.append(test_data)
                 all_test_label.append([label] * test_data.shape[0])
@@ -118,6 +135,11 @@ def main(TEST_PATIENT):
     all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
     all_test_data = np.concatenate(all_test_data,axis=0)
     all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
+    all_train_data_aug_diffusion = np.concatenate(all_train_data_aug_diffusion,axis=0)
+    all_train_label_aug_diffusion = np.concatenate(all_train_label_aug_diffusion,axis=0).squeeze()
+
+    print(all_train_data_aug_diffusion.shape)
+
 
     # TODO: train classification on augmentation and original dataset and test with test dataset
     train_dataset = ULF_Classification_Dataset(all_train_data,all_train_label)

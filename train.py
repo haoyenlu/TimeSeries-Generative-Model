@@ -20,12 +20,9 @@ from tqdm import tqdm
 
 
 
-def train_generative():
-    args = train_argument()
+def train_generative(args):
     config = load_config(args.config)
-
     curr_date = datetime.now().strftime("%d%m%Y_%H%M%S")
-
 
     
     # folder path
