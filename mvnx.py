@@ -16,7 +16,7 @@ class MvnxParser:
         self.features = features
         self.types = types
         self.tasks = tasks
-        self.cutoff_length = max_length
+        self.max_length = max_length
         self.resample =  resample
         self.resample_fn = partial(self.np_interp_resample,max_length=max_length)
 
