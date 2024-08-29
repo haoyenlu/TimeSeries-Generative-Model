@@ -85,7 +85,7 @@ class MvnxParser:
                     if T > self.max_length: continue
 
                     # Resample Data
-                    resample_shape = (self.maxlength,C)
+                    resample_shape = (self.max_length,C)
                     resample_data = np.zeros(resample_shape)
                     for i in range(C):
                         resample_data[:,i] = self.resample_fn(data[:,i])
