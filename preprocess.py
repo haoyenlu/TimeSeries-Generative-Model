@@ -21,10 +21,10 @@ def preprocess_original():
     os.makedirs(args.save,exist_ok=True)
 
     preprocessor = MvnxParser(**config)
-    data = preprocessor.get_dataset(args.mvnx)   
+    data = preprocessor.process_folder(args.mvnx)   
 
     # save data
-    save_path = f'./{args.save}/ulf_new.npy'
+    save_path = f'./{args.save}/ulf_parse.npy'
     np.save(save_path,data)
 
 
