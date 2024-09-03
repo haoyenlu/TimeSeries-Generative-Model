@@ -237,7 +237,8 @@ class DiffusionTrainer(BaseTrainer):
         self.model.to(self.device)
 
     def train(self,dataloader,max_iter,save_iter,scheduler,writer=None,verbal=True,save_path="./checkpoint.pth"):
-
+        
+        os.makedirs(os.path.dirname(save_path),exist_ok=True)
         dataloader_cycle = cycle(dataloader)
 
         self.model.train()
