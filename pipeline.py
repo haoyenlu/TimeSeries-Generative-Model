@@ -161,17 +161,30 @@ def main(TEST_PATIENT):
     logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f}% | F1-score: {orig_f1*100:.2f}%")
 
     # train with augmentation
-    logger.info("Train with Augmentation")
+    logger.info("Train with Time Warping Augmentation")
     train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0))
     train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
     trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
     trainer.train(train_dataloader,test_dataloader,args.max_ci,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'),verbal=args.verbal,writer=writer)
     trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
     prediction = trainer.make_prediction(all_test_data)
-    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Augmented-Prediciton")
-
+    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
     aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
-    logger.info(f"{TEST_PATIENT}(WITH AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
+    logger.info(f"{TEST_PATIENT}(WITH Time-Warping AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
+
+    # train with diffusion augmentation
+    logger.info("Train with Diffusion Augmentation")
+    train_dataset = ULF_Classification_Dataset(np.concatenate([all_train_data,all_train_data_aug_diffusion],axis=0),np.concatenate([all_train_label,all_train_label_aug_diffusion],axis=0))
+    train_dataloader = DataLoader(train_dataset,cc_config['batch_size'],shuffle=True)
+    trainer.load_weight(os.path.join(ckpt_dir,"initial.pth"))
+    trainer.train(train_dataloader,test_dataloader,args.max_ci,os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'),verbal=args.verbal,writer=writer)
+    trainer.load_weight(os.path.join(ckpt_dir,f'{TEST_PATIENT}_best_aug.pth'))
+    prediction = trainer.make_prediction(all_test_data)
+    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Diffusion-Augmented-Prediciton")
+
+    diffusion_aug_acc, diffusion_aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
+    logger.info(f"{TEST_PATIENT}(WITH Diffusion AUGMENTATION): Accuracy: {diffusion_aug_acc*100:.2f}% | F1-score: {diffusion_aug_f1*100:.2f}%")
+    
     return orig_acc, orig_f1, aug_acc, aug_f1
 
 
