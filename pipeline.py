@@ -41,12 +41,12 @@ args = parser.parse_args()
 
 
 # DIRECTORY
-output_dir = os.path.join(args.output,curr_date)
+output_dir = os.path.join(args.output, curr_date)
 os.makedirs(output_dir)
 ckpt_dir = os.path.join(args.ckpt, curr_date)
 os.makedirs(ckpt_dir,exist_ok=True)
-log_dir = os.path.join(args.log,curr_date)
-os.makedirs(log_dir,exist_ok=True)
+# log_dir = os.path.join(args.log, curr_date)
+# os.makedirs(log_dir,exist_ok=True)
 
 
 # CONFIG
