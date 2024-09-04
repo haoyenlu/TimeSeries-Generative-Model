@@ -24,7 +24,7 @@ def preprocess_original():
     data = preprocessor.process_folder(args.mvnx)   
 
     # save data
-    save_path = f'./{args.save}/ulf_parse.npy'
+    save_path = f'./{args.save}/{args.name}.npy'
     np.save(save_path,data)
 
 
