@@ -9,7 +9,7 @@ from pathlib import Path
 from functools import partial
 
 class MvnxParser:
-    def __init__(self,features, types, tasks, max_length, resample):
+    def __init__(self,features, types, tasks, max_length, cutoff_length, resample):
         '''
         Output Training dataset shape should be (B,T,C)
         '''
@@ -17,6 +17,7 @@ class MvnxParser:
         self.types = types
         self.tasks = tasks
         self.max_length = max_length
+        self.cutoff_length = cutoff_length
         self.resample =  resample
         self.resample_fn = partial(self.np_interp_resample,max_length=max_length)
 
@@ -82,7 +83,7 @@ class MvnxParser:
 
                     # Discard data exceed max length
                     T,C = data.shape
-                    if T > self.max_length: continue
+                    if T > self.cutoff_length: continue
 
                     # Resample Data
                     resample_shape = (self.max_length,C)
