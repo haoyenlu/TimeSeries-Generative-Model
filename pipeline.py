@@ -116,6 +116,12 @@ def main(TEST_PATIENT):
             samples = g_trainer.generate_samples(num_samples=train_data.shape[0],num_per_batch=10)
             all_train_data_aug_diffusion.append(samples)
 
+            # see the augmentation
+            plot_sample(train_data,samples,save_path=output_dir)
+            plot_pca(train_data,samples,output_dir)
+            plot_tsne(train_data,samples,output_dir)
+            plot_umap(train_data,samples,output_dir)
+
             # TODO: generate dataset with label
             label = np.argwhere(tasks == task)
             all_train_data.append(train_data)
