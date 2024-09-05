@@ -437,4 +437,4 @@ class Transformer(nn.Module):
             return trend, self.combine_s(season.transpose(1, 2)).transpose(1, 2), res - res_m
 
         # return trend + season_error
-        return res - res_m
+        return res
