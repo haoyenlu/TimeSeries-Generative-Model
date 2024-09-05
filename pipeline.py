@@ -112,15 +112,17 @@ def main(TEST_PATIENT):
             scheduler = LinearLrDecay(g_trainer.optimizer, gc_config['optimizer']['lr'], 0.0, 0, args.max_gi)
             train_generative_dataset = ULF_Generative_Dataset(train_data)
             train_generative_dataloader = DataLoader(train_generative_dataset) 
-            g_trainer.train(train_generative_dataloader,args.max_gi,args.save_gi,scheduler,writer,verbal = args.verbal, save_path=os.path.join(ckpt_dir,task,'best_generative_weight.pth'))
+            g_trainer.train(train_generative_dataloader,args.max_gi,args.save_gi,scheduler,writer,verbal = args.verbal, save_path=os.path.join(ckpt_dir,TEST_PATIENT,task,'best_generative_weight.pth'))
             samples = g_trainer.generate_samples(num_samples=train_data.shape[0],num_per_batch=10)
             all_train_data_aug_diffusion.append(samples)
 
+            patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
+            os.makedirs(patient_output_dir,exist_ok=True)
             # see the augmentation
-            plot_sample(train_data,samples,output_dir)
-            plot_pca(train_data,samples,output_dir)
-            plot_tsne(train_data,samples,output_dir)
-            plot_umap(train_data,samples,output_dir)
+            plot_sample(train_data,samples,patient_output_dir)
+            plot_pca(train_data,samples,patient_output_dir)
+            plot_tsne(train_data,samples,patient_output_dir)
+            plot_umap(train_data,samples,patient_output_dir)
 
             # TODO: generate dataset with label
             label = np.argwhere(tasks == task)
