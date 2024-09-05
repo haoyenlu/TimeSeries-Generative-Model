@@ -93,8 +93,8 @@ class MovingAverageFilter:
     def apply(self,series):
         B,T,C = series.shape
         new_series = np.zeros(shape=(B,T,C))
-        series = np.pad(series,(0,self.window_size),mode='constant',constant_values=(0,0))
-        
+        series = np.pad(series,(0,self.window_size),mode='edge')
+
         for b in range(B):
             for c in range(C):
                 _temp = sum(series[b,:self.window_size,c])
@@ -104,4 +104,4 @@ class MovingAverageFilter:
                     _temp -= series[b,i,c]
                     _temp += series[b,i+self.window_size,c]
         
-        return new_series[:,:T,:]
+        return new_series
