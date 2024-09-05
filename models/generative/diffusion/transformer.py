@@ -405,7 +405,8 @@ class Transformer(nn.Module):
         super().__init__()
         self.emb = Conv_MLP(n_feat, d_model, resid_pdrop=resid_pdrop)
         self.inverse = Conv_MLP(d_model, n_feat, resid_pdrop=resid_pdrop)
-            
+        self.output = nn.Conv1d(n_feat,n_feat,kernel_size=kernel_size,stride=1,padidng=padding,padding_mode='curcular',bias=False)
+
 
         self.combine_s = nn.Conv1d(d_model, n_feat, kernel_size=kernel_size, stride=1, padding=padding,
                                    padding_mode='circular', bias=False)
@@ -436,5 +437,7 @@ class Transformer(nn.Module):
         if return_res:
             return trend, self.combine_s(season.transpose(1, 2)).transpose(1, 2), res - res_m
 
-        return trend
+        # return trend + season_error
+        output = self.output(res)
 
+        return output
