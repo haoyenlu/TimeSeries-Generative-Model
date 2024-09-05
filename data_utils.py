@@ -83,3 +83,23 @@ class WindowWarping:
             warped[:,channel] = warped_series
         
         return warped
+    
+
+class MovingAverageFilter:
+    def __init__(self,window_size=10):
+        self.window_size = window_size
+        
+
+    def apply(self,series):
+        B,T,C = series.shape
+        new_series = np.zeros(shape=(B,T+self.window_size,C))
+        
+        for b in range(B):
+            for c in range(C):
+                _temp = sum(series[b,:self.window_size,c])
+                for i in range(T):
+                    new_series[b,i,c] = _temp / self.window_size
+                    _temp -= series[b,i,c]
+                    _temp += series[b,i+self.window_size,c]
+                
+        return new_series[:,:T,:]

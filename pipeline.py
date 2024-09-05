@@ -8,7 +8,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from model_utils import  get_trainer_from_config
 from utils import load_config
-from data_utils import FeatureWiseScaler , WindowWarping
+from data_utils import FeatureWiseScaler , WindowWarping, MovingAverageFilter
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_confusion_matrix
 from dataset import ULF_Classification_Dataset, ULF_Generative_Dataset
 from train_utils import LinearLrDecay
@@ -79,6 +79,7 @@ def main(TEST_PATIENT):
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
     augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
+    filter = MovingAverageFilter(window_size=10)
     tasks = np.array(list(train_dataset.keys()))
 
     all_train_data = []
@@ -114,6 +115,7 @@ def main(TEST_PATIENT):
             train_generative_dataloader = DataLoader(train_generative_dataset) 
             g_trainer.train(train_generative_dataloader,args.max_gi,args.save_gi,scheduler,writer,verbal = args.verbal, save_path=os.path.join(ckpt_dir,TEST_PATIENT,task,'best_generative_weight.pth'))
             samples = g_trainer.generate_samples(num_samples=train_data.shape[0],num_per_batch=10)
+            samples = filter.apply(samples)
             all_train_data_aug_diffusion.append(samples)
 
             patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
