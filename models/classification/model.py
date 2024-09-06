@@ -170,6 +170,7 @@ class BasicLSTM(nn.Module):
 		x = self.fcn(x.transpose(2,1))
 		x = torch.flatten(x,start_dim=1)
 		x = self.dropout(x)
+		print(x.shape)
 		x = self.out(x)
 		x = self.softmax(x)
 		return x
