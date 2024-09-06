@@ -2,7 +2,7 @@ infra: classification
 model: basicLSTM
 
 BasicLSTM:
-  sequence_len: 1024
+  sequence_len: 256
   feature_size: 24
   num_classes: 30
   hidden_size: 32

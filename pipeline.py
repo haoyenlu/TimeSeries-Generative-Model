@@ -79,7 +79,7 @@ def main(TEST_PATIENT):
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
     augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
-    filter = MovingAverageFilter(window_size=10)
+    filter = MovingAverageFilter(window_size=5)
     tasks = np.array(list(train_dataset.keys()))
 
     all_train_data = []
