@@ -37,6 +37,7 @@ parser.add_argument('--output','-o',type=str)
 parser.add_argument('--ckpt',type=str)
 parser.add_argument('--log',type=str)
 parser.add_argument('--verbal',action='store_true')
+parser.add_argument('--maw',help="Moving Average Window Size",type=int, default=0)
 
 args = parser.parse_args()
 
@@ -52,11 +53,8 @@ os.makedirs(ckpt_dir,exist_ok=True)
 
 # CONFIG
 cc_config = load_config(args.cc)
+gc_config = load_config(args.gc) if args.gc else None
 
-if args.gc:
-    gc_config = load_config(args.gc)
-else:
-    gc_config = None
 
 # logger
 # writer = SummaryWriter(log_dir)
@@ -84,7 +82,7 @@ def main(TEST_PATIENT):
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
     augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
-    filter = MovingAverageFilter(window_size=5)
+    filter = MovingAverageFilter(window_size=args.maw) if args.maw != 0 else None
     tasks = np.array(list(train_dataset.keys()))
 
     all_train_data = []
@@ -113,7 +111,7 @@ def main(TEST_PATIENT):
             # TODO: train generative model on train_data for augmentation
             logger.info(f"Training Generative Model on {task}")
             samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
-            samples = filter.apply(samples)
+            if filter: samples = filter.apply(samples)
             all_train_data_aug_diffusion.append(samples)
 
             patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
