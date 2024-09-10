@@ -145,7 +145,6 @@ def main(TEST_PATIENT):
     if len(all_train_data_aug_diffusion) != 0 and len(all_train_label_aug_diffusion) != 0:
         all_train_data_aug_diffusion = np.concatenate(all_train_data_aug_diffusion,axis=0)
         all_train_label_aug_diffusion = np.concatenate(all_train_label_aug_diffusion,axis=0).squeeze()
-        print(all_train_data_aug_diffusion.shape)
 
 
     # TODO: train classification on augmentation and original dataset and test with test dataset
