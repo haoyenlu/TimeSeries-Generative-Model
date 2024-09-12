@@ -1,0 +1,30 @@
+infra: diffusion
+model: transfusion
+
+diffusion:
+  seq_length: 256
+  feature_size: 24
+  label_dim: 30
+  timesteps: 300
+  sampling_timesteps: 300
+  loss_type: 'l2'
+  beta_schedule: 'linear'
+  use_ff: False
+  use_label: False
+
+
+
+backbone:
+  features: 24
+  latent_dim: 32
+  num_heads: 4
+  num_layers: 4
+  dropout: 0.3
+  activation: 'gelu'
+  ff_size: 256
+
+optimizer:
+  lr: 0.0003
+  betas: [0.9,0.99]
+
+batch_size: 8

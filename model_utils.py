@@ -9,6 +9,7 @@ from train_utils import LinearLrDecay
 from models.trainer import cGANTrainer, DiffusionTrainer, ClassifyTrainer
 from models.generative.GAN import tts_cgan, eeg_cgan
 from models.generative.diffusion import diffusion_ts , unet1d
+from models.generative.diffusion.transfusion import TransFusion
 from models.generative.diffusion.transformer import Transformer
 from models.classification.model import InceptionTime, BasicLSTM , BasicConv1d
 
@@ -21,6 +22,8 @@ def get_trainer_from_config(config):
             backbone = unet1d.Unet1D(**config.get('backbone',dict()))
         elif config['model'] == 'transformer':
             backbone = Transformer(**config.get('backbone',dict()))
+        elif config['model'] == 'transfusion':
+            backbone = TransFusion(**config.get('backbone',dict()))
         else:
             raise Exception("Only allow unet or transformer backbone")
         
