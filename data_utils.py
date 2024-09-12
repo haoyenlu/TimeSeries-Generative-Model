@@ -40,8 +40,6 @@ class WindowWarping:
         warped_series = X.copy()
         for i in range(B):
             warped_series[i,:,:] = self.warping_channels(warped_series[i,:,:])
-            # for j in range(C):
-            #     warped_series[i,:,j] = self.warping(warped_series[i,:,j])
 
         return warped_series
     

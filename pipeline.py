@@ -53,137 +53,131 @@ os.makedirs(ckpt_dir,exist_ok=True)
 
 # CONFIG
 cc_config = load_config(args.cc)
-gc_config = load_config(args.gc) if args.gc else None
+gc_config = load_config(args.gc)
 
 
 # logger
 # writer = SummaryWriter(log_dir)
 writer = None
 
-# TODO: preprocess dataset
-# Data Structure - Healthy - H01 ~ H05 - TASK- data
-#                - Stroke - P02 ~ P30 - TASK - data
 
-def main(TEST_PATIENT):
+def make_dataset_and_labels(data: dict, tasks: list):
+    dataset = []
+    labels = []
+
+    np_tasks = np.array(tasks)
+    
+    for key,value in data.items():
+        label = np.argwhere(np_tasks == key)
+        dataset.append(value)
+        labels.append([label] * value.shape[0])
+    
+    dataset = np.concatenate(dataset,axis=0)
+    labels = np.concatenate(labels,axis=0).squeeze()
+
+    assert dataset.shape[0] == labels.shape[0]
+    return dataset ,labels
+
+
+def main(TEST_PATIENT: int):
     logger.info(f"Processing Data. Leave {TEST_PATIENT} out")
     data = np.load(args.data,allow_pickle=True).item()
-    train_dataset = defaultdict(list)
-    test_dataset = defaultdict(list)
+    train_dataset = dict()
+    test_dataset = dict()
 
     for type, type_dict in data.items():
-        if not args.ih and type == 'Healthies': continue
+
+        train_dataset[type] = defaultdict(list)
+        test_dataset[type] = defaultdict(list)
 
         for patient , patient_dict in type_dict.items():
             for task , task_data in patient_dict.items():
-                if patient == TEST_PATIENT: test_dataset[task].append(task_data)
-                else: train_dataset[task].append(task_data)
+                if patient == TEST_PATIENT: 
+                    test_dataset[type][task].append(task_data)
+                else: 
+                    train_dataset[type][task].append(task_data)
 
 
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
-    augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
+    tasks = list(train_dataset.keys())
     filter = MovingAverageFilter(window_size=args.maw) if args.maw != 0 else None
-    tasks = np.array(list(train_dataset.keys()))
-
-    all_train_data = []
-    all_train_data_aug = []
-    all_train_data_aug_diffusion = []
-    all_train_label = []
-    all_train_label_aug = []
-    all_train_label_aug_diffusion = []
-    all_test_data = []
-    all_test_label = []
+    AUG_data = dict()
 
 
+    # Diffusion Data augmentation
     with tqdm(total=len(train_dataset.keys())) as pbar:
-        for task in train_dataset.keys():
-            train_data = np.concatenate(train_dataset[task],axis=0)
+        for task in tasks:              
+            # only use stroke data for diffusion augmentation
+            train_data = np.concatenate(train_dataset['Strokes'][task],axis=0)
             train_data = scaler.fit_transform(train_data)
-            train_data_aug = augmenter.generate(train_data)
 
-            if len(test_dataset[task]) != 0:
-                test_data = np.concatenate(test_dataset[task],axis=0)
-                test_data = scaler.fit_transform(test_data)
-            else:
-                logger.warning(f"{TEST_PATIENT} has no {task} data!")
-                test_data = None
-
-            # TODO: train generative model on train_data for augmentation
+            # Train generative model on train_data for augmentation
             logger.info(f"Training Generative Model on {task}")
             samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
-            if filter: samples = filter.apply(samples)
-            all_train_data_aug_diffusion.append(samples)
+
+            if filter:
+                samples = filter.apply(samples)
+            AUG_data[task] = samples
 
             patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
             os.makedirs(patient_output_dir,exist_ok=True)
-            # see the augmentation
+
+            # visualize the augmentation
             plot_sample(train_data,samples,patient_output_dir)
             plot_pca(train_data,samples,patient_output_dir)
             plot_tsne(train_data,samples,patient_output_dir)
             plot_umap(train_data,samples,patient_output_dir)
 
-            # TODO: generate dataset with label
-            label = np.argwhere(tasks == task)
-            all_train_data.append(train_data)
-            all_train_label.append([label] * train_data.shape[0])
-            all_train_data_aug.append(train_data_aug)
-            all_train_label_aug.append([label] * train_data_aug.shape[0])
-            all_train_label_aug_diffusion.append([label] * samples.shape[0])
-
-            if test_data is not None:
-                all_test_data.append(test_data)
-                all_test_label.append([label] * test_data.shape[0])
             pbar.update(1)
 
-    all_train_data = np.concatenate(all_train_data,axis=0)
-    all_train_label = np.squeeze(np.concatenate(all_train_label,axis=0))
-    all_train_data_aug = np.concatenate(all_train_data_aug,axis=0)
-    all_train_label_aug = np.squeeze(np.concatenate(all_train_label_aug,axis=0))
-    all_test_data = np.concatenate(all_test_data,axis=0)
-    all_test_label = np.squeeze(np.concatenate(all_test_label,axis=0))
 
-    if len(all_train_data_aug_diffusion) != 0 and len(all_train_label_aug_diffusion) != 0:
-        all_train_data_aug_diffusion = np.concatenate(all_train_data_aug_diffusion,axis=0)
-        all_train_label_aug_diffusion = np.concatenate(all_train_label_aug_diffusion,axis=0).squeeze()
+    Augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
 
 
-    # TODO: train classification on augmentation and original dataset and test with test dataset
-    # train without augmentation
+    train_data, train_label = make_dataset_and_labels(train_dataset['Strokes'],tasks)
+    test_data, test_label = make_dataset_and_labels(test_dataset['Strokes'],tasks)
+    
+
+    train_tw_aug_data = Augmenter.generate(train_data)
+    train_tw_aug_label = train_label.copy()
+
+    
+    if args.ih:
+        healthy_data, healthy_label = make_dataset_and_labels(train_dataset['Healthies'],tasks)
+        train_data = np.concatenate([train_data,healthy_data],axis=0)
+        train_label = np.concatenate([train_label,healthy_label],axis=0)
+
+
+
     logger.info("Train without Augmentation")
-    prediction = train_classificaton_model(cc_config,all_train_data,all_train_label,all_test_data,all_test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Original'))
-    plot_confusion_matrix(all_test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
-    orig_acc, orig_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average='micro')
+
+    prediction = train_classificaton_model(cc_config,train_data,train_label,test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Original'))
+    plot_confusion_matrix(test_label, prediction, output_dir, title=f"{TEST_PATIENT}-Original-Prediction")
+    orig_acc, orig_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average='micro')
     logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f}% | F1-score: {orig_f1*100:.2f}%")
 
-    # train with augmentation
+
     logger.info("Train with Time Warping Augmentation") 
-    prediction = train_classificaton_model(cc_config,np.concatenate([all_train_data,all_train_data_aug],axis=0),np.concatenate([all_train_label,all_train_label_aug],axis=0),all_test_data,all_test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'TW-Augmentation'))
-    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
-    aug_acc, aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
+
+    prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_tw_aug_data],axis=0),np.concatenate([train_label,train_tw_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'TW-Augmentation'))
+    plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
+    aug_acc, aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
     logger.info(f"{TEST_PATIENT}(WITH Time-Warping AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
 
-    # train with diffusion augmentation
+
     logger.info("Train with Diffusion Augmentation")
-    prediction = train_classificaton_model(cc_config,np.concatenate([all_train_data,all_train_data_aug_diffusion],axis=0),np.concatenate([all_train_label,all_train_label_aug_diffusion],axis=0),all_test_data,all_test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Diffusion-Augmentation'))
-    plot_confusion_matrix(all_test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Diffusion-Augmented-Prediciton")
-    diffusion_aug_acc, diffusion_aug_f1 = accuracy_score(all_test_label,prediction), f1_score(all_test_label,prediction,average="micro")
+
+    
+    train_diff_aug_data, train_diff_aug_label = make_dataset_and_labels(AUG_data,tasks)
+
+    prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_diff_aug_data],axis=0),np.concatenate([train_label,train_diff_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Diffusion-Augmentation'))
+    plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Diffusion-Augmented-Prediciton")
+    diffusion_aug_acc, diffusion_aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
     logger.info(f"{TEST_PATIENT}(WITH Diffusion AUGMENTATION): Accuracy: {diffusion_aug_acc*100:.2f}% | F1-score: {diffusion_aug_f1*100:.2f}%")
     
     return orig_acc, orig_f1, aug_acc, aug_f1
 
 
-total_orig_acc, total_orig_f1, total_aug_acc, total_aug_f1 = [] , [] , [] , []
-for patient in args.test_patient:
-    orig_acc, orig_f1, aug_acc, aug_f1 = main(patient)
-    total_orig_acc.append(orig_acc)
-    total_orig_f1.append(orig_f1)
-    total_aug_acc.append(aug_acc)
-    total_aug_f1.append(aug_f1)
-
-
-logger.info(f"Total Original Accuracy:{(sum(total_orig_acc)/len(total_orig_acc))*100:.4f}%")
-logger.info(f"Total Original F1-score:{(sum(total_orig_f1)/len(total_orig_f1))*100:.4f}%")
-logger.info(f"Total Augmented Accuracy:{(sum(total_aug_acc)/len(total_aug_acc))*100:.4f}%")
-logger.info(f"Total Augmented Accuracy:{(sum(total_aug_f1)/len(total_aug_f1))*100:.4f}%")
 
 
