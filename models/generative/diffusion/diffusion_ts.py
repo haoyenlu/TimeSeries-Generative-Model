@@ -230,7 +230,7 @@ class Diffusion(nn.Module):
 
     def generate_mts(self, batch_size=16):
         sample_fn = self.fast_sample if self.fast_sampling else self.sample
-        return sample_fn((batch_size, self.seq_length ,  self.feature_size))
+        return sample_fn((batch_size,self.seq_length,self.feature_size))
 
     @property
     def loss_fn(self):
