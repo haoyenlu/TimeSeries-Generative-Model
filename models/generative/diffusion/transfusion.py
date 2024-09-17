@@ -72,5 +72,5 @@ class TransFusion(nn.Module):
         time_added_data = self.pos_enc(time_added_data)
         trans_output = self.TransEncodeR(time_added_data)[1:]
         final_output = self.output_dim(trans_output)
-        transposed_data = final_output.permute(1, 2, 0)
-        return transposed_data
+
+        return final_output
