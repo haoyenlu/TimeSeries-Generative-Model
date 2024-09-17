@@ -70,7 +70,7 @@ def make_dataset_and_labels(data: dict, tasks: list):
     for key,value in data.items():
         label = np.argwhere(np_tasks == key)
         dataset.append(value)
-        labels.append([label] * value.shape[0])
+        labels.append([label] * len(value))
     
     dataset = np.concatenate(dataset,axis=0)
     labels = np.concatenate(labels,axis=0).squeeze()
@@ -99,7 +99,7 @@ def main(TEST_PATIENT: int):
 
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
-    tasks = list(train_dataset.keys())
+    tasks = list(train_dataset['Strokes'].keys())
     filter = MovingAverageFilter(window_size=args.maw) if args.maw != 0 else None
     AUG_data = dict()
 
@@ -108,9 +108,8 @@ def main(TEST_PATIENT: int):
     with tqdm(total=len(train_dataset.keys())) as pbar:
         for task in tasks:              
             # only use stroke data for diffusion augmentation
-            print(train_dataset['Strokes'][task])
             if len(train_dataset['Strokes'][task]) == 0:
-                logger.warning(f"No Strokes data for ")
+                logger.warning(f"No Strokes data for task {task}")
                 continue
 
             train_data = np.concatenate(train_dataset['Strokes'][task],axis=0)
