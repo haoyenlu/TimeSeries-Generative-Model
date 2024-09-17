@@ -65,16 +65,12 @@ class TransFusion(nn.Module):
         
         
     def forward(self, x, t, x_self_cond = None): # shape: (N,L,C)
-        print(x.shape)
         x = self.input_dim(x)
         x = torch.transpose(x,0,1) # (L,N,C)
-        print(x.shape)
         embed = self.emb_timestep(t)
-        print(x.shape, embed.shape)
         time_added_data = torch.cat((embed, x), axis = 0)
         time_added_data = self.pos_enc(time_added_data)
         trans_output = self.TransEncodeR(time_added_data)[1:]
-        print(trans_output.shape)
         final_output = self.output_dim(trans_output)
-        print(final_output.shape)
+        
         return final_output

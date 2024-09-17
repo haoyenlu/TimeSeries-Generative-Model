@@ -24,7 +24,7 @@ def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
     trainer = get_trainer_from_config(config)
     scheduler = LinearLrDecay(trainer.optimizer,config['optimizer']['lr'],0.0,0,max_iter)
     dataset = ULF_Generative_Dataset(data)
-    dataloader = DataLoader(dataset)
+    dataloader = DataLoader(dataset,batch_size=config['batch_size'],shuffle=True)
     trainer.train(dataloader,max_iter,save_iter,scheduler,writer=None,verbal=verbal,save_path=os.path.join(ckpt_dir,'best_weight.pth'))
     samples = trainer.generate_samples(num_samples=data.shape[0],num_per_batch=10)
 
