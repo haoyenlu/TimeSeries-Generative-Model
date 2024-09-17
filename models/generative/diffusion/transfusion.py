@@ -71,6 +71,6 @@ class TransFusion(nn.Module):
         time_added_data = torch.cat((embed, x), axis = 0)
         time_added_data = self.pos_enc(time_added_data)
         trans_output = self.TransEncodeR(time_added_data)[1:]
-        final_output = self.output_dim(trans_output)
+        final_output = self.output_dim(trans_output).permute(1,0,2)
         print(final_output.shape)
         return final_output
