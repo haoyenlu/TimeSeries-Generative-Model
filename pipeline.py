@@ -57,7 +57,7 @@ gc_config = load_config(args.gc)
 
 
 # logger
-# writer = SummaryWriter(log_dir)
+# writer = SummaryWriter(log_dir)  
 writer = None
 
 
@@ -80,13 +80,13 @@ def make_dataset_and_labels(data: dict, tasks: list):
 
 
 def main(TEST_PATIENT: int):
-    logger.info(f"Processing Data. Leave {TEST_PATIENT} out")
+    logger.info(f"Processing Data. Leave {TEST_PATIENT} out. ")
     data = np.load(args.data,allow_pickle=True).item()
     train_dataset = dict()
     test_dataset = dict()
 
     for type, type_dict in data.items():
-
+        logger.info(f"Processing Data type {type}.")
         train_dataset[type] = defaultdict(list)
         test_dataset[type] = defaultdict(list)
 
@@ -96,7 +96,6 @@ def main(TEST_PATIENT: int):
                     test_dataset[type][task].append(task_data)
                 else: 
                     train_dataset[type][task].append(task_data)
-
 
     # TODO: Data augmentation and Preprocessing
     scaler = FeatureWiseScaler(feature_range=(0,1))
@@ -109,6 +108,11 @@ def main(TEST_PATIENT: int):
     with tqdm(total=len(train_dataset.keys())) as pbar:
         for task in tasks:              
             # only use stroke data for diffusion augmentation
+            print(train_dataset['Strokes'][task])
+            if len(train_dataset['Strokes'][task]) == 0:
+                logger.warning(f"No Strokes data for ")
+                continue
+
             train_data = np.concatenate(train_dataset['Strokes'][task],axis=0)
             train_data = scaler.fit_transform(train_data)
 
