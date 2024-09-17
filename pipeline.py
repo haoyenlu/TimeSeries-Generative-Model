@@ -181,3 +181,5 @@ def main(TEST_PATIENT: int):
 
 
 
+for patient in args.test_patient:
+    main(patient)
