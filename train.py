@@ -40,10 +40,10 @@ def train_classificaton_model(config,train_data,train_label,test_data,test_label
     trainer = get_trainer_from_config(config)
     # scale data
     scaler = FeatureWiseScaler(feature_range=(0,1))
-    scaler.fit(np.concatentate([train_data,test_data],axis=0))
+    scaler.fit(np.concatenate([train_data,test_data],axis=0))
     train_data = scaler.transform(train_data)
     test_data = scaler.transform(test_data)
-    
+
     train_dataset = ULF_Classification_Dataset(train_data,train_label)
     train_dataloader = DataLoader(train_dataset,batch_size=config['batch_size'],shuffle=True)
     test_dataset = ULF_Classification_Dataset(test_data,test_label)
