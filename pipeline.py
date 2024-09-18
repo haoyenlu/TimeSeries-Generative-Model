@@ -122,7 +122,7 @@ def main(TEST_PATIENT: int):
 
             # Train generative model on train_data for augmentation
             logger.info(f"Training Generative Model on {task}")
-            samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
+            real , samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
 
             if filter:
                 samples = filter.apply(samples)
@@ -132,10 +132,10 @@ def main(TEST_PATIENT: int):
             os.makedirs(patient_output_dir,exist_ok=True)
 
             # visualize the augmentation
-            plot_sample(train_data,samples,patient_output_dir)
-            plot_pca(train_data,samples,patient_output_dir)
-            plot_tsne(train_data,samples,patient_output_dir)
-            plot_umap(train_data,samples,patient_output_dir)
+            plot_sample(real,samples,patient_output_dir)
+            plot_pca(real,samples,patient_output_dir)
+            plot_tsne(real,samples,patient_output_dir)
+            plot_umap(real,samples,patient_output_dir)
 
             pbar.update(1)
 

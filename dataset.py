@@ -25,7 +25,7 @@ class ULF_Generative_Dataset(Dataset):
         return self.data[index,:,:]
 
 
-    def _get_numpy(self):
+    def _getdata_(self):
         return self.data
 
 
@@ -47,5 +47,6 @@ class ULF_Classification_Dataset(Dataset):
     def __getitem__(self, index):
         return self.data[index,:,:] , self.label[index]
 
-
+    def _getdata_(self):
+        return self.data
     
