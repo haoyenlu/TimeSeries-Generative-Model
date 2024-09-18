@@ -8,10 +8,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from model_utils import  get_trainer_from_config
 from utils import load_config
-from data_utils import FeatureWiseScaler , WindowWarping, MovingAverageFilter
+from data_utils import  WindowWarping, MovingAverageFilter
 from analysis_utils import plot_pca, plot_tsne, plot_umap, plot_sample, plot_confusion_matrix
-from dataset import ULF_Classification_Dataset, ULF_Generative_Dataset
-from train_utils import LinearLrDecay
 from train import train_generative_model, train_classificaton_model
 
 from sklearn.metrics import accuracy_score, f1_score
@@ -74,8 +72,7 @@ def make_dataset_and_labels(data: dict, tasks: list):
     
     dataset = np.concatenate(dataset,axis=0)
     labels = np.concatenate(labels,axis=0).squeeze()
-    print(labels)
-
+    
     assert dataset.shape[0] == labels.shape[0]
     return dataset ,labels
 
@@ -140,17 +137,10 @@ def main(TEST_PATIENT: int):
             pbar.update(1)
 
 
-    Augmenter = WindowWarping(window_ratio=0.4,scales=[0.1,0.5,1,1.5,2,2.5])
-
-
     train_data, train_label = make_dataset_and_labels(train_dataset['Strokes'],tasks)
     test_data, test_label = make_dataset_and_labels(test_dataset['Strokes'],tasks)
-    
 
-    train_tw_aug_data = Augmenter.generate(train_data)
-    train_tw_aug_label = train_label.copy()
 
-    
     if args.ih:
         healthy_data, healthy_label = make_dataset_and_labels(train_dataset['Healthies'],tasks)
         train_data = np.concatenate([train_data,healthy_data],axis=0)
@@ -166,12 +156,12 @@ def main(TEST_PATIENT: int):
     logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f}% | F1-score: {orig_f1*100:.2f}%")
 
 
-    logger.info("Train with Time Warping Augmentation") 
+    # logger.info("Train with Time Warping Augmentation") 
 
-    prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_tw_aug_data],axis=0),np.concatenate([train_label,train_tw_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'TW-Augmentation'))
-    plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
-    aug_acc, aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
-    logger.info(f"{TEST_PATIENT}(WITH Time-Warping AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
+    # prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_tw_aug_data],axis=0),np.concatenate([train_label,train_tw_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'TW-Augmentation'))
+    # plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
+    # aug_acc, aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
+    # logger.info(f"{TEST_PATIENT}(WITH Time-Warping AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
 
 
     logger.info("Train with Diffusion Augmentation")
@@ -183,8 +173,6 @@ def main(TEST_PATIENT: int):
     plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Diffusion-Augmented-Prediciton")
     diffusion_aug_acc, diffusion_aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
     logger.info(f"{TEST_PATIENT}(WITH Diffusion AUGMENTATION): Accuracy: {diffusion_aug_acc*100:.2f}% | F1-score: {diffusion_aug_f1*100:.2f}%")
-    
-    return orig_acc, orig_f1, aug_acc, aug_f1
 
 
 
