@@ -69,12 +69,12 @@ def make_dataset_and_labels(data: dict, tasks: list):
     
     for key,value in data.items():
         label = np.argwhere(np_tasks == key)
-        print(value.shape)
         dataset.append(value)
         labels.append([label] * len(value))
     
     dataset = np.concatenate(dataset,axis=0)
     labels = np.concatenate(labels,axis=0).squeeze()
+    print(labels)
 
     assert dataset.shape[0] == labels.shape[0]
     return dataset ,labels
