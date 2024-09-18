@@ -114,6 +114,10 @@ def main(TEST_PATIENT: int):
 
             train_dataset['Strokes'][task] = np.concatenate(train_dataset['Strokes'][task],axis=0)
             train_dataset['Healthies'][task] = np.concatenate(train_dataset['Healthies'][task],axis=0)
+            
+            if task in test_dataset['Strokes']:
+                test_dataset['Strokes'][task] = np.concatenate(test_dataset['Strokes'][task],axis=0)
+            
             train_data = train_dataset['Strokes'][task]
 
             # # Train generative model on train_data for augmentation
