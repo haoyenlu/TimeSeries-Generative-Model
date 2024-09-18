@@ -120,22 +120,22 @@ def main(TEST_PATIENT: int):
             
             train_data = train_dataset['Strokes'][task]
 
-            # Train generative model on train_data for augmentation
-            logger.info(f"Training Generative Model on {task}")
-            real , samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
+            # # Train generative model on train_data for augmentation
+            # logger.info(f"Training Generative Model on {task}")
+            # real , samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
 
-            if filter:
-                samples = filter.apply(samples)
-            AUG_data[task] = samples
+            # if filter:
+            #     samples = filter.apply(samples)
+            # AUG_data[task] = samples
 
-            patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
-            os.makedirs(patient_output_dir,exist_ok=True)
+            # patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
+            # os.makedirs(patient_output_dir,exist_ok=True)
 
-            # visualize the augmentation
-            plot_sample(real,samples,patient_output_dir)
-            plot_pca(real,samples,patient_output_dir)
-            plot_tsne(real,samples,patient_output_dir)
-            plot_umap(real,samples,patient_output_dir)
+            # # visualize the augmentation
+            # plot_sample(real,samples,patient_output_dir)
+            # plot_pca(real,samples,patient_output_dir)
+            # plot_tsne(real,samples,patient_output_dir)
+            # plot_umap(real,samples,patient_output_dir)
 
             pbar.update(1)
 
