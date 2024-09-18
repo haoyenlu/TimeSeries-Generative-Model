@@ -69,6 +69,7 @@ def make_dataset_and_labels(data: dict, tasks: list):
     
     for key,value in data.items():
         label = np.argwhere(np_tasks == key)
+        print(value.shape)
         dataset.append(value)
         labels.append([label] * len(value))
     
@@ -115,22 +116,22 @@ def main(TEST_PATIENT: int):
             train_dataset['Healthies'][task] = np.concatenate(train_dataset['Healthies'][task],axis=0)
             train_data = train_dataset['Strokes'][task]
 
-            # Train generative model on train_data for augmentation
-            logger.info(f"Training Generative Model on {task}")
-            samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
+            # # Train generative model on train_data for augmentation
+            # logger.info(f"Training Generative Model on {task}")
+            # samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
 
-            if filter:
-                samples = filter.apply(samples)
-            AUG_data[task] = samples
+            # if filter:
+            #     samples = filter.apply(samples)
+            # AUG_data[task] = samples
 
-            patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
-            os.makedirs(patient_output_dir,exist_ok=True)
+            # patient_output_dir = os.path.join(output_dir,TEST_PATIENT,task)
+            # os.makedirs(patient_output_dir,exist_ok=True)
 
-            # visualize the augmentation
-            plot_sample(train_data,samples,patient_output_dir)
-            plot_pca(train_data,samples,patient_output_dir)
-            plot_tsne(train_data,samples,patient_output_dir)
-            plot_umap(train_data,samples,patient_output_dir)
+            # # visualize the augmentation
+            # plot_sample(train_data,samples,patient_output_dir)
+            # plot_pca(train_data,samples,patient_output_dir)
+            # plot_tsne(train_data,samples,patient_output_dir)
+            # plot_umap(train_data,samples,patient_output_dir)
 
             pbar.update(1)
 
