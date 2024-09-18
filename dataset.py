@@ -6,7 +6,7 @@ class ULF_Generative_Dataset(Dataset):
     def __init__(self,data):
         super(ULF_Generative_Dataset,self).__init__()
 
-        self.data = data
+        self.data = data.astype(np.float32)
     
     def __len__(self) -> int:
         return self.data.shape[0]
@@ -24,7 +24,7 @@ class ULF_Classification_Dataset(Dataset):
         super(ULF_Classification_Dataset,self).__init__()
         assert data.shape[0] == label.shape[0]
 
-        self.data = data
+        self.data = data.astype(np.float32)
         self.label = label
 
     def __len__(self) -> int:
