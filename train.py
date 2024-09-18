@@ -1,9 +1,6 @@
-import argparse
-import torch
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import os
-from datetime import datetime
 import numpy as np
 
 from utils import load_config

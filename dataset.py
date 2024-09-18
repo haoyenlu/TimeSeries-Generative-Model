@@ -30,6 +30,7 @@ class ULF_Classification_Dataset(Dataset):
     def __len__(self) -> int:
         return self.data.shape[0]
     
+
     def __getitem__(self, index):
         return self.data[index,:,:] , self.label[index]
 
