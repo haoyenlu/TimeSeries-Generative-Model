@@ -23,7 +23,7 @@ def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
     os.makedirs(ckpt_dir,exist_ok=True)
     trainer = get_trainer_from_config(config)
     scheduler = LinearLrDecay(trainer.optimizer,config['optimizer']['lr'],0.0,0,max_iter)
-    dataset = ULF_Generative_Dataset(data)
+    dataset = ULF_Generative_Dataset(data) # scaling in this Object
     dataloader = DataLoader(dataset,batch_size=config['batch_size'],shuffle=True)
     trainer.train(dataloader,max_iter,save_iter,scheduler,writer=None,verbal=verbal,save_path=os.path.join(ckpt_dir,'best_weight.pth'))
     samples = trainer.generate_samples(num_samples=data.shape[0],num_per_batch=10)
@@ -34,7 +34,7 @@ def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
 def train_classificaton_model(config,train_data,train_label,test_data,test_label,max_iter,verbal,ckpt_dir):
     os.makedirs(ckpt_dir,exist_ok=True)
     trainer = get_trainer_from_config(config)
-    train_dataset = ULF_Classification_Dataset(train_data,train_label)
+    train_dataset = ULF_Classification_Dataset(train_data,train_label) # scaling in this object
     train_dataloader = DataLoader(train_dataset,batch_size=config['batch_size'],shuffle=True)
     test_dataset = ULF_Classification_Dataset(test_data,test_label)
     test_dataloader = DataLoader(test_dataset,batch_size=config['batch_size'],shuffle=True)

@@ -98,7 +98,6 @@ def main(TEST_PATIENT: int):
                     train_dataset[type][task].append(task_data)
 
     # TODO: Data augmentation and Preprocessing
-    scaler = FeatureWiseScaler(feature_range=(0,1))
     tasks = list(train_dataset['Strokes'].keys())
     filter = MovingAverageFilter(window_size=args.maw) if args.maw != 0 else None
     AUG_data = dict()
@@ -112,8 +111,9 @@ def main(TEST_PATIENT: int):
                 logger.warning(f"No Strokes data for task {task}")
                 continue
 
-            train_data = np.concatenate(train_dataset['Strokes'][task],axis=0)
-            train_data = scaler.fit_transform(train_data)
+            train_dataset['Strokes'][task] = np.concatenate(train_dataset['Strokes'][task],axis=0)
+            train_dataset['Healthies'][task] = np.concatenate(train_dataset['Healthies'][task],axis=0)
+            train_data = train_dataset['Strokes'][task]
 
             # Train generative model on train_data for augmentation
             logger.info(f"Training Generative Model on {task}")
