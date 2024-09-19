@@ -32,7 +32,7 @@ def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
     return dataset._getdata_() , samples
 
 
-def train_classificaton_model(config,train_data,train_label,test_data,test_label,max_iter,verbal,ckpt_dir):
+def train_classificaton_model(config,train_data,train_label,test_data,test_label,max_iter,verbal,ckpt_dir,aug_data=None, aug_label=None):
     os.makedirs(ckpt_dir,exist_ok=True)
     trainer = get_trainer_from_config(config)
     # scale data
@@ -40,7 +40,11 @@ def train_classificaton_model(config,train_data,train_label,test_data,test_label
     scaler.fit(np.concatenate([train_data,test_data],axis=0))
     train_data = scaler.transform(train_data)
     test_data = scaler.transform(test_data)
-
+    
+    if aug_data and aug_label:
+        train_data = np.concatenate([train_data, aug_data],axis=0)
+        train_label = np.concatenate([train_label,aug_label],axis=0)
+        
     train_dataset = ULF_Classification_Dataset(train_data,train_label)
     train_dataloader = DataLoader(train_dataset,batch_size=config['batch_size'],shuffle=True)
     test_dataset = ULF_Classification_Dataset(test_data,test_label)

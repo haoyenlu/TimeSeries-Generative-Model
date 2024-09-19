@@ -156,20 +156,13 @@ def main(TEST_PATIENT: int):
     logger.info(f"{TEST_PATIENT}(WITHOUT AUGMENTATION): Accuracy: {orig_acc*100:.2f}% | F1-score: {orig_f1*100:.2f}%")
 
 
-    # logger.info("Train with Time Warping Augmentation") 
-
-    # prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_tw_aug_data],axis=0),np.concatenate([train_label,train_tw_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'TW-Augmentation'))
-    # plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-TW-Augmented-Prediciton")
-    # aug_acc, aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
-    # logger.info(f"{TEST_PATIENT}(WITH Time-Warping AUGMENTATION): Accuracy: {aug_acc*100:.2f}% | F1-score: {aug_f1*100:.2f}%")
-
 
     logger.info("Train with Diffusion Augmentation")
 
     
     train_diff_aug_data, train_diff_aug_label = make_dataset_and_labels(AUG_data,tasks)
 
-    prediction = train_classificaton_model(cc_config,np.concatenate([train_data,train_diff_aug_data],axis=0),np.concatenate([train_label,train_diff_aug_label],axis=0),test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Diffusion-Augmentation'))
+    prediction = train_classificaton_model(cc_config,train_data,train_label,test_data,test_label,args.max_ci,args.verbal,os.path.join(ckpt_dir,TEST_PATIENT,'Diffusion-Augmentation'),aug_data=train_diff_aug_data,aug_label=train_diff_aug_label)
     plot_confusion_matrix(test_label,prediction,output_dir,title=f"{TEST_PATIENT}-Diffusion-Augmented-Prediciton")
     diffusion_aug_acc, diffusion_aug_f1 = accuracy_score(test_label,prediction), f1_score(test_label,prediction,average="micro")
     logger.info(f"{TEST_PATIENT}(WITH Diffusion AUGMENTATION): Accuracy: {diffusion_aug_acc*100:.2f}% | F1-score: {diffusion_aug_f1*100:.2f}%")
