@@ -41,7 +41,7 @@ def train_classificaton_model(config,train_data,train_label,test_data,test_label
     train_data = scaler.transform(train_data)
     test_data = scaler.transform(test_data)
     
-    if aug_data and aug_label:
+    if aug_data is not None and aug_label is not None:
         train_data = np.concatenate([train_data, aug_data],axis=0)
         train_label = np.concatenate([train_label,aug_label],axis=0)
         
