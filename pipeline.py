@@ -36,6 +36,7 @@ parser.add_argument('--ckpt',type=str)
 parser.add_argument('--log',type=str)
 parser.add_argument('--verbal',action='store_true')
 parser.add_argument('--maw',help="Moving Average Window Size",type=int, default=0)
+parser.add_argument('--ratio',type=float,help="The ratio of augmentation data size")
 
 args = parser.parse_args()
 
@@ -77,7 +78,7 @@ def make_dataset_and_labels(data: dict, tasks: list):
     return dataset ,labels
 
 
-def main(TEST_PATIENT: int):
+def main(TEST_PATIENT: str):
     logger.info(f"Processing Data. Leave {TEST_PATIENT} out. ")
     data = np.load(args.data,allow_pickle=True).item()
     train_dataset = dict()
@@ -119,7 +120,7 @@ def main(TEST_PATIENT: int):
 
             # Train generative model on train_data for augmentation
             logger.info(f"Training Generative Model on {task}")
-            real , samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task))
+            real , samples = train_generative_model(gc_config,train_data,args.max_gi,args.save_gi,args.verbal,ckpt_dir=os.path.join(ckpt_dir,TEST_PATIENT,task),ratio=args.ratio)
 
             if filter:
                 samples = filter.apply(samples)

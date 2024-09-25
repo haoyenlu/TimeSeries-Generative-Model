@@ -16,7 +16,7 @@ from data_utils import FeatureWiseScaler
 from tqdm import tqdm
 
 
-def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
+def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir,ratio):
     os.makedirs(ckpt_dir,exist_ok=True)
     trainer = get_trainer_from_config(config)
     # scale data
@@ -27,7 +27,7 @@ def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir):
     dataset = ULF_Generative_Dataset(data)
     dataloader = DataLoader(dataset,batch_size=config['batch_size'],shuffle=True)
     trainer.train(dataloader,max_iter,save_iter,scheduler,writer=None,verbal=verbal,save_path=os.path.join(ckpt_dir,'best_weight.pth'))
-    samples = trainer.generate_samples(num_samples=data.shape[0],num_per_batch=10)
+    samples = trainer.generate_samples(num_samples=int(data.shape[0] * ratio),num_per_batch=10)
 
     return dataset._getdata_() , samples
 
