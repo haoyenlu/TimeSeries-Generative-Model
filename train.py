@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 
 def train_generative_model(config,data,max_iter,save_iter,verbal,ckpt_dir,ratio):
+    print(ratio)
     os.makedirs(ckpt_dir,exist_ok=True)
     trainer = get_trainer_from_config(config)
     # scale data

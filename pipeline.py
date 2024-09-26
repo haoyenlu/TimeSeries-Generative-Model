@@ -36,7 +36,7 @@ parser.add_argument('--ckpt',type=str)
 parser.add_argument('--log',type=str)
 parser.add_argument('--verbal',action='store_true')
 parser.add_argument('--maw',help="Moving Average Window Size",type=int, default=0)
-parser.add_argument('--ratio',type=float,help="The ratio of augmentation data size")
+parser.add_argument('--ratio',type=float,help="The ratio of augmentation data size",default=1)
 
 args = parser.parse_args()
 
