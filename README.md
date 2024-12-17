@@ -13,12 +13,25 @@ This project explored the used of time-series diffusion model with Unet backbone
 
 After some explorations and experiments, we found that using diffusion model for data augmentation doesn't improve any classification performance.
 
-### Original Prediction for patient 28
-![P28-Original-Prediction](https://github.com/user-attachments/assets/7496e702-0919-42af-936c-c14f48b47f62)
+### Original and Synthetic Sample
+![sample](https://github.com/user-attachments/assets/2eddc343-5cbf-4dd2-bc46-9773e4b23d28)
 
-### Augmented with Diffusion model 
+### Dimension Reduction
+<p float="left" align="middle">
+<img src="https://github.com/user-attachments/assets/c585c446-f967-4cb3-8888-ecae5eca8874" width="480" height="360">
+<img src="https://github.com/user-attachments/assets/5ef01272-b3ae-451c-85ee-898bc281be46" width="480" height="360">
+</p>
 
-![P28-Diffusion-Augmented-Prediciton](https://github.com/user-attachments/assets/338cd4d1-971f-4665-979f-7a41c85fd717)
+
+
+
+
+
+### Prediction for patient 28
+<p float="left" align="middle">
+<img src="https://github.com/user-attachments/assets/7496e702-0919-42af-936c-c14f48b47f62" width="480" height="360">
+<img src="https://github.com/user-attachments/assets/338cd4d1-971f-4665-979f-7a41c85fd717" width="480" height="360">
+</p>
 
 
 
